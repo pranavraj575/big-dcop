@@ -1591,6 +1591,38 @@ def find_arg_optimal(variable, relation, mode):
     return var_val, best_rel_val
 
 
+
+
+def find_costs(variable: Variable, assignment: Dict, constraints: Iterable[Constraint]):
+    """
+    Find cost for every assignment of variable
+    Parameters
+    ----------
+    variable: Variable
+        the variable for which we want to find the best values.
+    assignment: dict
+        An assignment that contains a value for all other variables involved in the set
+        of constraints.
+    constraints: iterable of constraints
+        a set of constraints
+    Returns
+    -------
+        dict
+            dict of value -> cost
+    """
+    costs=dict()
+
+    for value in variable.domain:
+        assignment[variable.name] = value
+        cost = assignment_cost(assignment, constraints)
+
+        # Take into account variable cost, if any
+        if hasattr(variable, "cost_for_value"):
+            cost += variable.cost_for_val(value)
+        costs[value]=cost
+
+    return costs
+
 def find_optimal(
     variable: Variable, assignment: Dict, constraints: Iterable[Constraint], mode: str
 ):
