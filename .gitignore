@@ -1,7 +1,4 @@
- output
-
-
-**/.directory
+ **/.directory
 
  
 ######################################################
@@ -87,3 +84,4 @@ target/
 /todo.txt
 
 venv
+/output/

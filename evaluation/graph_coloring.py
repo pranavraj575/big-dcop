@@ -27,6 +27,9 @@ problems = [
 # Common algorithms supported by pyDCOP
 algorithms = [
     "regret_matching",
+    "regret_matching(rm_plus:1)",
+    "regret_matching(rm_plus:1,predictive:1)",
+    "regret_matching(predictive:1)",
     "dpop",
     "dsa",
     "mgm",
@@ -44,29 +47,32 @@ def run_pydcop(problem_file, algo):
     Returns JSON result or error info
     """
     print(f"--> Running {algo} on {problem_file}...")
+    if '(' in algo:
+        alg_name = algo[:algo.index('(')]
+        alg_parameters = algo[algo.index('(') + 1:-1].split(',')
+    else:
+        alg_name = algo
+        alg_parameters = []
 
     cmd = [
         "pydcop",
         "--timeout", str(TIMEOUT_SECONDS),
         "solve",
-        "--algo", algo,
+        "--algo", alg_name,
         problem_file
     ]
 
     # for maxsum, need to make adhoc
-    if algo == "maxsum":
+    if alg_name == "maxsum":
         cmd.insert(4, "--dist")
         cmd.insert(5, "adhoc")
 
     # iterations for local search algs
-    if algo in ["dsa", "mgm", "regret_matching"]:
+    if alg_name in ["dsa", "mgm", "regret_matching"]:
         # Add algo_params to stop after fixed cycles if timeout doesn't kill it first
         cmd.extend(["--algo_params", "stop_cycle:50"])
-
-    # regret matching config
-    if algo == "regret_matching":
-        cmd.extend(["--algo_params", "rm_plus:1"])
-        cmd.extend(["--algo_params", "predictive:1"])
+    for param in alg_parameters:
+        cmd.extend(["--algo_params", param])
 
     try:
         result = subprocess.run(
