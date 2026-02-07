@@ -122,10 +122,12 @@ def main(trials=1):
                     summary = {"error": "No assignment found", "raw": data}
                     print("    Failed to get valid assignment.")
                 all_summaries.append(summary)
-            overall_summary = {
-                key: np.mean([float(sm[key]) for sm in all_summaries]) for key in
-                scalar_keys
-            }
+            overall_summary = dict()
+            for key in scalar_keys:
+                arr = [float(sm[key]) for sm in all_summaries if key in sm]
+                if arr:
+                    overall_summary[key] = {'mean': np.mean(arr), 'std': np.std(arr)}
+                overall_summary['success_prop'] = len(arr)/trials
             all_results[problem][algo] = {'summary': overall_summary, 'trials': all_summaries}
 
     # save all details
