@@ -1,4 +1,3 @@
-
 import logging
 import numpy as np
 
@@ -16,7 +15,6 @@ UNIT_SIZE = 1
 
 # Type of computations graph that must be used with dsa
 GRAPH_TYPE = "constraints_hypergraph"
-
 
 algo_params = [
     AlgoParameterDef("rm_plus", "int", [0, 1], 0),
@@ -67,7 +65,7 @@ class RMComputation(VariableComputation):
         super().__init__(comp_def.node.variable, comp_def)
 
         self.regrets = None
-        self.last_strategy=None
+        self.last_strategy = None
         assert comp_def.algo.algo == "regret_matching"
 
         assert (comp_def.algo.mode == "min") or (comp_def.algo.mode == "max")
@@ -85,9 +83,10 @@ class RMComputation(VariableComputation):
         self.next_cycle = {}
 
     def get_initial_regrets(self):
-        return {val:0 for val in self.variable.domain}
+        return {val: 0 for val in self.variable.domain}
+
     def get_uniform_policy(self):
-        return {val:1/len(self.variable.domain) for val in self.variable.domain}
+        return {val: 1/len(self.variable.domain) for val in self.variable.domain}
 
     def on_start(self):
         if not self.neighbors:
@@ -104,7 +103,7 @@ class RMComputation(VariableComputation):
             self.stop()
         else:
             if self.context_based:
-                self.regrets=dict()
+                self.regrets = dict()
             else:
                 self.regrets = self.get_initial_regrets()
             self.last_strategy = self.get_uniform_policy()
@@ -147,28 +146,28 @@ class RMComputation(VariableComputation):
 
             self.current_cycle[self.variable.name] = self.current_value
             assignment = self.current_cycle.copy()
-            costs = find_costs(variable=self.variable,assignment=assignment,constraints=self.constraints)
-            if self.mode=='min':
-                utilities={k:-v for k,v in costs.items()}
+            costs = find_costs(variable=self.variable, assignment=assignment, constraints=self.constraints)
+            if self.mode == 'min':
+                utilities = {k: -v for k, v in costs.items()}
             else:
-                utilities=costs
-            last_u=sum(utilities[k]*self.last_strategy[k] for k in utilities)
+                utilities = costs
+            last_u = sum(utilities[k]*self.last_strategy[k] for k in utilities)
 
             # calc instantaneous regret
             instant_regrets = {
-                k: u_action - last_u 
+                k: u_action - last_u
                 for k, u_action in utilities.items()
             }
 
             # update regrets, (if context based, update based on neighbors context)
             if self.context_based:
-                context=None
+                context = None
                 if context not in self.regrets:
-                    self.regrets[context]=self.get_initial_regrets()
-                cum_regrets=self.regrets[context]
+                    self.regrets[context] = self.get_initial_regrets()
+                cum_regrets = self.regrets[context]
             else:
-                cum_regrets=self.regrets
-            if self.use_rm_plus: #RM+
+                cum_regrets = self.regrets
+            if self.use_rm_plus:  # RM+
                 for k in cum_regrets:
                     cum_regrets[k] = max(0, cum_regrets[k] + instant_regrets[k])
             else:
@@ -181,13 +180,13 @@ class RMComputation(VariableComputation):
                     k: cum_regrets[k] + instant_regrets[k]
                     for k in cum_regrets
                 }
-            else: # default vanilla RM
+            else:  # default vanilla RM
                 regret_basis = cum_regrets
-            positive_part=sum(max(0,rT) for _,rT in regret_basis.items())
-            if positive_part<=0:
-                self.last_strategy=self.get_uniform_policy()
+            positive_part = sum(max(0, rT) for _, rT in regret_basis.items())
+            if positive_part <= 0:
+                self.last_strategy = self.get_uniform_policy()
             else:
-                self.last_strategy={k:max(0,rT)/positive_part for k,rT in cum_regrets.items()}
+                self.last_strategy = {k: max(0, rT)/positive_part for k, rT in cum_regrets.items()}
 
             self.assign_sampled_value(self.last_strategy, costs)
 
@@ -201,11 +200,10 @@ class RMComputation(VariableComputation):
                 return
 
             self.post_to_all_neighbors(RMMessage(self.current_value))
-    
-    
+
     def assign_sampled_value(self, strategy, costs):
-        dom=list(self.variable.domain)
-        value=np.random.choice(dom, p=[strategy[val] for val in dom])
+        dom = list(self.variable.domain)
+        value = np.random.choice(dom, p=[strategy[val] for val in dom])
         self.value_selection(value, costs[value])
         return costs[value]
 
