@@ -36,7 +36,7 @@ algorithms = [
 
 # Configuration for runs
 TIMEOUT_SECONDS = 30  
-OUTPUT_FILE = "evaluation/results.json"
+OUTPUT_FILE = "output/results.json"
 
 def run_pydcop(problem_file, algo):
     """
@@ -125,6 +125,7 @@ def main():
             all_results[problem][algo] = summary
 
     # save all details
+    os.makedirs(os.path.dirname(OUTPUT_FILE),exist_ok=True)
     with open(OUTPUT_FILE, "w") as f:
         json.dump(all_results, f, indent=4)
     
