@@ -66,6 +66,10 @@ class RMComputation(VariableComputation):
 
         self.regrets = None
         self.last_strategy = None
+        self.ordered_neighbors = None
+        # technically, the order of neighbors in self.neighbors might change time
+        # fix an order on initialization so we do not permute these accidentally
+
         assert comp_def.algo.algo == "regret_matching"
 
         assert (comp_def.algo.mode == "min") or (comp_def.algo.mode == "max")
@@ -106,6 +110,7 @@ class RMComputation(VariableComputation):
                 self.regrets = dict()
             else:
                 self.regrets = self.get_initial_regrets()
+            self.ordered_neighbors = tuple(self.neighbors)
             self.last_strategy = self.get_uniform_policy()
             self.random_value_selection()
             self.logger.debug(
@@ -161,7 +166,7 @@ class RMComputation(VariableComputation):
 
             # update regrets, (if context based, update based on neighbors context)
             if self.context_based:
-                context = None
+                context = tuple(self.current_cycle[n] for n in self.neighbors)
                 if context not in self.regrets:
                     self.regrets[context] = self.get_initial_regrets()
                 cum_regrets = self.regrets[context]
