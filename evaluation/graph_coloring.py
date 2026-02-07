@@ -1,8 +1,7 @@
 import subprocess
 import json
 import os
-import time
-
+import numpy as np
 import yaml
 
 with open("evaluation/graph_coloring_50.yaml", "r") as f:
@@ -94,8 +93,10 @@ def run_pydcop(problem_file, algo):
         print(f"    Error message: {e.stderr}")
         return {"status": "FAILED", "error": e.stderr}
 
-def main():
+def main(trials=1):
     all_results = {}
+    keys_to_store=("status","cost","time","msg_count","cycle")
+    scalar_keys = ("cost","time","msg_count","cycle")
 
     for problem in problems:
         if not os.path.exists(problem):
@@ -106,23 +107,24 @@ def main():
         
         for algo in algorithms:
             # run algorithm
-            data = run_pydcop(problem, algo)
-            
-            # store results
-            if "assignment" in data:
-                summary = {
-                    "status": data.get("status"),
-                    "cost": data.get("cost"),
-                    "time": data.get("time"),
-                    "msg_count": data.get("msg_count"),
-                    "cycle": data.get("cycle")
-                }
-                print(f"    Success! Cost: {summary['cost']}, Time: {summary['time']:.4f}s")
-            else:
-                summary = {"error": "No assignment found", "raw": data}
-                print("    Failed to get valid assignment.")
-                
-            all_results[problem][algo] = summary
+            all_summaries=[]
+            for _ in range(trials):
+                data = run_pydcop(problem, algo)
+                # store results
+                if "assignment" in data:
+                    summary = {
+                        key: data.get(key) for key in keys_to_store
+                    }
+                    print(f"    Success! Cost: {summary['cost']}, Time: {summary['time']:.4f}s")
+                else:
+                    summary = {"error": "No assignment found", "raw": data}
+                    print("    Failed to get valid assignment.")
+                all_summaries.append(summary)
+            overall_summary={
+                key:np.mean([float(sm[key]) for sm in all_summaries]) for key in
+                scalar_keys
+            }
+            all_results[problem][algo] = {'summary':overall_summary,'trials':all_summaries}
 
     # save all details
     os.makedirs(os.path.dirname(OUTPUT_FILE),exist_ok=True)
@@ -132,4 +134,5 @@ def main():
     print(f"\Run complete. Results saved to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
-    main()
+    trials=2
+    main(trials=trials)
