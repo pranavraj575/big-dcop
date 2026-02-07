@@ -1,0 +1,76 @@
+{
+    "evaluation/graph_coloring_3agts.yaml": {
+        "regret_matching": {
+            "status": "FINISHED",
+            "cost": -0.1,
+            "time": 0.01372137499999998,
+            "msg_count": 216,
+            "cycle": 50
+        },
+        "dpop": {
+            "status": "TIMEOUT",
+            "cost": null,
+            "time": 30.005937832999997,
+            "msg_count": 6,
+            "cycle": 0
+        },
+        "dsa": {
+            "status": "FINISHED",
+            "cost": -0.1,
+            "time": 0.013439415999999982,
+            "msg_count": 216,
+            "cycle": 50
+        },
+        "mgm": {
+            "status": "FINISHED",
+            "cost": 0.1,
+            "time": 0.02979804199999997,
+            "msg_count": 408,
+            "cycle": 50
+        },
+        "maxsum": {
+            "status": "TIMEOUT",
+            "cost": -0.1,
+            "time": 30.007055083,
+            "msg_count": 247043,
+            "cycle": 61754
+        }
+    },
+    "evaluation/graph_coloring_50.yaml": {
+        "regret_matching": {
+            "status": "FINISHED",
+            "cost": 1744,
+            "time": 0.9571120419999999,
+            "msg_count": 9992,
+            "cycle": 50
+        },
+        "dpop": {
+            "status": "TIMEOUT",
+            "cost": null,
+            "time": 30.009469,
+            "msg_count": 247,
+            "cycle": 0
+        },
+        "dsa": {
+            "status": "FINISHED",
+            "cost": 1770,
+            "time": 0.9017148749999999,
+            "msg_count": 9992,
+            "cycle": 50
+        },
+        "mgm": {
+            "status": "FINISHED",
+            "cost": 1837,
+            "time": 0.908499833,
+            "msg_count": 19208,
+            "cycle": 50
+        },
+        "maxsum": {
+            "status": "TIMEOUT",
+            "cost": 2017,
+            "time": 30.029889334,
+            "msg_count": 15158,
+            "cycle": 192
+        }
+    }
+}

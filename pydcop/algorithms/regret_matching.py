@@ -1,22 +1,15 @@
 
-"""
-Regret Matching, based off DSA
---------------------------------------
-to save computation, samples a pure action instead of using mixed strategies
-
-"""
 import logging
 import random
 import numpy as np
 
 from pydcop.algorithms import AlgoParameterDef, ComputationDef
 from pydcop.infrastructure.computations import Message, VariableComputation, register
-
 from pydcop.computations_graph.constraints_hypergraph import VariableComputationNode
 from pydcop.dcop.relations import (
     find_optimum,
     assignment_cost,
-find_costs,
+    find_costs,
     filter_assignment_dict,
     find_optimal,
     optimal_cost_value,
@@ -30,56 +23,17 @@ GRAPH_TYPE = "constraints_hypergraph"
 
 
 algo_params = [
-    AlgoParameterDef("probability", "float", None, 0.7),
-    AlgoParameterDef("p_mode", "str", ["fixed", "arity"], "fixed"),
-    AlgoParameterDef("variant", "str", ["A", "B", "C"], "B"),
+    AlgoParameterDef("rm_plus", "int", [0, 1], 0),
+    AlgoParameterDef("predictive", "int", [0, 1], 0),
     AlgoParameterDef("stop_cycle", "int", None, 0),
 ]
 
 
 def computation_memory(computation: VariableComputationNode) -> float:
-    """Return the memory footprint of a DSA computation.
-
-    Notes
-    -----
-    With DSA, a computation must only remember the current value for each
-    of it's neighbors.
-
-    Parameters
-    ----------
-    computation: VariableComputationNode
-        a computation in the hyper-graph computation graph
-
-    Returns
-    -------
-    float:
-        the memory footprint of the computation.
-
-    """
     return UNIT_SIZE*len(computation.variable.domain)*2
 
 
 def communication_load(src: VariableComputationNode, target: str) -> float:
-    """Return the communication load between two variables.
-
-    Notes
-    -----
-    The only message in DSA is the 'value' messages, which simply contains
-    the current value.
-
-    Parameters
-    ----------
-    src: VariableComputationNode
-        The ComputationNode for the source variable.
-    target: str
-        the name of the other variable `src` is sending messages to
-
-
-    Returns
-    -------
-    float
-        The size of messages sent from the src variable to the target variable.
-    """
     return UNIT_SIZE + HEADER_SIZE
 
 
@@ -123,7 +77,8 @@ class RMComputation(VariableComputation):
 
         self.mode = comp_def.algo.mode
 
-        self.variant = comp_def.algo.param_value("variant")
+        self.use_rm_plus = bool(comp_def.algo.param_value("rm_plus"))
+        self.use_predictive = bool(comp_def.algo.param_value("predictive"))
         self.stop_cycle = comp_def.algo.param_value("stop_cycle")
         self.constraints = comp_def.node.constraints
 
@@ -193,8 +148,30 @@ class RMComputation(VariableComputation):
             else:
                 utilities=costs
             last_u=sum(utilities[k]*self.last_strategy[k] for k in utilities)
-            self.regrets={k:self.regrets[k]+(u_t-last_u) for k,u_t in utilities.items()}
-            positive_part=sum(max(0,rT) for _,rT in self.regrets.items())
+
+            # calc instantaneous regret
+            instant_regrets = {
+                k: u_action - last_u 
+                for k, u_action in utilities.items()
+            }
+
+            if self.use_rm_plus: #RM+
+                for k in self.regrets:
+                    self.regrets[k] = max(0, self.regrets[k] + instant_regrets[k])
+            else:
+                for k in self.regrets:
+                    self.regrets[k] += instant_regrets[k]
+
+            if self.use_predictive:  # predictive RM
+               
+                regret_basis = {
+                    k: self.regrets[k] + instant_regrets[k] 
+                    for k in self.regrets
+                }
+            else: # default vanilla RM
+                regret_basis = self.regrets
+
+            positive_part=sum(max(0,rT) for _,rT in regret_basis.items())
             if positive_part<=0:
                 self.last_strategy={k:1/len(self.regrets) for k,rT in self.regrets.items()}
             else:
@@ -212,6 +189,8 @@ class RMComputation(VariableComputation):
                 return
 
             self.post_to_all_neighbors(RMMessage(self.current_value))
+    
+    
     def assign_sampled_value(self, strategy, costs):
         dom=list(self.variable.domain)
         value=np.random.choice(dom, p=[strategy[val] for val in dom])
