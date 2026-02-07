@@ -1,17 +1,13 @@
 
 import logging
-import random
 import numpy as np
 
 from pydcop.algorithms import AlgoParameterDef, ComputationDef
 from pydcop.infrastructure.computations import Message, VariableComputation, register
 from pydcop.computations_graph.constraints_hypergraph import VariableComputationNode
 from pydcop.dcop.relations import (
-    find_optimum,
-    assignment_cost,
     find_costs,
     filter_assignment_dict,
-    find_optimal,
     optimal_cost_value,
 )
 
@@ -25,6 +21,7 @@ GRAPH_TYPE = "constraints_hypergraph"
 algo_params = [
     AlgoParameterDef("rm_plus", "int", [0, 1], 0),
     AlgoParameterDef("predictive", "int", [0, 1], 0),
+    AlgoParameterDef("context_based", "int", [0, 1], 0),
     AlgoParameterDef("stop_cycle", "int", None, 0),
 ]
 
@@ -79,6 +76,7 @@ class RMComputation(VariableComputation):
 
         self.use_rm_plus = bool(comp_def.algo.param_value("rm_plus"))
         self.use_predictive = bool(comp_def.algo.param_value("predictive"))
+        self.context_based = bool(comp_def.algo.param_value("context_based"))
         self.stop_cycle = comp_def.algo.param_value("stop_cycle")
         self.constraints = comp_def.node.constraints
 
@@ -86,6 +84,10 @@ class RMComputation(VariableComputation):
         self.current_cycle = {}
         self.next_cycle = {}
 
+    def get_initial_regrets(self):
+        return {val:0 for val in self.variable.domain}
+    def get_uniform_policy(self):
+        return {val:1/len(self.variable.domain) for val in self.variable.domain}
 
     def on_start(self):
         if not self.neighbors:
@@ -101,8 +103,11 @@ class RMComputation(VariableComputation):
             self.finished()
             self.stop()
         else:
-            self.regrets = {val:0 for val in self.variable.domain}
-            self.last_strategy = {val:1/len(self.regrets) for val in self.variable.domain}
+            if self.context_based:
+                self.regrets=dict()
+            else:
+                self.regrets = self.get_initial_regrets()
+            self.last_strategy = self.get_uniform_policy()
             self.random_value_selection()
             self.logger.debug(
                 "RM starts: randomly select value %s", self.current_value
@@ -155,27 +160,34 @@ class RMComputation(VariableComputation):
                 for k, u_action in utilities.items()
             }
 
-            if self.use_rm_plus: #RM+
-                for k in self.regrets:
-                    self.regrets[k] = max(0, self.regrets[k] + instant_regrets[k])
+            # update regrets, (if context based, update based on neighbors context)
+            if self.context_based:
+                context=None
+                if context not in self.regrets:
+                    self.regrets[context]=self.get_initial_regrets()
+                cum_regrets=self.regrets[context]
             else:
-                for k in self.regrets:
-                    self.regrets[k] += instant_regrets[k]
+                cum_regrets=self.regrets
+            if self.use_rm_plus: #RM+
+                for k in cum_regrets:
+                    cum_regrets[k] = max(0, cum_regrets[k] + instant_regrets[k])
+            else:
+                for k in cum_regrets:
+                    cum_regrets[k] += instant_regrets[k]
 
+            # get probability distribution, (if predictive RM, use prediction of the most recent utilities obtained)
             if self.use_predictive:  # predictive RM
-               
                 regret_basis = {
-                    k: self.regrets[k] + instant_regrets[k] 
-                    for k in self.regrets
+                    k: cum_regrets[k] + instant_regrets[k]
+                    for k in cum_regrets
                 }
             else: # default vanilla RM
-                regret_basis = self.regrets
-
+                regret_basis = cum_regrets
             positive_part=sum(max(0,rT) for _,rT in regret_basis.items())
             if positive_part<=0:
-                self.last_strategy={k:1/len(self.regrets) for k,rT in self.regrets.items()}
+                self.last_strategy=self.get_uniform_policy()
             else:
-                self.last_strategy={k:max(0,rT)/positive_part for k,rT in self.regrets.items()}
+                self.last_strategy={k:max(0,rT)/positive_part for k,rT in cum_regrets.items()}
 
             self.assign_sampled_value(self.last_strategy, costs)
 
