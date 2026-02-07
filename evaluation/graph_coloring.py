@@ -34,8 +34,9 @@ algorithms = [
 ]
 
 # Configuration for runs
-TIMEOUT_SECONDS = 30  
+TIMEOUT_SECONDS = 30
 OUTPUT_FILE = "output/results.json"
+
 
 def run_pydcop(problem_file, algo):
     """
@@ -43,15 +44,15 @@ def run_pydcop(problem_file, algo):
     Returns JSON result or error info
     """
     print(f"--> Running {algo} on {problem_file}...")
-    
+
     cmd = [
-        "pydcop", 
+        "pydcop",
         "--timeout", str(TIMEOUT_SECONDS),
         "solve",
         "--algo", algo,
         problem_file
     ]
-    
+
     # for maxsum, need to make adhoc
     if algo == "maxsum":
         cmd.insert(4, "--dist")
@@ -69,16 +70,16 @@ def run_pydcop(problem_file, algo):
 
     try:
         result = subprocess.run(
-            cmd, 
-            capture_output=True, 
-            text=True, 
+            cmd,
+            capture_output=True,
+            text=True,
             check=True
         )
-        
+
         # read logs
         output_lines = result.stdout.strip().split('\n')
         full_output = result.stdout
-        
+
         # heuristic to find JSON start/end if mixed with logs
         try:
             # Attempt to parse the whole output 
@@ -93,21 +94,22 @@ def run_pydcop(problem_file, algo):
         print(f"    Error message: {e.stderr}")
         return {"status": "FAILED", "error": e.stderr}
 
+
 def main(trials=1):
     all_results = {}
-    keys_to_store=("status","cost","time","msg_count","cycle")
-    scalar_keys = ("cost","time","msg_count","cycle")
+    keys_to_store = ("status", "cost", "time", "msg_count", "cycle")
+    scalar_keys = ("cost", "time", "msg_count", "cycle")
 
     for problem in problems:
         if not os.path.exists(problem):
             print(f"Skipping {problem} (file not found)")
             continue
-            
+
         all_results[problem] = {}
-        
+
         for algo in algorithms:
             # run algorithm
-            all_summaries=[]
+            all_summaries = []
             for _ in range(trials):
                 data = run_pydcop(problem, algo)
                 # store results
@@ -120,19 +122,20 @@ def main(trials=1):
                     summary = {"error": "No assignment found", "raw": data}
                     print("    Failed to get valid assignment.")
                 all_summaries.append(summary)
-            overall_summary={
-                key:np.mean([float(sm[key]) for sm in all_summaries]) for key in
+            overall_summary = {
+                key: np.mean([float(sm[key]) for sm in all_summaries]) for key in
                 scalar_keys
             }
-            all_results[problem][algo] = {'summary':overall_summary,'trials':all_summaries}
+            all_results[problem][algo] = {'summary': overall_summary, 'trials': all_summaries}
 
     # save all details
-    os.makedirs(os.path.dirname(OUTPUT_FILE),exist_ok=True)
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     with open(OUTPUT_FILE, "w") as f:
         json.dump(all_results, f, indent=4)
-    
+
     print(f"\Run complete. Results saved to {OUTPUT_FILE}")
 
+
 if __name__ == "__main__":
-    trials=2
+    trials = 2
     main(trials=trials)
