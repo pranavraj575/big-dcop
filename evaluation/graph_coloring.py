@@ -26,6 +26,7 @@ problems = [
 
 # Common algorithms supported by pyDCOP
 algorithms = [
+    "ftrl",
     "regret_matching",
     "regret_matching(rm_plus:1)",
     "regret_matching(rm_plus:1,predictive:1)",
@@ -68,7 +69,7 @@ def run_pydcop(problem_file, algo):
         cmd.insert(5, "adhoc")
 
     # iterations for local search algs
-    if alg_name in ["dsa", "mgm", "regret_matching"]:
+    if alg_name in ["dsa", "mgm", "regret_matching", 'ftrl']:
         # Add algo_params to stop after fixed cycles if timeout doesn't kill it first
         cmd.extend(["--algo_params", "stop_cycle:50"])
     for param in alg_parameters:
@@ -146,5 +147,5 @@ def main(trials=1):
 
 
 if __name__ == "__main__":
-    trials = 10
+    trials = 30
     main(trials=trials)

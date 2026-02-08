@@ -199,6 +199,6 @@ class FTRLComputation(VariableComputation):
             self.post_to_all_neighbors(FTRLMessage(self.current_value))
 
     def assign_sampled_value(self, strategy, costs):
-        idx=np.random.choice(np.arange(len(self.ordered_domain)), p=strategy)
+        idx = np.random.choice(np.arange(len(self.ordered_domain)), p=strategy)
         self.value_selection(self.ordered_domain[idx], costs[idx])
-        return  costs[idx]
+        return costs[idx]
