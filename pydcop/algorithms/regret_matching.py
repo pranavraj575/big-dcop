@@ -21,6 +21,7 @@ algo_params = [
     AlgoParameterDef("predictive", "int", [0, 1], 0),
     AlgoParameterDef("context_based", "int", [0, 1], 0),
     AlgoParameterDef("stop_cycle", "int", None, 0),
+    AlgoParameterDef("update_prob", "float", None, 1.0),
 ]
 
 
@@ -80,6 +81,7 @@ class RMComputation(VariableComputation):
         self.use_predictive = bool(comp_def.algo.param_value("predictive"))
         self.context_based = bool(comp_def.algo.param_value("context_based"))
         self.stop_cycle = comp_def.algo.param_value("stop_cycle")
+        self.update_prob = float(comp_def.algo.param_value("update_prob"))
         self.constraints = comp_def.node.constraints
 
         # Maps for the values of our neighbors for the current and next cycle:
@@ -207,8 +209,11 @@ class RMComputation(VariableComputation):
             self.post_to_all_neighbors(RMMessage(self.current_value))
 
     def assign_sampled_value(self, strategy, costs):
-        dom = list(self.variable.domain)
-        value = np.random.choice(dom, p=[strategy[val] for val in dom])
+        if np.random.random() < self.update_prob:
+            dom = list(self.variable.domain)
+            value = np.random.choice(dom, p=[strategy[val] for val in dom])
+        else:
+            value = self.current_value
         self.value_selection(value, costs[value])
         return costs[value]
 
