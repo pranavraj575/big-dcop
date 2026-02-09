@@ -27,10 +27,16 @@ problems = [
 # Common algorithms supported by pyDCOP
 algorithms = [
     "ftrl",
+    "ftrl(context_based:1)",
+    "ftrl(context_based:1,update_prob:0.95)",
     "regret_matching",
+    "regret_matching(context_based:1)",
+    "regret_matching(context_based:1,update_prob:0.95)",
     "regret_matching(rm_plus:1)",
     "regret_matching(rm_plus:1,predictive:1)",
     "regret_matching(predictive:1)",
+    "regret_matching(rm_plus:1,predictive:1,update_prob:0.95)",
+    "regret_matching(predictive:1,update_prob:0.95)",
     "dpop",
     "dsa",
     "mgm",
