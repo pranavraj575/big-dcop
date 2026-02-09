@@ -21,6 +21,7 @@ algo_params = [
     AlgoParameterDef("predictive", "int", [0, 1], 0),
     AlgoParameterDef("context_based", "int", [0, 1], 0),
     AlgoParameterDef("stop_cycle", "int", None, 0),
+    AlgoParameterDef("update_prob", "float", None, 1.0),
 ]
 
 
@@ -79,6 +80,7 @@ class FTRLComputation(VariableComputation):
         self.use_predictive = bool(comp_def.algo.param_value("predictive"))
         self.context_based = bool(comp_def.algo.param_value("context_based"))
         self.stop_cycle = comp_def.algo.param_value("stop_cycle")
+        self.update_prob = float(comp_def.algo.param_value("update_prob"))
         self.constraints = comp_def.node.constraints
 
         # Maps for the values of our neighbors for the current and next cycle:
@@ -199,6 +201,9 @@ class FTRLComputation(VariableComputation):
             self.post_to_all_neighbors(FTRLMessage(self.current_value))
 
     def assign_sampled_value(self, strategy, costs):
-        idx = np.random.choice(np.arange(len(self.ordered_domain)), p=strategy)
+        if np.random.random() < self.update_prob:
+            idx = np.random.choice(np.arange(len(self.ordered_domain)), p=strategy)
+        else:
+            idx = self.ordered_domain.index(self.current_value)
         self.value_selection(self.ordered_domain[idx], costs[idx])
         return costs[idx]
