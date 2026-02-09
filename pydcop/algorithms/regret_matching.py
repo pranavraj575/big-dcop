@@ -216,17 +216,3 @@ class RMComputation(VariableComputation):
             value = self.current_value
         self.value_selection(value, costs[value])
         return costs[value]
-
-    def exists_violated_constraint(self) -> bool:
-        """
-        Tells if there is a violated soft constraint regarding the current
-        assignment
-        :return: a boolean
-        """
-        for c in self.constraints:
-            asgt = self.current_cycle.copy()
-            asgt[self.name] = self.current_value
-            const = c(**filter_assignment_dict(asgt, c.dimensions))
-            if const != self.best_constraints_costs[c.name]:
-                return True
-        return False
