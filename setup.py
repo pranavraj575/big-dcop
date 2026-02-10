@@ -29,17 +29,17 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-
 # Basic dependencies, required to run pyDCOP:
 deps = [
-        'pulp',
-        'numpy',
-        'networkx',
-        'pyyaml',
-        'requests',
-        'websocket-server',
-        'tqdm',
-    ]
+    'pulp',
+    'numpy',
+    'networkx',
+    'pyyaml',
+    'requests',
+    'websocket-server',
+    'tqdm',
+    'matplotlib',
+]
 
 # Extra dependencies, used to run tests
 test_deps = [
@@ -62,7 +62,6 @@ extras = {
     'doc': doc_deps
 }
 
-
 from setuptools import setup, find_packages
 from os import path
 
@@ -80,7 +79,7 @@ setup(
     description='Several dcop algo implementation',
 
     long_description=long_description,
-    long_description_content_type='text/markdown', 
+    long_description_content_type='text/markdown',
 
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -106,11 +105,11 @@ setup(
         'pydcop/dcop_cli.py'
     ],
 
-    packages =find_packages(),
+    packages=find_packages(),
 
     project_urls={
-        'Documentation':  'http://pydcop.readthedocs.io',
+        'Documentation': 'http://pydcop.readthedocs.io',
         'Source': 'https://github.com/Orange-OpenSource/pyDcop',
         'Bug Reports': 'https://github.com/Orange-OpenSource/pyDcop/issues'
-    }    
+    }
 )

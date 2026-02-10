@@ -154,5 +154,5 @@ def main(trials=1):
 
 
 if __name__ == "__main__":
-    trials = 2
+    trials = 30
     main(trials=trials)
