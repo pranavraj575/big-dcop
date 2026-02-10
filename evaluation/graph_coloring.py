@@ -139,8 +139,9 @@ def main(trials=1):
             for key in scalar_keys:
                 arr = [float(sm[key]) for sm in all_summaries if key in sm]
                 if arr:
-                    overall_summary[key] = {'mean': np.mean(arr), 'std': np.std(arr)}
-                overall_summary['proportion_completed'] = len(arr)/trials
+                    overall_summary[key] = {'mean': np.mean(arr), 'std': np.std(arr), 'n': len(arr)}
+                p = len(arr)/trials
+                overall_summary['proportion_completed'] = {'mean': p, 'std': np.sqrt(p*(1 - p)), 'n': trials}
             all_results[problem][algo] = {'summary': overall_summary, 'trials': all_summaries}
             print('    Stats across all trials:', overall_summary)
 
@@ -153,5 +154,5 @@ def main(trials=1):
 
 
 if __name__ == "__main__":
-    trials = 30
+    trials = 2
     main(trials=trials)
