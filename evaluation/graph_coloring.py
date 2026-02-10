@@ -3,21 +3,25 @@ import json
 import os
 import numpy as np
 import yaml
+import argparse
 
-with open("evaluation/graph_coloring_50.yaml", "r") as f:
-    data = yaml.safe_load(f)
 
-# Convert agents list to dict with capacity for maxsum
-if isinstance(data['agents'], list):
-    print("Patching agents...")
-    new_agents = {}
-    for agent_name in data['agents']:
-        new_agents[agent_name] = {'capacity': 1000}
-    data['agents'] = new_agents
+def reformat_file_for_maxsum(problem_file):
+    with open(problem_file, "r") as f:
+        data = yaml.safe_load(f)
 
-    # Save
-    with open("evaluation/graph_coloring_50.yaml", "w") as f:
-        yaml.dump(data, f, sort_keys=False)
+    # Convert agents list to dict with capacity for maxsum
+    if isinstance(data['agents'], list):
+        print("Patching agents...")
+        new_agents = {}
+        for agent_name in data['agents']:
+            new_agents[agent_name] = {'capacity': 1000}
+        data['agents'] = new_agents
+
+        # Save
+        with open(problem_file, "w") as f:
+            yaml.dump(data, f, sort_keys=False)
+
 
 problems = [
     "evaluation/graph_coloring_3agts.yaml",
@@ -43,12 +47,8 @@ algorithms = [
     "maxsum"
 ]
 
-# Configuration for runs
-TIMEOUT_SECONDS = 30
-OUTPUT_FILE = "output/results.json"
 
-
-def run_pydcop(problem_file, algo):
+def run_pydcop(args, problem_file, algo):
     """
     Runs pydcop solve for a specific problem and algorithm
     Returns JSON result or error info
@@ -63,7 +63,7 @@ def run_pydcop(problem_file, algo):
 
     cmd = [
         "pydcop",
-        "--timeout", str(TIMEOUT_SECONDS),
+        "--timeout", str(args.timeout),
         "solve",
         "--algo", alg_name,
         problem_file
@@ -108,23 +108,23 @@ def run_pydcop(problem_file, algo):
         return {"status": "FAILED", "error": e.stderr}
 
 
-def main(trials=1):
+def main(args):
     all_results = {}
     keys_to_store = ("status", "cost", "time", "msg_count", "cycle")
     scalar_keys = ("cost", "time", "msg_count", "cycle")
 
-    for problem in problems:
+    for problem in args.problems:
         if not os.path.exists(problem):
             print(f"Skipping {problem} (file not found)")
             continue
 
         all_results[problem] = {}
 
-        for algo in algorithms:
+        for algo in args.algorithms:
             # run algorithm
             all_summaries = []
-            for _ in range(trials):
-                data = run_pydcop(problem, algo)
+            for _ in range(args.trials):
+                data = run_pydcop(args, problem, algo)
                 # store results
                 if "assignment" in data:
                     summary = {
@@ -140,19 +140,54 @@ def main(trials=1):
                 arr = [float(sm[key]) for sm in all_summaries if key in sm]
                 if arr:
                     overall_summary[key] = {'mean': np.mean(arr), 'std': np.std(arr), 'n': len(arr)}
-                p = len(arr)/trials
-                overall_summary['proportion_completed'] = {'mean': p, 'std': np.sqrt(p*(1 - p)), 'n': trials}
+                p = len(arr)/args.trials
+                overall_summary['proportion_completed'] = {'mean': p, 'std': np.sqrt(p*(1 - p)), 'n': args.trials}
             all_results[problem][algo] = {'summary': overall_summary, 'trials': all_summaries}
             print('    Stats across all trials:', overall_summary)
 
     # save all details
-    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
-    with open(OUTPUT_FILE, "w") as f:
+    os.makedirs(os.path.dirname(args.output_file), exist_ok=True)
+    with open(args.output_file, "w") as f:
         json.dump(all_results, f, indent=4)
 
-    print(f"\Run complete. Results saved to {OUTPUT_FILE}")
+    print(f"\Run complete. Results saved to {args.output_file}")
 
 
 if __name__ == "__main__":
-    trials = 30
-    main(trials=trials)
+    reformat_file_for_maxsum("evaluation/graph_coloring_50.yaml")
+    # Configuration for runs
+    p = argparse.ArgumentParser()
+    p.add_argument("--trials",
+                   required=False,
+                   type=int,
+                   default=30,
+                   help="number of trials to run",
+                   )
+    p.add_argument("--timeout",
+                   required=False,
+                   type=int,
+                   default=10,
+                   help="seconds before timeout",
+                   )
+    p.add_argument('--algorithms',
+                   required=False,
+                   nargs="*",
+                   default=algorithms,
+                   type=str,
+                   help='algorithms to include',
+                   )
+    p.add_argument('--problems',
+                   required=False,
+                   nargs="*",
+                   default=problems,
+                   type=str,
+                   help='problem (.yaml files) to include',
+                   )
+    p.add_argument('--output_file',
+                   required=False,
+                   default="output/results.json",
+                   type=str,
+                   help='output file',
+                   )
+
+    main(p.parse_args())
