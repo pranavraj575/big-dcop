@@ -1,0 +1,3507 @@
+name: v39hard graph coloring
+objective: min
+
+domains:
+  colors:
+    type: color
+    values:
+    - R
+    - G
+    - B
+
+variables:
+  v00:
+    domain: colors
+  v01:
+    domain: colors
+  v02:
+    domain: colors
+  v03:
+    domain: colors
+  v04:
+    domain: colors
+  v05:
+    domain: colors
+  v06:
+    domain: colors
+  v07:
+    domain: colors
+  v08:
+    domain: colors
+  v09:
+    domain: colors
+  v10:
+    domain: colors
+  v11:
+    domain: colors
+  v12:
+    domain: colors
+  v13:
+    domain: colors
+  v14:
+    domain: colors
+  v15:
+    domain: colors
+  v16:
+    domain: colors
+  v17:
+    domain: colors
+  v18:
+    domain: colors
+  v19:
+    domain: colors
+  v20:
+    domain: colors
+  v21:
+    domain: colors
+  v22:
+    domain: colors
+  v23:
+    domain: colors
+  v24:
+    domain: colors
+  v25:
+    domain: colors
+  v26:
+    domain: colors
+  v27:
+    domain: colors
+  v28:
+    domain: colors
+  v29:
+    domain: colors
+  v30:
+    domain: colors
+  v31:
+    domain: colors
+  v32:
+    domain: colors
+  v33:
+    domain: colors
+  v34:
+    domain: colors
+  v35:
+    domain: colors
+  v36:
+    domain: colors
+  v37:
+    domain: colors
+  v38:
+    domain: colors
+  v39:
+    domain: colors
+
+constraints:
+  c0:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v01
+  c1:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v03
+  c10:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v26
+  c100:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v11
+  c101:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v13
+  c102:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v14
+  c103:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v15
+  c104:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v19
+  c105:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v20
+  c106:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v21
+  c107:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v22
+  c108:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v23
+  c109:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v25
+  c11:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v27
+  c110:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v26
+  c111:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v28
+  c112:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v29
+  c113:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v32
+  c114:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v36
+  c115:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v38
+  c116:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v07
+  c117:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v08
+  c118:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v09
+  c119:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v14
+  c12:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v28
+  c120:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v17
+  c121:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v19
+  c122:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v20
+  c123:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v21
+  c124:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v22
+  c125:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v23
+  c126:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v25
+  c127:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v27
+  c128:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v28
+  c129:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v30
+  c13:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v29
+  c130:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v33
+  c131:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v35
+  c132:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v37
+  c133:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v09
+  c134:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v15
+  c135:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v16
+  c136:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v17
+  c137:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v23
+  c138:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v24
+  c139:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v26
+  c14:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v30
+  c140:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v27
+  c141:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v28
+  c142:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v30
+  c143:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v33
+  c144:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v34
+  c145:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v37
+  c146:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v07
+    - v39
+  c147:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v09
+  c148:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v11
+  c149:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v14
+  c15:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v31
+  c150:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v15
+  c151:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v16
+  c152:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v23
+  c153:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v25
+  c154:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v26
+  c155:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v28
+  c156:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v29
+  c157:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v30
+  c158:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v33
+  c159:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v34
+  c16:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v32
+  c160:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v36
+  c161:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v39
+  c162:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v10
+  c163:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v13
+  c164:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v19
+  c165:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v20
+  c166:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v21
+  c167:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v22
+  c168:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v24
+  c169:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v28
+  c17:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v36
+  c170:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v30
+  c171:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v31
+  c172:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v32
+  c173:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v33
+  c174:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v36
+  c175:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v37
+  c176:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v09
+    - v38
+  c177:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v11
+  c178:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v13
+  c179:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v14
+  c18:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v37
+  c180:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v16
+  c181:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v18
+  c182:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v20
+  c183:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v21
+  c184:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v23
+  c185:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v25
+  c186:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v31
+  c187:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v32
+  c188:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v33
+  c189:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v34
+  c19:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v38
+  c190:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v10
+    - v35
+  c191:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v13
+  c192:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v16
+  c193:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v18
+  c194:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v19
+  c195:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v21
+  c196:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v22
+  c197:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v23
+  c198:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v27
+  c199:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v28
+  c2:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v04
+  c20:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v39
+  c200:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v32
+  c201:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v33
+  c202:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v34
+  c203:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v37
+  c204:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v38
+  c205:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v11
+    - v39
+  c206:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v13
+  c207:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v14
+  c208:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v16
+  c209:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v19
+  c21:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v05
+  c210:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v20
+  c211:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v21
+  c212:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v23
+  c213:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v24
+  c214:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v26
+  c215:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v29
+  c216:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v30
+  c217:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v31
+  c218:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v33
+  c219:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v35
+  c22:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v09
+  c220:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v36
+  c221:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v12
+    - v38
+  c222:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v13
+    - v14
+  c223:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v13
+    - v15
+  c224:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v13
+    - v16
+  c225:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v13
+    - v20
+  c226:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v13
+    - v28
+  c227:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v13
+    - v32
+  c228:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v13
+    - v33
+  c229:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v13
+    - v34
+  c23:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v11
+  c230:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v13
+    - v35
+  c231:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v13
+    - v36
+  c232:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v13
+    - v37
+  c233:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v13
+    - v38
+  c234:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v15
+  c235:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v16
+  c236:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v19
+  c237:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v20
+  c238:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v21
+  c239:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v22
+  c24:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v17
+  c240:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v23
+  c241:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v25
+  c242:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v26
+  c243:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v27
+  c244:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v29
+  c245:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v30
+  c246:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v31
+  c247:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v32
+  c248:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v33
+  c249:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v34
+  c25:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v19
+  c250:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v36
+  c251:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v37
+  c252:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v38
+  c253:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v14
+    - v39
+  c254:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v15
+    - v16
+  c255:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v15
+    - v17
+  c256:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v15
+    - v18
+  c257:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v15
+    - v19
+  c258:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v15
+    - v25
+  c259:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v15
+    - v26
+  c26:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v20
+  c260:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v15
+    - v28
+  c261:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v15
+    - v29
+  c262:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v15
+    - v37
+  c263:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v15
+    - v38
+  c264:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v15
+    - v39
+  c265:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v17
+  c266:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v20
+  c267:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v21
+  c268:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v23
+  c269:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v25
+  c27:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v21
+  c270:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v27
+  c271:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v29
+  c272:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v30
+  c273:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v31
+  c274:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v34
+  c275:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v35
+  c276:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v37
+  c277:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v38
+  c278:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v16
+    - v39
+  c279:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v17
+    - v19
+  c28:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v23
+  c280:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v17
+    - v21
+  c281:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v17
+    - v22
+  c282:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v17
+    - v26
+  c283:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v17
+    - v28
+  c284:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v17
+    - v29
+  c285:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v17
+    - v30
+  c286:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v17
+    - v33
+  c287:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v17
+    - v36
+  c288:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v17
+    - v37
+  c289:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v17
+    - v39
+  c29:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v25
+  c290:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v18
+    - v20
+  c291:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v18
+    - v21
+  c292:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v18
+    - v23
+  c293:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v18
+    - v24
+  c294:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v18
+    - v26
+  c295:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v18
+    - v27
+  c296:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v18
+    - v31
+  c297:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v18
+    - v32
+  c298:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v18
+    - v34
+  c299:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v18
+    - v35
+  c3:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v05
+  c30:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v26
+  c300:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v18
+    - v36
+  c301:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v18
+    - v39
+  c302:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v19
+    - v21
+  c303:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v19
+    - v24
+  c304:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v19
+    - v25
+  c305:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v19
+    - v26
+  c306:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v19
+    - v29
+  c307:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v19
+    - v30
+  c308:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v19
+    - v31
+  c309:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v19
+    - v32
+  c31:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v27
+  c310:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v19
+    - v33
+  c311:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v19
+    - v34
+  c312:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v19
+    - v35
+  c313:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v19
+    - v38
+  c314:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v20
+    - v27
+  c315:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v20
+    - v28
+  c316:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v20
+    - v29
+  c317:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v20
+    - v32
+  c318:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v20
+    - v33
+  c319:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v20
+    - v36
+  c32:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v28
+  c320:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v20
+    - v37
+  c321:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v20
+    - v39
+  c322:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v21
+    - v22
+  c323:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v21
+    - v23
+  c324:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v21
+    - v24
+  c325:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v21
+    - v25
+  c326:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v21
+    - v27
+  c327:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v21
+    - v32
+  c328:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v21
+    - v37
+  c329:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v21
+    - v38
+  c33:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v30
+  c330:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v21
+    - v39
+  c331:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v22
+    - v23
+  c332:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v22
+    - v25
+  c333:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v22
+    - v26
+  c334:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v22
+    - v28
+  c335:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v22
+    - v30
+  c336:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v22
+    - v35
+  c337:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v22
+    - v36
+  c338:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v22
+    - v38
+  c339:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v22
+    - v39
+  c34:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v34
+  c340:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v23
+    - v24
+  c341:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v23
+    - v25
+  c342:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v23
+    - v27
+  c343:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v23
+    - v28
+  c344:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v23
+    - v29
+  c345:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v23
+    - v32
+  c346:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v23
+    - v35
+  c347:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v23
+    - v36
+  c348:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v23
+    - v37
+  c349:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v24
+    - v26
+  c35:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v35
+  c350:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v24
+    - v27
+  c351:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v24
+    - v28
+  c352:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v24
+    - v29
+  c353:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v24
+    - v30
+  c354:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v24
+    - v31
+  c355:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v24
+    - v32
+  c356:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v24
+    - v33
+  c357:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v24
+    - v34
+  c358:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v24
+    - v35
+  c359:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v24
+    - v37
+  c36:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v38
+  c360:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v25
+    - v26
+  c361:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v25
+    - v28
+  c362:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v25
+    - v29
+  c363:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v25
+    - v32
+  c364:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v25
+    - v34
+  c365:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v25
+    - v36
+  c366:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v25
+    - v37
+  c367:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v25
+    - v38
+  c368:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v26
+    - v27
+  c369:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v26
+    - v28
+  c37:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v03
+  c370:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v26
+    - v29
+  c371:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v26
+    - v30
+  c372:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v26
+    - v33
+  c373:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v26
+    - v34
+  c374:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v26
+    - v37
+  c375:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v26
+    - v39
+  c376:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v27
+    - v30
+  c377:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v27
+    - v31
+  c378:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v27
+    - v34
+  c379:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v27
+    - v36
+  c38:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v05
+  c380:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v27
+    - v37
+  c381:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v27
+    - v39
+  c382:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v28
+    - v29
+  c383:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v28
+    - v30
+  c384:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v28
+    - v31
+  c385:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v28
+    - v32
+  c386:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v28
+    - v34
+  c387:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v28
+    - v35
+  c388:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v28
+    - v36
+  c389:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v28
+    - v37
+  c39:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v06
+  c390:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v28
+    - v39
+  c391:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v29
+    - v33
+  c392:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v29
+    - v34
+  c393:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v29
+    - v35
+  c394:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v29
+    - v36
+  c395:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v29
+    - v37
+  c396:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v29
+    - v39
+  c397:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v30
+    - v36
+  c398:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v30
+    - v37
+  c399:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v30
+    - v39
+  c4:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v07
+  c40:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v07
+  c400:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v31
+    - v36
+  c401:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v32
+    - v33
+  c402:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v32
+    - v34
+  c403:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v32
+    - v35
+  c404:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v32
+    - v36
+  c405:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v32
+    - v37
+  c406:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v32
+    - v38
+  c407:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v33
+    - v35
+  c408:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v33
+    - v37
+  c409:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v33
+    - v38
+  c41:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v10
+  c410:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v34
+    - v37
+  c411:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v34
+    - v38
+  c412:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v34
+    - v39
+  c413:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v35
+    - v36
+  c414:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v35
+    - v39
+  c415:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v36
+    - v37
+  c416:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v36
+    - v38
+  c417:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v36
+    - v39
+  c418:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v37
+    - v38
+  c419:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v37
+    - v39
+  c42:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v13
+  c420:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v38
+    - v39
+  c43:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v17
+  c44:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v18
+  c45:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v19
+  c46:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v23
+  c47:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v24
+  c48:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v25
+  c49:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v27
+  c5:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v09
+  c50:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v31
+  c51:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v33
+  c52:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v34
+  c53:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v39
+  c54:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v04
+  c55:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v05
+  c56:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v10
+  c57:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v11
+  c58:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v12
+  c59:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v13
+  c6:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v13
+  c60:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v15
+  c61:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v16
+  c62:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v17
+  c63:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v19
+  c64:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v20
+  c65:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v23
+  c66:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v24
+  c67:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v25
+  c68:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v27
+  c69:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v30
+  c7:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v20
+  c70:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v31
+  c71:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v32
+  c72:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v34
+  c73:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v36
+  c74:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v37
+  c75:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v39
+  c76:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v05
+  c77:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v06
+  c78:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v07
+  c79:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v11
+  c8:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v22
+  c80:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v12
+  c81:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v13
+  c82:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v14
+  c83:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v15
+  c84:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v16
+  c85:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v17
+  c86:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v22
+  c87:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v23
+  c88:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v25
+  c89:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v26
+  c9:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v23
+  c90:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v28
+  c91:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v31
+  c92:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v32
+  c93:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v33
+  c94:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v34
+  c95:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v36
+  c96:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v38
+  c97:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v39
+  c98:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v06
+  c99:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v08
+
+agents:
+  a00: {}
+  a01: {}
+  a02: {}
+  a03: {}
+  a04: {}
+  a05: {}
+  a06: {}
+  a07: {}
+  a08: {}
+  a09: {}
+  a10: {}
+  a11: {}
+  a12: {}
+  a13: {}
+  a14: {}
+  a15: {}
+  a16: {}
+  a17: {}
+  a18: {}
+  a19: {}
+  a20: {}
+  a21: {}
+  a22: {}
+  a23: {}
+  a24: {}
+  a25: {}
+  a26: {}
+  a27: {}
+  a28: {}
+  a29: {}
+  a30: {}
+  a31: {}
+  a32: {}
+  a33: {}
+  a34: {}
+  a35: {}
+  a36: {}
+  a37: {}
+  a38: {}
+  a39: {}
+routes:
+  default: 1
+

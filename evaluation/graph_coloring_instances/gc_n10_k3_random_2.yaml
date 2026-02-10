@@ -1,0 +1,209 @@
+name: v09hard graph coloring
+objective: min
+
+domains:
+  colors:
+    type: color
+    values:
+    - R
+    - G
+    - B
+
+variables:
+  v00:
+    domain: colors
+  v01:
+    domain: colors
+  v02:
+    domain: colors
+  v03:
+    domain: colors
+  v04:
+    domain: colors
+  v05:
+    domain: colors
+  v06:
+    domain: colors
+  v07:
+    domain: colors
+  v08:
+    domain: colors
+  v09:
+    domain: colors
+
+constraints:
+  c0:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v04
+  c1:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v07
+  c10:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v08
+  c11:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v03
+    - v09
+  c12:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v05
+  c13:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v04
+    - v06
+  c14:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v06
+  c15:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v08
+  c16:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v05
+    - v09
+  c17:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v07
+  c18:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v06
+    - v09
+  c19:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v08
+    - v09
+  c2:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v00
+    - v09
+  c3:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v04
+  c4:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v07
+  c5:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v08
+  c6:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v01
+    - v09
+  c7:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v04
+  c8:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v05
+  c9:
+    type: extensional
+    values:
+      0.0: G R | B R | R G | B G | R B | G B
+      1000.0: R R | G G | B B
+    variables:
+    - v02
+    - v06
+
+agents:
+  a00: {}
+  a01: {}
+  a02: {}
+  a03: {}
+  a04: {}
+  a05: {}
+  a06: {}
+  a07: {}
+  a08: {}
+  a09: {}
+routes:
+  default: 1
+
