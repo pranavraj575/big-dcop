@@ -234,11 +234,22 @@ def init_cli_parser(parent_parser):
         "Erdős-Rényi graphs",
     )
 
+    parser.add_argument(
+        "--seed",
+        required=False,
+        type=int,
+        default=None,
+        help="Random seed to use",
+    )
+
+
 
 def generate(args):
     """
     Generate and output a graph coloring problem
     """
+    if args.seed is not None:
+        random.seed(args.seed)
     if args.colors_count > len(COLORS):
         raise ValueError("Too many colors!")
 

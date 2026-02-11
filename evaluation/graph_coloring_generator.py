@@ -9,7 +9,8 @@ def generate_graph_coloring_problems(
     color_count: int = 3,
     graph_type: str = "random",  # random, grid, scalefree
     p_edge: float = 0.4,         # probability of edge (for random graphs)
-    m_edge: int = 2              # edges per node (for scalefree graphs)
+    m_edge: int = 2,             # edges per node (for scalefree graphs)
+    use_seed= False,             # whether to use fixed random seed
 ):
    
     if not os.path.exists(output_dir):
@@ -37,10 +38,13 @@ def generate_graph_coloring_problems(
         elif graph_type == "scalefree":
             cmd_args.extend(["--m_edge", str(m_edge)]) # -m
 
+        if use_seed:
+            cmd_args.extend(["--seed", str(i)]) # -m
+
         cmd = base_cmd + cmd_args
 
         try:
-        
+
             with open(os.path.join(output_dir, filename), "w") as outfile:
                 subprocess.run(cmd, stdout=outfile, check=True)
             print(f"[{i}/{n_problems}] Generated: {filename}")
@@ -62,7 +66,8 @@ if __name__ == "__main__":
             node_count=n,       # -v
             color_count=3,       # -c
             graph_type="random", # -g (random, grid, scalefree)
-            p_edge=0.5           # -p (only used if type is random)
+            p_edge=0.5,           # -p (only used if type is random)
+            use_seed=True,
         )
     
     print("\nDone.")
