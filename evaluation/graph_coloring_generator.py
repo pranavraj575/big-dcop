@@ -12,7 +12,7 @@ def generate_graph_coloring_problems(
     m_edge: int = 2,             # edges per node (for scalefree graphs)
     use_seed= False,             # whether to use fixed random seed
 ):
-   
+
     if not os.path.exists(output_dir):
         try:
             os.makedirs(output_dir)
@@ -24,8 +24,8 @@ def generate_graph_coloring_problems(
     for i in range(1, n_problems + 1):
         filename = f"gc_n{node_count}_k{color_count}_{graph_type}_{i}.yaml"
         filepath = os.path.join(output_dir, filename)
-        
-        base_cmd = ["pydcop", "generate", "graph_coloring"] 
+
+        base_cmd = ["pydcop", "generate", "graph_coloring"]
         cmd_args = [
             "--variables_count", str(node_count),   # -v
             "--colors_count", str(color_count),     # -c
@@ -48,16 +48,16 @@ def generate_graph_coloring_problems(
             with open(os.path.join(output_dir, filename), "w") as outfile:
                 subprocess.run(cmd, stdout=outfile, check=True)
             print(f"[{i}/{n_problems}] Generated: {filename}")
-            
+
         except subprocess.CalledProcessError as e:
             print(e.stderr)
-        
+
 
 if __name__ == "__main__":
 
-    INPUT_DIR = "evaluation/graph_coloring_instances"
+    INPUT_DIR = "output/graph_coloring_instances"
     NUM_PROBLEMS = 5
-    
+
     # generate random 3 coloring problems
     for n in range(10, 51, 10):
         generate_graph_coloring_problems(
@@ -69,5 +69,5 @@ if __name__ == "__main__":
             p_edge=0.5,           # -p (only used if type is random)
             use_seed=True,
         )
-    
+
     print("\nDone.")

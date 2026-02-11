@@ -62,7 +62,7 @@ def run_pydcop(problem_file, algo_str, timeout, cycles=50):
 
 def main():
     parser = argparse.ArgumentParser(description="Run pyDCOP benchmark")
-    parser.add_argument("--input_dir", type=str, default="evaluation/graph_coloring_instances", 
+    parser.add_argument("--input_dir", type=str, default="output/graph_coloring_instances",
                         help="Directory containing .yaml problem files")
     parser.add_argument("--output_csv", type=str, default="output/results.csv",
                         help="Path to save the results DataFrame")
