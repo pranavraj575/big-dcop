@@ -20,12 +20,13 @@ pip install -e .
 Test installation
 
 ```bash
- pydcop -t 10 solve  --algo regret_matching tests/instances/graph_coloring1.yaml 
+pydcop -t 10 solve  --algo regret_matching tests/instances/graph_coloring1.yaml 
 ```
 Run experiment
 
 ```bash
- python evaluation/graph_coloring.py 
+python evaluation/graph_coloring_generator.py
+python evaluation/graph_coloring_runner.py 
 ```
 
 # pyDCOP info
