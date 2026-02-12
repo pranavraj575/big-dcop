@@ -3,16 +3,18 @@ import os
 import glob
 import argparse
 import pandas as pd
+import json
+
 from eval_helpers import reformat_file_for_maxsum, extract_json_from_output
-from algo_configs import ALGORITHMS, get_algo_info
+from algo_configs import get_algo_info, get_display_name
 
 
-def run_pydcop(problem_file, algorithm, config, timeout):
+def run_pydcop(problem_file, algo_config, timeout):
     """
     Runs pydcop solve.
     Returns a dictionary of metrics.
     """
-    display_name, base_name, extra_alg_params = get_algo_info(algorithm, config)
+    base_name, extra_alg_params = get_algo_info(algo_config)
 
     # build Command
     cmd = [
@@ -55,6 +57,8 @@ def run_pydcop(problem_file, algorithm, config, timeout):
 
 def main():
     parser = argparse.ArgumentParser(description="Run pyDCOP benchmark")
+    parser.add_argument("--algorithms", type=str, default="evaluation/algorithm_configs.json",
+                        help="json file with algorithm configs to use")
     parser.add_argument("--input_dir", type=str, default="output/graph_coloring_instances",
                         help="Directory containing .yaml problem files")
     parser.add_argument("--output_csv", type=str, default="output/results.csv",
@@ -62,6 +66,13 @@ def main():
     parser.add_argument("--trials", type=int, default=1, help="Number of trials per algorithm per problem")
     parser.add_argument("--timeout", type=int, default=10, help="Timeout in seconds per run")
     args = parser.parse_args()
+
+    if not os.path.exists(args.algorithms):
+        print(f"Error: Directory '{args.algorithms}' does not exist.")
+        return
+    with open(args.algorithms) as f:
+        algorithms = json.load(f)
+        f.close()
 
     if not os.path.exists(args.input_dir):
         print(f"Error: Directory '{args.input_dir}' does not exist.")
@@ -81,21 +92,21 @@ def main():
         # apply fix for maxsum if needed
         reformat_file_for_maxsum(problem_path)
 
-        for algo, config in ALGORITHMS:
-            print(f"    Algorithm: {algo}")
+        for algo_config in algorithms:
+            display_name = get_display_name(algo_config)
+            print(f"    Algorithm: {display_name}")
             for i in range(args.trials):
                 # Run the solver
                 metrics = run_pydcop(
                     problem_file=problem_path,
-                    algorithm=algo,
-                    config=config,
+                    algo_config=algo_config,
                     timeout=args.timeout,
                 )
 
                 # Create a record row
                 record = {
                     "problem": problem_name,
-                    "algorithm": algo,
+                    "algorithm": display_name,
                     "trial": i + 1,
                     "status": metrics.get("status"),
                     "cost": metrics.get("cost"),

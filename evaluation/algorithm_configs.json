@@ -1,0 +1,35 @@
+[
+  {
+    "name": "dsa",
+    "algo_params": [
+      "stop_cycle:100",
+      "variant:B"
+    ]
+  },
+  {
+    "name": "mgm",
+    "algo_params": [
+      "stop_cycle:100"
+    ]
+  },
+  {
+    "name": "maxsum",
+    "dist": "adhoc"
+  },
+  {
+    "name": "ftrl",
+    "algo_params": [
+      "stop_cycle:100"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM",
+    "algo_params": [
+      "stop_cycle:100"
+    ]
+  },
+  {
+    "name": "dpop"
+  }
+]
