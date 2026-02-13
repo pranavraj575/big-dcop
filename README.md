@@ -27,6 +27,7 @@ Run experiment
 ```bash
 python evaluation/graph_coloring_generator.py
 python evaluation/graph_coloring_runner.py 
+python evaluation/plot_results.py 
 ```
 
 # pyDCOP info

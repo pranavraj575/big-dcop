@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 
-def plot_wrt_n(df, key, save_path, args,algs=None):
+def plot_wrt_n(df, key, save_path, args, algs=None):
     if algs is None:
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
     ns = sorted(set(df['n']))
@@ -83,10 +83,11 @@ if __name__ == '__main__':
     else:
         algs = args.algorithms
 
-
+    save_dir = os.path.join(plt_dir, 'cost_by_algorithm_over_n.png')
     plot_wrt_n(df=df,
                key='cost',
-               save_path=os.path.join(plt_dir, 'cost_by_algorithm_over_n.png'),
+               save_path=save_dir,
                algs=algs,
                args=args
                )
+    print(f'saved to {save_dir}')
