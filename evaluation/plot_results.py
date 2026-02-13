@@ -82,12 +82,12 @@ if __name__ == '__main__':
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
     else:
         algs = args.algorithms
-
-    save_dir = os.path.join(plt_dir, 'cost_by_algorithm_over_n.png')
-    plot_wrt_n(df=df,
-               key='cost',
-               save_path=save_dir,
-               algs=algs,
-               args=args
-               )
-    print(f'saved to {save_dir}')
+    for key in ('cost','msg_count','time'):
+        save_dir = os.path.join(plt_dir, key+'_by_algorithm_over_n.png')
+        plot_wrt_n(df=df,
+                   key=key,
+                   save_path=save_dir,
+                   algs=algs,
+                   args=args
+                   )
+        print(f'saved to {save_dir}')
