@@ -156,10 +156,11 @@ if __name__ == '__main__':
 
         this_plot_dir = os.path.join(plt_dir, f'{key}_over_time')
         save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
+        choose_gaussian_kernel_b = lambda x0: x0
         kernel_smoothed_plot_wrt_value(
             df=df_with_n_param,
             key=key,
-            kernel_fn=lambda x0, x: np.exp(-(x0 - x)**2/(2*x0**2)),
+            kernel_fn=lambda x0, x: np.exp(-(x0 - x)**2/(2*choose_gaussian_kernel_b(x0)**2)),
             x_param='time',
             save_path=save_dir,
             algs=algs,
