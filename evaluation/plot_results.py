@@ -1,36 +1,37 @@
-import argparse, json, matplotlib.pyplot as plt
+import argparse, itertools, matplotlib.pyplot as plt
 import os.path
 import pandas as pd
 
 import numpy as np
 
 
-def plot_wrt_n(df, key, save_path, args, algs=None):
+def plot_wrt_param(df, key, x_param, save_path, x_log=False, y_log=False, algs=None):
     if algs is None:
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
-    ns = sorted(set(df['n']))
+    xs = sorted(set(df[x_param]))
     for alg in algs:
-        temp_df = df.where(df['algorithm'] == alg)
-        x = ns
+        temp_df = df[df['algorithm'] == alg]
         means = []
         std_errors = []
-        for n in ns:
-            temp_temp_df = temp_df.where(temp_df['n'] == n)
+        for x in xs:
+            temp_temp_df = temp_df[temp_df[x_param] == x]
             y = temp_temp_df[key]
             means.append(y.mean())
             sample_size = y.notna().sum()
             sample_variance = y.var()*sample_size/(sample_size - 1)
-            std_error = np.sqrt(sample_variance)/np.sqrt(n)
+            std_error = np.sqrt(sample_variance)/np.sqrt(sample_size)
             std_errors.append(std_error)
         means, std_errors = np.array(means), np.array(std_errors)
-        t = plt.plot(x, means, label=alg)
+        t = plt.plot(xs, means, label=alg)
         color = t[0].get_c()
         z = 1.96
-        plt.fill_between(x, means - std_errors*z, means + std_errors*z, color=color, alpha=.2)
+        plt.fill_between(xs, means - std_errors*z, means + std_errors*z, color=color, alpha=.2)
     plt.legend()
     plt.ylabel(key)
-    plt.xlabel('n')
-    if args.log_scale:
+    plt.xlabel(x_param)
+    if x_log:
+        plt.xscale("log")
+    if y_log:
         plt.yscale("log")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, bbox_inches='tight')
@@ -60,10 +61,12 @@ if __name__ == '__main__':
                    type=str,
                    help='algorithms to include (defaults to all)',
                    )
-    p.add_argument('--log_scale',
+    p.add_argument('--y_keys',
                    required=False,
-                   action='store_true',
-                   help='plot on log scale',
+                   nargs="+",
+                   default=['cost'],
+                   type=str,
+                   help='things to plot on y value',
                    )
     args = p.parse_args()
 
@@ -74,20 +77,35 @@ if __name__ == '__main__':
 
     # get n parameter from problem file name
     df['n'] = df['problem'].map(lambda s: int(s.split('_')[1][1:]))
-
-    df.plot(x='n', y='cost', kind='scatter')
-    plt.savefig(os.path.join(plt_dir, 'test.png'))
-    plt.close()
     if args.algorithms is None:
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
     else:
         algs = args.algorithms
-    for key in ('cost','msg_count','time'):
-        save_dir = os.path.join(plt_dir, key+'_by_algorithm_over_n.png')
-        plot_wrt_n(df=df,
-                   key=key,
-                   save_path=save_dir,
-                   algs=algs,
-                   args=args
-                   )
+    timeout_params = sorted(set(df['timeout_param']))
+    for timeout_param, key in itertools.product(timeout_params,
+                                                args.y_keys
+                                                ):
+        this_plot_dir = os.path.join(plt_dir, f'{key}_over_n')
+        save_dir = os.path.join(this_plot_dir, f'timeout_{timeout_param}.png')
+        plot_wrt_param(df=df[df['timeout_param'] == timeout_param],
+                       key=key,
+                       x_param='n',
+                       save_path=save_dir,
+                       algs=algs,
+                       )
+        print(f'saved to {save_dir}')
+
+    n_params = sorted(set(df['n']))
+    for n_param, key in itertools.product(n_params,
+                                          args.y_keys
+                                          ):
+        this_plot_dir = os.path.join(plt_dir, f'{key}_over_timeout')
+        save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
+        plot_wrt_param(df=df[df['n'] == n_param],
+                       key=key,
+                       x_param='timeout_param',
+                       save_path=save_dir,
+                       algs=algs,
+                       x_log=True,
+                       )
         print(f'saved to {save_dir}')
