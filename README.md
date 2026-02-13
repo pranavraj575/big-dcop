@@ -6,8 +6,8 @@ Tested with python 3.8 on Ubuntu 24
 
 (if using conda, create and activate environment)
 ```bash
-conda create --name dcop python=3.8
-conda activate dcop
+conda create --name big-dcop python=3.8
+conda activate big-dcop
 ```
 
 Clone and install project
