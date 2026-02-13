@@ -69,7 +69,7 @@ def main():
                              'the result automatically.')
     parser.add_argument('--version', action='store_true',
                         help='output pydcop version')
-    parser.add_argument('-t', '--timeout', default=0, type=int,
+    parser.add_argument('-t', '--timeout', default=0, type=float,
                         help='timeout for running the command , '
                              'if not specified run until finished or stop '
                              'with ctrl-c.')

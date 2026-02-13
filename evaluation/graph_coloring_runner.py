@@ -4,6 +4,7 @@ import glob
 import argparse
 import pandas as pd
 import json
+import itertools
 
 from eval_helpers import reformat_file_for_maxsum, extract_json_from_output
 from algo_configs import get_algo_info, get_display_name
@@ -64,7 +65,8 @@ def main():
     parser.add_argument("--output_csv", type=str, default="output/results.csv",
                         help="Path to save the results DataFrame")
     parser.add_argument("--trials", type=int, default=1, help="Number of trials per algorithm per problem")
-    parser.add_argument("--timeout", type=int, default=10, help="Timeout in seconds per run")
+    parser.add_argument("--timeout", type=float, default=[10.], nargs='+',
+                        help="Timeout in seconds per run, use multiple values if you want to run with different paramters")
     args = parser.parse_args()
 
     if not os.path.exists(args.algorithms):
@@ -95,30 +97,36 @@ def main():
         for algo_config in algorithms:
             display_name = get_display_name(algo_config)
             print(f"    Algorithm: {display_name}")
-            for i in range(args.trials):
+            for timeout, trial in itertools.product(args.timeout, range(args.trials)):
                 # Run the solver
                 metrics = run_pydcop(
                     problem_file=problem_path,
                     algo_config=algo_config,
-                    timeout=args.timeout,
+                    timeout=timeout,
                 )
 
                 # Create a record row
                 record = {
                     "problem": problem_name,
                     "algorithm": display_name,
-                    "trial": i + 1,
+                    "trial": trial + 1,
                     "status": metrics.get("status"),
                     "cost": metrics.get("cost"),
                     "time": metrics.get("time"),
                     "msg_count": metrics.get("msg_count"),
                     "cycles": metrics.get("cycles"),
+                    "timeout_param": timeout,
                     "error_msg": metrics.get("error", "")
                 }
 
                 all_records.append(record)
                 print(
-                    f"        Trial {i + 1}: {metrics.get('status')}, Cost: {metrics.get('cost', 'N/A')}, Time: {metrics.get('time', 'N/A')})")
+                    f"        Trial {trial + 1}: {metrics.get('status')},"
+                    f" Cost: {metrics.get('cost', 'N/A')},"
+                    f" Time: {metrics.get('time', 'N/A')})")
+                error_msg = metrics.get("error", "")
+                if error_msg:
+                    print(f"        ERROR: {error_msg}")
 
     if all_records:
         df = pd.DataFrame(all_records)
