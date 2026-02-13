@@ -5,27 +5,56 @@ import pandas as pd
 import numpy as np
 
 
-def plot_wrt_param(df, key, x_param, save_path, x_log=False, y_log=False, algs=None):
+def kernel_smoothed_plot_wrt_value(df,
+                                   key,
+                                   x_param,
+                                   save_path,
+                                   kernel_fn,
+                                   z_score=1.96,
+                                   grid=None,
+                                   x_log=False,
+                                   y_log=False,
+                                   algs=None,
+                                   ):
+    """
+    Parameters
+    ----------
+    z_score
+    df
+    key
+    x_param
+    save_path
+    kernel_fn: function of K(x0,x), x's weight when estimating x0
+        for std_error to make sense, should have K(x0,x0)=1
+    x_log
+    y_log
+    algs
+
+    Returns
+    -------
+
+    """
     if algs is None:
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
-    xs = sorted(set(df[x_param]))
+    if grid is None:
+        grid = sorted(set(df[x_param]))
     for alg in algs:
         temp_df = df[df['algorithm'] == alg]
         means = []
         std_errors = []
-        for x in xs:
-            temp_temp_df = temp_df[temp_df[x_param] == x]
-            y = temp_temp_df[key]
-            means.append(y.mean())
-            sample_size = y.notna().sum()
-            sample_variance = y.var()*sample_size/(sample_size - 1)
-            std_error = np.sqrt(sample_variance)/np.sqrt(sample_size)
+        for x0 in grid:
+            weights = temp_df[x_param].map(lambda x: kernel_fn(x0, x))
+            y = temp_df[key]
+            cum_weight = weights.sum()
+            mu = (weights*y).sum()/cum_weight
+            means.append(mu)
+            sample_variance = (((y - mu)**2)*weights).sum()/(cum_weight - 1)
+            std_error = np.sqrt(sample_variance)/np.sqrt(cum_weight)
             std_errors.append(std_error)
         means, std_errors = np.array(means), np.array(std_errors)
-        t = plt.plot(xs, means, label=alg)
+        t = plt.plot(grid, means, label=alg)
         color = t[0].get_c()
-        z = 1.96
-        plt.fill_between(xs, means - std_errors*z, means + std_errors*z, color=color, alpha=.2)
+        plt.fill_between(grid, means - std_errors*z_score, means + std_errors*z_score, color=color, alpha=.2)
     plt.legend()
     plt.ylabel(key)
     plt.xlabel(x_param)
@@ -36,6 +65,18 @@ def plot_wrt_param(df, key, x_param, save_path, x_log=False, y_log=False, algs=N
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, bbox_inches='tight')
     plt.close()
+
+
+def plot_wrt_param(df, key, x_param, save_path, x_log=False, y_log=False, algs=None):
+    kernel_smoothed_plot_wrt_value(df=df,
+                                   key=key,
+                                   x_param=x_param,
+                                   save_path=save_path,
+                                   kernel_fn=lambda x0, x: int(x0 == x),
+                                   grid=None,
+                                   x_log=x_log,
+                                   y_log=y_log,
+                                   algs=algs)
 
 
 if __name__ == '__main__':
@@ -87,12 +128,13 @@ if __name__ == '__main__':
                                                 ):
         this_plot_dir = os.path.join(plt_dir, f'{key}_over_n')
         save_dir = os.path.join(this_plot_dir, f'timeout_{timeout_param}.png')
-        plot_wrt_param(df=df[df['timeout_param'] == timeout_param],
-                       key=key,
-                       x_param='n',
-                       save_path=save_dir,
-                       algs=algs,
-                       )
+        plot_wrt_param(
+            df=df[df['timeout_param'] == timeout_param],
+            key=key,
+            x_param='n',
+            save_path=save_dir,
+            algs=algs,
+        )
         print(f'saved to {save_dir}')
 
     n_params = sorted(set(df['n']))
@@ -101,11 +143,26 @@ if __name__ == '__main__':
                                           ):
         this_plot_dir = os.path.join(plt_dir, f'{key}_over_timeout')
         save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
-        plot_wrt_param(df=df[df['n'] == n_param],
-                       key=key,
-                       x_param='timeout_param',
-                       save_path=save_dir,
-                       algs=algs,
-                       x_log=True,
-                       )
+        df_with_n_param = df[df['n'] == n_param]
+        plot_wrt_param(
+            df=df_with_n_param,
+            key=key,
+            x_param='timeout_param',
+            save_path=save_dir,
+            algs=algs,
+            x_log=True,
+        )
+        print(f'saved to {save_dir}')
+
+        this_plot_dir = os.path.join(plt_dir, f'{key}_over_time')
+        save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
+        kernel_smoothed_plot_wrt_value(
+            df=df_with_n_param,
+            key=key,
+            kernel_fn=lambda x0, x: np.exp(-(x0 - x)**2/(2*x0**2)),
+            x_param='time',
+            save_path=save_dir,
+            algs=algs,
+            x_log=True,
+        )
         print(f'saved to {save_dir}')
