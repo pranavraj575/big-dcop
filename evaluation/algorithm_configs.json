@@ -28,8 +28,5 @@
     "algo_params": [
       "stop_cycle:100"
     ]
-  },
-  {
-    "name": "dpop"
   }
 ]
