@@ -39,6 +39,7 @@ deps = [
     'websocket-server',
     'tqdm',
     'matplotlib',
+    'pandas',
 ]
 
 # Extra dependencies, used to run tests
