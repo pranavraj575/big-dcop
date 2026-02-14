@@ -180,8 +180,10 @@ def main():
                     assert os.path.exists(args.output_csv)
                     old_df = pd.read_csv(args.output_csv)
                     cum_df = pd.concat([old_df, cum_df], ignore_index=True)
+                    del old_df
 
                 cum_df.to_csv(args.output_csv, index=False)
+                del cum_df
     print(f"\nResults saved to {args.output_csv}")
     if os.path.exists(args.temp_csv):
         os.remove(args.temp_csv)
