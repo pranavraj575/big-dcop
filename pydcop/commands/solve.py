@@ -279,7 +279,7 @@ def set_parser(subparsers):
         "-c",
         "--collect_on",
         choices=["value_change", "cycle_change", "period"],
-        default=None,
+        default="value_change",
         help='When should a "new" assignment be observed',
     )
 
