@@ -20,7 +20,7 @@ pip install -e .
 Test installation
 
 ```bash
-pydcop -t 10 solve  --algo regret_matching tests/instances/graph_coloring1.yaml 
+pydcop solve tests/instances/graph_coloring1.yaml --algo regret_matching --algo_param "stop_cycle:100"
 ```
 Run experiment
 
