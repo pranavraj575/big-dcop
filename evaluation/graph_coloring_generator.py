@@ -55,8 +55,8 @@ def generate_graph_coloring_problems(
 
 if __name__ == "__main__":
 
-    INPUT_DIR = "output/graph_coloring_instances"
-    NUM_PROBLEMS = 5
+    INPUT_DIR = "output/graph_coloring_instances_hard"
+    NUM_PROBLEMS = 1
 
     # generate random 3 coloring problems
     for n in range(10, 51, 10):
@@ -66,7 +66,7 @@ if __name__ == "__main__":
             node_count=n,       # -v
             color_count=3,       # -c
             graph_type="random", # -g (random, grid, scalefree)
-            p_edge=0.5,           # -p (only used if type is random)
+            p_edge=(4.6*n) / (n*(n-1)),           # -p (only used if type is random)
             use_seed=True,
         )
 

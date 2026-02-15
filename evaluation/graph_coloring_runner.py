@@ -76,7 +76,7 @@ def main():
     parser.add_argument("--temp_csv", type=str, default=os.path.join(DIR, "output", "temp.csv"),
                         help="Path to save mid-run results into (cleared after running each experiemnt)")
     parser.add_argument("--trials", type=int, default=1, help="Number of trials per algorithm per problem")
-    parser.add_argument("--timeout", type=float, default=10.,
+    parser.add_argument("--timeout", type=float, default=30.,
                         help="Timeout in seconds per run")
     parser.add_argument(
         "-c",

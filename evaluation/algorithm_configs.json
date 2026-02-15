@@ -1,27 +1,4 @@
-[
-  {
-    "name": "dsa",
-    "algo_params": [
-      "stop_cycle:100",
-      "variant:B"
-    ]
-  },
-  {
-    "name": "mgm",
-    "algo_params": [
-      "stop_cycle:100"
-    ]
-  },
-  {
-    "name": "maxsum",
-    "dist": "adhoc"
-  },
-  {
-    "name": "ftrl",
-    "algo_params": [
-      "stop_cycle:100"
-    ]
-  },
+[ 
   {
     "name": "regret_matching",
     "display_name": "RM",
@@ -35,6 +12,62 @@
     "algo_params": [
       "stop_cycle:100",
       "rm_plus:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "DRM",
+    "algo_params": [
+      "stop_cycle:100",
+      "alpha:1.5",
+      "beta:0"
+    ]
+  },
+  {
+    "name": "ftrl",
+    "algo_params": [
+      "stop_cycle:100"
+    ]
+  },
+  {
+    "name": "maxsum_advp",
+    "dist": "adhoc",
+    "algo_params": [
+      "damping:0.9",
+      "stability:0.1",
+      "start_messages:leafs",
+      "stop_cycle:100"
+    ]
+  },
+  {
+    "name": "gdba",
+    "dist": "adhoc",
+    "algo_params": [
+      "modifier:A",
+      "violation:NZ",
+      "increase_mode:E"
+      ]
+  },
+  {
+    "name": "d_gibbs",
+    "dist": "adhoc",
+    "algo_params": [
+      "temperature:100.0",
+      "cooling_rate:0.95",
+      "stop_cycle:100"
+    ]
+  },
+  {
+    "name": "dsa",
+    "algo_params": [
+      "stop_cycle:100",
+      "variant:B"
+    ]
+  },
+  {
+    "name": "mgm2",
+    "algo_params": [
+      "stop_cycle:100"
     ]
   }
 ]

@@ -21,6 +21,8 @@ algo_params = [
     AlgoParameterDef("context_based", "int", [0, 1], 0),
     AlgoParameterDef("stop_cycle", "int", None, 0),
     AlgoParameterDef("update_prob", "float", None, 1.0),
+    AlgoParameterDef("alpha", "float", None, 1.5), # Discount for positive regrets
+    AlgoParameterDef("beta", "float", None, 0.0),  # Discount for negative regrets
 ]
 
 
@@ -81,6 +83,8 @@ class RMComputation(VariableComputation):
         self.context_based = bool(comp_def.algo.param_value("context_based"))
         self.stop_cycle = comp_def.algo.param_value("stop_cycle")
         self.update_prob = float(comp_def.algo.param_value("update_prob"))
+        self.alpha = float(comp_def.algo.param_value("alpha"))
+        self.beta = float(comp_def.algo.param_value("beta"))
         self.constraints = comp_def.node.constraints
 
         # Maps for the values of our neighbors for the current and next cycle:
@@ -165,6 +169,10 @@ class RMComputation(VariableComputation):
                 for k, u_action in utilities.items()
             }
 
+            t = self.cycle_count + 1
+            pos_discount = (t**self.alpha) / (t**self.alpha + 1)
+            neg_discount = (t**self.beta) / (t**self.beta + 1)
+
             # update regrets, (if context based, update based on neighbors context)
             if self.context_based:
                 context = tuple(self.current_cycle[n] for n in self.neighbors)
@@ -173,12 +181,17 @@ class RMComputation(VariableComputation):
                 cum_regrets = self.regrets[context]
             else:
                 cum_regrets = self.regrets
-            if self.use_rm_plus:  # RM+
-                for k in cum_regrets:
-                    cum_regrets[k] = max(0, cum_regrets[k] + instant_regrets[k])
-            else:
-                for k in cum_regrets:
-                    cum_regrets[k] += instant_regrets[k]
+            
+            for k in cum_regrets:
+                if cum_regrets[k] > 0:
+                    discounted_old = cum_regrets[k] * pos_discount
+                else:
+                    discounted_old = cum_regrets[k] * neg_discount
+                discounted_sum = discounted_old + instant_regrets[k]
+                if self.use_rm_plus:  # RM+
+                    cum_regrets[k] = max(0, discounted_sum)
+                else:
+                    cum_regrets[k] = discounted_sum
 
             # get probability distribution, (if predictive RM, use prediction of the most recent utilities obtained)
             if self.use_predictive:  # predictive RM

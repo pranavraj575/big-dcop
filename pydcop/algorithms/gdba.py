@@ -91,10 +91,13 @@ def computation_memory(computation: VariableComputationNode) -> float:
         the memory footprint of the computation.
 
     """
-    neighbors = set(
-        (n for l in computation.neighbors for n in l.nodes if n not in computation.name)
-    )
-    return len(neighbors) * UNIT_SIZE
+    count = 0
+    if computation.neighbors:
+        # Just count the number of neighbors.
+        # This is sufficient for the heuristic.
+        count = len(computation.neighbors)
+        
+    return count * UNIT_SIZE
 
 
 def communication_load(src: VariableComputationNode, target: str) -> float:
