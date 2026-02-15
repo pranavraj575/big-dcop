@@ -19,13 +19,15 @@ def kernel_smoothed_plot_wrt_value(df,
     """
     Parameters
     ----------
-    z_score
     df
     key
     x_param
     save_path
     kernel_fn: function of K(x0,x), x's weight when estimating x0
         for std_error to make sense, should have K(x0,x0)=1
+    z_score
+    grid: grid of x values to use when plotting
+        can also be dict of algorithm to grid
     x_log
     y_log
     algs
@@ -38,11 +40,13 @@ def kernel_smoothed_plot_wrt_value(df,
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
     if grid is None:
         grid = sorted(set(df[x_param]))
+    if type(grid) != dict:
+        grid = {alg: grid for alg in algs}
     for alg in algs:
         temp_df = df[df['algorithm'] == alg]
         means = []
         std_errors = []
-        for x0 in grid:
+        for x0 in grid[alg]:
             weights = temp_df[x_param].map(lambda x: kernel_fn(x0, x))
             y = temp_df[key]
             cum_weight = weights.sum()
@@ -52,9 +56,9 @@ def kernel_smoothed_plot_wrt_value(df,
             std_error = np.sqrt(sample_variance)/np.sqrt(cum_weight)
             std_errors.append(std_error)
         means, std_errors = np.array(means), np.array(std_errors)
-        t = plt.plot(grid, means, label=alg)
+        t = plt.plot(grid[alg], means, label=alg)
         color = t[0].get_c()
-        plt.fill_between(grid, means - std_errors*z_score, means + std_errors*z_score, color=color, alpha=.2)
+        plt.fill_between(grid[alg], means - std_errors*z_score, means + std_errors*z_score, color=color, alpha=.2)
     plt.legend()
     plt.ylabel(key)
     plt.xlabel(x_param)
@@ -159,13 +163,13 @@ if __name__ == '__main__':
 
         this_plot_dir = os.path.join(plt_dir, f'{key}_over_time')
         save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
-        # points from 10^-3 to highest time value, spaced evenly on a logarithmic plot
-        grid = np.power(10,
-                        np.linspace(-3,
-                                    np.log10(max(relevant_df['time'])),
-                                    num=20
-                                    ),
-                        )
+        # points from lowest to highest time value, spaced evenly on a logarithmic plot
+        grid = {
+            alg: np.exp(np.linspace(np.log(min(relevant_df[relevant_df['algorithm'] == alg]['time'])),
+                                    np.log(max(relevant_df[relevant_df['algorithm'] == alg]['time'])),
+                                    num=20))
+            for alg in algs
+        }
         choose_gaussian_kernel_b = lambda x0: x0
         kernel_smoothed_plot_wrt_value(
             df=relevant_df,
