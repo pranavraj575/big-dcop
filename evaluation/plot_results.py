@@ -128,8 +128,10 @@ if __name__ == '__main__':
                                                 ):
         this_plot_dir = os.path.join(plt_dir, f'{key}_over_n')
         save_dir = os.path.join(this_plot_dir, f'timeout_{timeout_param}.png')
+        relevant_df = df[df['timeout_param'] == timeout_param]
+        relevant_df = relevant_df[relevant_df[key].notnull()]
         plot_wrt_param(
-            df=df[df['timeout_param'] == timeout_param],
+            df=relevant_df,
             key=key,
             x_param='n',
             save_path=save_dir,
@@ -143,9 +145,10 @@ if __name__ == '__main__':
                                           ):
         this_plot_dir = os.path.join(plt_dir, f'{key}_over_timeout')
         save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
-        df_with_n_param = df[df['n'] == n_param]
+        relevant_df = df[df['n'] == n_param]
+        relevant_df = relevant_df[relevant_df[key].notnull()]
         plot_wrt_param(
-            df=df_with_n_param,
+            df=relevant_df,
             key=key,
             x_param='timeout_param',
             save_path=save_dir,
@@ -159,13 +162,13 @@ if __name__ == '__main__':
         # points from 10^-3 to highest time value, spaced evenly on a logarithmic plot
         grid = np.power(10,
                         np.linspace(-3,
-                                    np.log10(max(df_with_n_param['time'])),
+                                    np.log10(max(relevant_df['time'])),
                                     num=20
                                     ),
                         )
         choose_gaussian_kernel_b = lambda x0: x0
         kernel_smoothed_plot_wrt_value(
-            df=df_with_n_param,
+            df=relevant_df,
             key=key,
             kernel_fn=lambda x0, x: np.exp(-(x0 - x)**2/(2*choose_gaussian_kernel_b(x0)**2)),
             grid=grid,
