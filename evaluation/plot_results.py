@@ -149,15 +149,14 @@ if __name__ == '__main__':
     for n_param, key in itertools.product(n_params,
                                           args.y_keys
                                           ):
-        """
+        relevant_df = df[df['n'] == n_param]
+        relevant_df = relevant_df[relevant_df[key].notnull()]
         # commented out since we can do better by plotting mid run data
+        """
         this_plot_dir = os.path.join(plt_dir, f'{key}_over_timeout')
         save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
-        relevant_df = df[df['n'] == n_param]
-        relevant_df = relevant_df[relevant_df['status']!="RUNNING"]
-        relevant_df = relevant_df[relevant_df[key].notnull()]
         plot_wrt_param(
-            df=relevant_df,
+            df=relevant_df[relevant_df['status']!="RUNNING"],
             key=key,
             x_param='timeout_param',
             save_path=save_dir,
