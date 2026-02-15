@@ -166,7 +166,7 @@ def main():
                 print(
                     f"        Trial {trial + 1}: {final_metrics.get('status')},"
                     f" Cost: {final_metrics.get('cost', 'N/A')},"
-                    f" Time: {final_metrics.get('time', 'N/A')})")
+                    f" Time: {final_metrics.get('time', 'N/A')}")
                 error_msg = final_metrics.get("error", "")
                 if error_msg:
                     print(f"        ERROR: {error_msg}")
