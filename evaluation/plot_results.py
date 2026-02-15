@@ -106,6 +106,8 @@ if __name__ == '__main__':
                    type=str,
                    help='algorithms to include (defaults to all)',
                    )
+
+    p.add_argument("--grid_n", type=int, default=10, help="number of points to put on plotting grid")
     p.add_argument('--y_keys',
                    required=False,
                    nargs="+",
@@ -171,7 +173,7 @@ if __name__ == '__main__':
         grid = {
             alg: np.exp(np.linspace(np.log(min(relevant_df[relevant_df['algorithm'] == alg]['time'])),
                                     np.log(max(relevant_df[relevant_df['algorithm'] == alg]['time'])),
-                                    num=20))
+                                    num=args.grid_n))
             for alg in algs
         }
         choose_gaussian_kernel_b = lambda x0: x0
