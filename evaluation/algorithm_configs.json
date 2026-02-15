@@ -28,5 +28,13 @@
     "algo_params": [
       "stop_cycle:100"
     ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM+",
+    "algo_params": [
+      "stop_cycle:100",
+      "rm_plus:1"
+    ]
   }
 ]

@@ -6,7 +6,6 @@ from pydcop.infrastructure.computations import Message, VariableComputation, reg
 from pydcop.computations_graph.constraints_hypergraph import VariableComputationNode
 from pydcop.dcop.relations import (
     find_costs,
-    filter_assignment_dict,
     optimal_cost_value,
 )
 
