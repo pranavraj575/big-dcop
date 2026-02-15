@@ -156,11 +156,19 @@ if __name__ == '__main__':
 
         this_plot_dir = os.path.join(plt_dir, f'{key}_over_time')
         save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
+        # points from 10^-3 to highest time value, spaced evenly on a logarithmic plot
+        grid = np.power(10,
+                        np.linspace(-3,
+                                    np.log10(max(df_with_n_param['time'])),
+                                    num=20
+                                    ),
+                        )
         choose_gaussian_kernel_b = lambda x0: x0
         kernel_smoothed_plot_wrt_value(
             df=df_with_n_param,
             key=key,
             kernel_fn=lambda x0, x: np.exp(-(x0 - x)**2/(2*choose_gaussian_kernel_b(x0)**2)),
+            grid=grid,
             x_param='time',
             save_path=save_dir,
             algs=algs,
