@@ -133,6 +133,8 @@ if __name__ == '__main__':
         this_plot_dir = os.path.join(plt_dir, f'{key}_over_n')
         save_dir = os.path.join(this_plot_dir, f'timeout_{timeout_param}.png')
         relevant_df = df[df['timeout_param'] == timeout_param]
+        # dont consider mid-run data for this plot
+        relevant_df = relevant_df[relevant_df['status'] != "RUNNING"]
         relevant_df = relevant_df[relevant_df[key].notnull()]
         plot_wrt_param(
             df=relevant_df,
@@ -147,9 +149,12 @@ if __name__ == '__main__':
     for n_param, key in itertools.product(n_params,
                                           args.y_keys
                                           ):
+        """
+        # commented out since we can do better by plotting mid run data
         this_plot_dir = os.path.join(plt_dir, f'{key}_over_timeout')
         save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
         relevant_df = df[df['n'] == n_param]
+        relevant_df = relevant_df[relevant_df['status']!="RUNNING"]
         relevant_df = relevant_df[relevant_df[key].notnull()]
         plot_wrt_param(
             df=relevant_df,
@@ -160,7 +165,7 @@ if __name__ == '__main__':
             x_log=True,
         )
         print(f'saved to {save_dir}')
-
+        """
         this_plot_dir = os.path.join(plt_dir, f'{key}_over_time')
         save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
         # points from lowest to highest time value, spaced evenly on a logarithmic plot
