@@ -112,6 +112,7 @@ def main():
         return
 
     # loop over problems
+    added_header = False
     for p_idx, problem_path in enumerate(problem_files):
         problem_name = os.path.basename(problem_path)
         print(f"Processing [{p_idx + 1}/{len(problem_files)}] {problem_name}...")
@@ -172,18 +173,17 @@ def main():
                     print(f"        ERROR: {error_msg}")
 
                 # save memory by not tracking records across all trials, just dump them into the csv after each trial
-                cum_df = pd.DataFrame(trial_records)
-
+                df = pd.DataFrame(trial_records)
                 # Ensure output directory exists
                 os.makedirs(os.path.dirname(args.output_csv), exist_ok=True)
-                if (p_idx, algo_idx, trial) != (0, 0, 0):
-                    assert os.path.exists(args.output_csv)
-                    old_df = pd.read_csv(args.output_csv)
-                    cum_df = pd.concat([old_df, cum_df], ignore_index=True)
-                    del old_df
+                df.to_csv(args.output_csv,
+                          index=False,
+                          mode='a' if added_header else 'w',
+                          header=not added_header,
+                          )
+                added_header = True
+                del df
 
-                cum_df.to_csv(args.output_csv, index=False)
-                del cum_df
     print(f"\nResults saved to {args.output_csv}")
     if os.path.exists(args.temp_csv):
         os.remove(args.temp_csv)
