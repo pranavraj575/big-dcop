@@ -1,0 +1,64 @@
+[ 
+  {
+    "name": "regret_matching",
+    "display_name": "RM",
+    "algo_params": [
+      "stop_cycle:100"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM+",
+    "algo_params": [
+      "stop_cycle:100",
+      "rm_plus:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "DRM(1.5,0)",
+    "algo_params": [
+      "stop_cycle:100",
+      "alpha:1.5",
+      "beta:0"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "DRM+",
+    "algo_params": [
+      "stop_cycle:100",
+      "alpha:1.5",
+      "beta:0",
+      "rm_plus:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Damped RM (0.5)",
+    "algo_params": [
+      "stop_cycle:100",
+      "damping:0.5"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Damped DRM+",
+    "algo_params": [
+      "stop_cycle:100",
+      "alpha:1.5",
+      "beta:0",
+      "rm_plus:1",
+      "damping:0.3"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Damped PRM",
+    "algo_params": [
+      "stop_cycle:100",
+      "predictive:1",
+      "damping:0.5"
+    ]
+  }
+]

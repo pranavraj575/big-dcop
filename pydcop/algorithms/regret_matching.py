@@ -23,6 +23,7 @@ algo_params = [
     AlgoParameterDef("update_prob", "float", None, 1.0),
     AlgoParameterDef("alpha", "float", None, 1.5), # Discount for positive regrets
     AlgoParameterDef("beta", "float", None, 0.0),  # Discount for negative regrets
+    AlgoParameterDef("damping", "float", None, 0.0)
 ]
 
 
@@ -85,6 +86,7 @@ class RMComputation(VariableComputation):
         self.update_prob = float(comp_def.algo.param_value("update_prob"))
         self.alpha = float(comp_def.algo.param_value("alpha"))
         self.beta = float(comp_def.algo.param_value("beta"))
+        self.damping = float(comp_def.algo.param_value("damping"))
         self.constraints = comp_def.node.constraints
 
         # Maps for the values of our neighbors for the current and next cycle:
@@ -131,20 +133,17 @@ class RMComputation(VariableComputation):
     def _on_value_msg(self, variable_name, recv_msg, t):
         if not self._running:
             return
+            
+        # In synchronous mode, we strictly separate current and next
+        # If we get a message for a cycle we already processed, it's for the next one.
         if variable_name not in self.current_cycle:
             self.current_cycle[variable_name] = recv_msg.value
-            self.logger.debug(
-                "Receiving value %s from %s", recv_msg.value, variable_name
-            )
-            self.evaluate_cycle()
-
         else:
-            self.logger.debug(
-                "Receiving value %s from %s for the next cycle.",
-                recv_msg.value,
-                variable_name,
-            )
             self.next_cycle[variable_name] = recv_msg.value
+
+        # The trigger: only evaluate when the buffer for the current cycle is full
+        if len(self.current_cycle) == len(self.neighbors):
+            self.evaluate_cycle()
 
     def evaluate_cycle(self):
         if len(self.current_cycle) == len(self.neighbors):
@@ -201,24 +200,34 @@ class RMComputation(VariableComputation):
                 }
             else:  # default vanilla RM
                 regret_basis = cum_regrets
-            positive_part = sum(max(0, rT) for _, rT in regret_basis.items())
-            if positive_part <= 0:
-                self.last_strategy = self.get_uniform_policy()
+            pos_sum = sum(max(0, rT) for _, rT in regret_basis.items())
+            if pos_sum <= 0:
+                new_strat = self.get_uniform_policy()
             else:
-                self.last_strategy = {k: max(0, rT)/positive_part for k, rT in cum_regrets.items()}
+                new_strat = {k: max(0, r)/pos_sum for k, r in regret_basis.items()}
 
+            if self.damping > 0:
+                for k in new_strat:
+                    new_strat[k] = (self.damping * self.last_strategy[k]) + ((1 - self.damping) * new_strat[k])
+            
+            self.last_strategy = new_strat
             self.assign_sampled_value(self.last_strategy, costs)
 
             self.new_cycle()
-            self.current_cycle, self.next_cycle = self.next_cycle, {}
+            self.current_cycle = self.next_cycle
+            self.next_cycle = {}
+            
+            self.post_to_all_neighbors(RMMessage(self.current_value))
 
             # Check if this was the last cycle
             if self.stop_cycle and self.cycle_count >= self.stop_cycle:
                 self.finished()
                 self.stop()
                 return
+            
+            if len(self.current_cycle) == len(self.neighbors):
+                self.evaluate_cycle()
 
-            self.post_to_all_neighbors(RMMessage(self.current_value))
 
     def assign_sampled_value(self, strategy, costs):
         if np.random.random() < self.update_prob:
