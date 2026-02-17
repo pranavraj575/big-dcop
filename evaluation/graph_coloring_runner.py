@@ -67,7 +67,7 @@ def run_pydcop(problem_file, algo_config, args):
 def main():
     DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     parser = argparse.ArgumentParser(description="Run pyDCOP benchmark")
-    parser.add_argument("--algorithms", type=str, default=os.path.join(DIR, "evaluation", "algorithm_configs.json"),
+    parser.add_argument("--algorithms", type=str, default=os.path.join(DIR, "evaluation", "configs", "algorithm_configs.json"),
                         help="json file with algorithm configs to use")
     parser.add_argument("--input_dir", type=str, default=os.path.join(DIR, "output", "graph_coloring_instances_hard"),
                         help="Directory containing .yaml problem files")

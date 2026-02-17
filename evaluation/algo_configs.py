@@ -29,7 +29,7 @@ def get_algo_info(algo_config):
 if __name__ == '__main__':
     import json
 
-    with open('algorithm_configs.json') as f:
+    with open('configs/algorithm_configs.json') as f:
         ALGORITHMS = json.load(f)
         for alg_config in ALGORITHMS:
             print(get_algo_info(alg_config))
