@@ -69,7 +69,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run pyDCOP benchmark")
     parser.add_argument("--algorithms", type=str, default=os.path.join(DIR, "evaluation", "algorithm_configs.json"),
                         help="json file with algorithm configs to use")
-    parser.add_argument("--input_dir", type=str, default=os.path.join(DIR, "output", "graph_coloring_instances"),
+    parser.add_argument("--input_dir", type=str, default=os.path.join(DIR, "output", "graph_coloring_instances_hard"),
                         help="Directory containing .yaml problem files")
     parser.add_argument("--output_csv", type=str, default=os.path.join(DIR, "output", "results.csv"),
                         help="Path to save the results DataFrame")
