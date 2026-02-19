@@ -5,17 +5,17 @@ import argparse
 import itertools
 import time
 
-def generate_graph_coloring_problems(
-    n_problems: int,
-    output_dir: str,
-    node_count: int = 20,
-    color_count: int = 3,
-    graph_type: str = "random",  # random, grid, scalefree
-    p_edge: float = 0.4,         # probability of edge (for random graphs)
-    m_edge: int = 2,             # edges per node (for scalefree graphs)
-    use_seed= False,             # whether to use fixed random seed
-):
 
+def generate_graph_coloring_problems(
+        n_problems: int,
+        output_dir: str,
+        node_count: int = 20,
+        color_count: int = 3,
+        graph_type: str = "random",  # random, grid, scalefree
+        p_edge: float = 0.4,  # probability of edge (for random graphs)
+        m_edge: int = 2,  # edges per node (for scalefree graphs)
+        use_seed=False,  # whether to use fixed random seed
+):
     if not os.path.exists(output_dir):
         try:
             os.makedirs(output_dir)
@@ -30,19 +30,19 @@ def generate_graph_coloring_problems(
 
         base_cmd = ["pydcop", "generate", "graph_coloring"]
         cmd_args = [
-            "--variables_count", str(node_count),   # -v
-            "--colors_count", str(color_count),     # -c
-            "--graph", graph_type,                  # -g
+            "--variables_count", str(node_count),  # -v
+            "--colors_count", str(color_count),  # -c
+            "--graph", graph_type,  # -g
         ]
 
         # Add specific parameters based on graph type
         if graph_type == "random":
-            cmd_args.extend(["--p_edge", str(p_edge)]) # -p
+            cmd_args.extend(["--p_edge", str(p_edge)])  # -p
         elif graph_type == "scalefree":
-            cmd_args.extend(["--m_edge", str(m_edge)]) # -m
+            cmd_args.extend(["--m_edge", str(m_edge)])  # -m
 
         if use_seed:
-            cmd_args.extend(["--seed", str(i)]) # -m
+            cmd_args.extend(["--seed", str(i)])  # -m
 
         cmd = base_cmd + cmd_args
 
@@ -62,30 +62,34 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate graph coloring instances")
     parser.add_argument("--output_dir", type=str, default=os.path.join(DIR, "output", "graph_coloring_instances_hard"),
                         help="directory to save problem .yaml files")
-    parser.add_argument("--num_problems", type=int, default=1, help="Number of graph coloring problems to sample for each case")
-    parser.add_argument("--graph_n",type=int,nargs='+',default=list(range(10,51,10)),
+    parser.add_argument("--num_problems", type=int, default=1,
+                        help="Number of graph coloring problems to sample for each case")
+    parser.add_argument("--graph_n", type=int, nargs='+', default=list(range(10, 51, 10)),
                         help='number of nodes in the graph to use (can list multiple)')
-    parser.add_argument("--color_count",type=int,nargs='+',default=[3],
+    parser.add_argument("--color_count", type=int, nargs='+', default=[3],
                         help='number of colors available (can list multiple)')
-    parser.add_argument("--dont_use_seed",action='store_true',
+    parser.add_argument("--graph_type", type=str, nargs='+', default=['random'], choices=['random','scalefree','grid'],
+                        help='graph type to generate (can list multiple)')
+    parser.add_argument("--dont_use_seed", action='store_true',
                         help='dont use a random seed (will generate different graphs on each run)')
-    parser.add_argument("--dont_clear_dir",action='store_true',
+    parser.add_argument("--dont_clear_dir", action='store_true',
                         help='dont clear the directory listed in --output_dir')
     args = parser.parse_args()
     if not args.dont_clear_dir and os.path.exists(args.output_dir):
-        for t in range(5,0,-1):
-            print(f"ABOUT TO OVERWRITE {args.output_dir}, if that was not intended, CtrL+C in the next {t} seconds",end='\r')
+        for t in range(5, 0, -1):
+            print(f"ABOUT TO OVERWRITE {args.output_dir}, if that was not intended, CtrL+C in the next {t} seconds",
+                  end='\r')
             time.sleep(1)
         shutil.rmtree(args.output_dir)
     # generate random 3 coloring problems
-    for n,c in itertools.product(args.graph_n,args.color_count):
+    for n, c, g in itertools.product(args.graph_n, args.color_count, args.graph_type):
         generate_graph_coloring_problems(
             n_problems=args.num_problems,
             output_dir=args.output_dir,
-            node_count=n,       # -v
-            color_count=c,       # -c
-            graph_type="random", # -g (random, grid, scalefree)
-            p_edge=(4.6*n) / (n*(n-1)),           # -p (only used if type is random)
+            node_count=n,  # -v
+            color_count=c,  # -c
+            graph_type=g,  # -g (random, grid, scalefree)
+            p_edge=(4.6*n)/(n*(n - 1)),  # -p (only used if type is random)
             use_seed=not args.dont_use_seed,
         )
 
