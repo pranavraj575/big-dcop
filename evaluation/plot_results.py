@@ -10,11 +10,13 @@ def kernel_smoothed_plot_wrt_value(df,
                                    x_param,
                                    save_path,
                                    kernel_fn,
+                                   args,
                                    z_score=1.96,
                                    grid=None,
                                    x_log=False,
                                    y_log=False,
                                    algs=None,
+                                   title=None,
                                    ):
     """
     Parameters
@@ -25,12 +27,14 @@ def kernel_smoothed_plot_wrt_value(df,
     save_path
     kernel_fn: function of K(x0,x), x's weight when estimating x0
         for std_error to make sense, should have K(x0,x0)=1
+    args
     z_score
     grid: grid of x values to use when plotting
         can also be dict of algorithm to grid
     x_log
     y_log
     algs
+    title
 
     Returns
     -------
@@ -44,6 +48,8 @@ def kernel_smoothed_plot_wrt_value(df,
         grid = {alg: grid for alg in algs}
     for alg in algs:
         temp_df = df[df['algorithm'] == alg]
+        if args.subsample_p < 1.:
+            temp_df = temp_df[np.random.random(len(temp_df)) < args.subsample_p]
         means = []
         std_errors = []
         for x0 in grid[alg]:
@@ -66,21 +72,25 @@ def kernel_smoothed_plot_wrt_value(df,
         plt.xscale("log")
     if y_log:
         plt.yscale("log")
+    plt.title(title)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, bbox_inches='tight')
     plt.close()
 
 
-def plot_wrt_param(df, key, x_param, save_path, x_log=False, y_log=False, algs=None):
+def plot_wrt_param(df, key, x_param, save_path, args, x_log=False, y_log=False, algs=None, title=None):
     kernel_smoothed_plot_wrt_value(df=df,
                                    key=key,
                                    x_param=x_param,
                                    save_path=save_path,
                                    kernel_fn=lambda x0, x: int(x0 == x),
+                                   args=args,
                                    grid=None,
                                    x_log=x_log,
                                    y_log=y_log,
-                                   algs=algs)
+                                   algs=algs,
+                                   title=title,
+                                   )
 
 
 if __name__ == '__main__':
@@ -115,6 +125,7 @@ if __name__ == '__main__':
                    type=str,
                    help='things to plot on y value',
                    )
+    p.add_argument("--subsample_p", type=float, default=1., help="proportion of datapoints to sample")
     args = p.parse_args()
 
     plt_dir = args.output
@@ -144,6 +155,8 @@ if __name__ == '__main__':
             x_param='n',
             save_path=save_dir,
             algs=algs,
+            title="performance on graph coloring problems",
+            args=args,
         )
         print(f'saved to {save_dir}')
 
@@ -186,5 +199,7 @@ if __name__ == '__main__':
             save_path=save_dir,
             algs=algs,
             x_log=True,
+            title="performance on graph coloring problems",
+            args=args,
         )
         print(f'saved to {save_dir}')
