@@ -46,6 +46,7 @@ def kernel_smoothed_plot_wrt_value(df,
         grid = sorted(set(df[x_param]))
     if type(grid) != dict:
         grid = {alg: grid for alg in algs}
+    styles = set()
     for alg in algs:
         temp_df = df[df['algorithm'] == alg]
         if args.subsample_p < 1.:
@@ -62,9 +63,15 @@ def kernel_smoothed_plot_wrt_value(df,
             std_error = np.sqrt(sample_variance)/np.sqrt(cum_weight)
             std_errors.append(std_error)
         means, std_errors = np.array(means), np.array(std_errors)
-        t = plt.plot(grid[alg], means, label=alg)
-        color = t[0].get_c()
-        plt.fill_between(grid[alg], means - std_errors*z_score, means + std_errors*z_score, color=color, alpha=.2)
+        t, = plt.plot(grid[alg], means, label=alg)
+        style = (t.get_c(), t.get_linestyle())
+        if style in styles:
+            # todo: can make this more fancy, but this works up until 2*(# of colors) = 20 lines
+            t.set_linestyle('--')
+        style = (t.get_c(), t.get_linestyle())
+        styles.add(style)
+
+        plt.fill_between(grid[alg], means - std_errors*z_score, means + std_errors*z_score, color=t.get_c(), alpha=.2)
     plt.legend()
     plt.ylabel(key)
     plt.xlabel(x_param)
