@@ -67,7 +67,8 @@ def run_pydcop(problem_file, algo_config, args):
 def main():
     DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     parser = argparse.ArgumentParser(description="Run pyDCOP benchmark")
-    parser.add_argument("--algorithms", type=str, default=os.path.join(DIR, "evaluation", "configs", "algorithm_configs.json"),
+    parser.add_argument("--algorithms", type=str,
+                        default=os.path.join(DIR, "evaluation", "configs", "algorithm_configs.json"),
                         help="json file with algorithm configs to use")
     parser.add_argument("--input_dir", type=str, default=os.path.join(DIR, "output", "graph_coloring_instances_hard"),
                         help="Directory containing .yaml problem files")
@@ -93,6 +94,9 @@ def main():
              "when using --collect_on period. Defaults to 1 "
              "second if not specified",
     )
+
+    parser.add_argument("--append_results", action='store_true',
+                        help='append results to end of csv file')
     args = parser.parse_args()
 
     if not os.path.exists(args.algorithms):
@@ -113,6 +117,8 @@ def main():
 
     # loop over problems
     added_header = False
+    if args.append_results:
+        added_header = True
     for p_idx, problem_path in enumerate(problem_files):
         problem_name = os.path.basename(problem_path)
         print(f"Processing [{p_idx + 1}/{len(problem_files)}] {problem_name}...")
