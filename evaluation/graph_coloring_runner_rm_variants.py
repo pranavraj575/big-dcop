@@ -69,11 +69,11 @@ def main():
     parser = argparse.ArgumentParser(description="Run pyDCOP benchmark")
     parser.add_argument("--algorithms", type=str, default=os.path.join(DIR, "evaluation", "configs", "rm_configs.json"),
                         help="json file with algorithm configs to use")
-    parser.add_argument("--input_dir", type=str, default=os.path.join(DIR, "output", "graph_coloring_instances_hard"),
+    parser.add_argument("--input_dir", type=str, default=os.path.join(DIR, "output", "graph_coloring_scalefree"),
                         help="Directory containing .yaml problem files")
-    parser.add_argument("--output_csv", type=str, default=os.path.join(DIR, "output", "results_rm.csv"),
+    parser.add_argument("--output_csv", type=str, default=os.path.join(DIR, "output", "results_rm_scalefree.csv"),
                         help="Path to save the results DataFrame")
-    parser.add_argument("--temp_csv", type=str, default=os.path.join(DIR, "output", "temp_rm.csv"),
+    parser.add_argument("--temp_csv", type=str, default=os.path.join(DIR, "output", "temp_rm_scalefree.csv"),
                         help="Path to save mid-run results into (cleared after running each experiemnt)")
     parser.add_argument("--trials", type=int, default=10, help="Number of trials per algorithm per problem")
     parser.add_argument("--timeout", type=float, default=30.,

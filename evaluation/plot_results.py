@@ -106,7 +106,7 @@ if __name__ == '__main__':
     p.add_argument(
         "--path",
         required=False,
-        default=os.path.join(DIR, "output", "results_rm.csv"),
+        default=os.path.join(DIR, "output", "results_rm_scalefree.csv"),
         type=str,
         help="Directory of csv result file.",
     )
