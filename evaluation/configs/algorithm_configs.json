@@ -96,15 +96,6 @@
     ]
   },
   {
-    "name": "d_gibbs",
-    "dist": "adhoc",
-    "algo_params": [
-      "temperature:100.0",
-      "cooling_rate:0.95",
-      "stop_cycle:100"
-    ]
-  },
-  {
     "name": "dsa",
     "algo_params": [
       "stop_cycle:100",

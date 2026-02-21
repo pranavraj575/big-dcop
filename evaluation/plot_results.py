@@ -131,10 +131,9 @@ if __name__ == '__main__':
                    )
     p.add_argument('--algorithms',
                    required=False,
-                   nargs="*",
                    default=None,
                    type=str,
-                   help='algorithms to include (defaults to all)',
+                   help='json file with algorithms to include (defaults to using all algorithms found in data)',
                    )
 
     p.add_argument("--grid_n", type=int, default=10, help="number of points to put on plotting grid")
@@ -173,7 +172,8 @@ if __name__ == '__main__':
     if args.algorithms is None:
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
     else:
-        algs = args.algorithms
+        with open(args.algorithms) as f:
+            algs = [get_display_name(alg_config) for alg_config in json.load(f)]
     print_stats_by_alg(df, algs)
 
     """
