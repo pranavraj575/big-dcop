@@ -140,7 +140,7 @@ if __name__ == '__main__':
                    nargs="+",
                    default=['cost'],
                    type=str,
-                   help='things to plot on y value',
+                   help='things to plot on y value, to specifiy log scale, use <key>:log',
                    )
     p.add_argument("--subsample", type=float, default=None, help="subsample datapoints. if 0< subsample < 1, samples probabilistically, if subsample>=1, samples n values at random without replacement")
     args = p.parse_args()
@@ -151,8 +151,14 @@ if __name__ == '__main__':
 
     df = pd.read_csv(args.path)
     print(f'loaded df, length {len(df)}')
+    keys=[]
     for key in args.y_keys:
-        assert key in set(df.keys()), f"key '{key}' is not in data. Valid keys: {set(df.keys())}"
+        configs=[]
+        if ':' in key:
+            key,m=key.split(':')
+            configs=m.split(',')
+        keys.append((key,configs))
+        assert key in set(df.keys()), f"key '{key}' with configs {modifier} is not in data. Valid keys: {set(df.keys())}"
 
     # get n parameter from problem file name
     df['n'] = df['problem'].map(lambda s: int(s.split('_')[1][1:]))
@@ -163,10 +169,8 @@ if __name__ == '__main__':
     print_stats_by_alg(df,algs)
     
     timeout_params = sorted(set(df['timeout_param']))
-    for timeout_param, key in itertools.product(timeout_params,
-                                                args.y_keys
-                                                ):
-        this_plot_dir = os.path.join(plt_dir, f'{key}_over_n')
+    for timeout_param, (key,configs) in itertools.product(timeout_params, keys):
+        this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_n')
         save_dir = os.path.join(this_plot_dir, f'timeout_{timeout_param}.png')
         relevant_df = df[df['timeout_param'] == timeout_param]
         # dont consider mid-run data for this plot
@@ -178,35 +182,19 @@ if __name__ == '__main__':
             x_param='n',
             save_path=save_dir,
             algs=algs,
+            y_log='log' in configs,
             title="performance on graph coloring problems",
             args=args,
         )
         print(f'saved to {save_dir}')
 
     n_params = sorted(set(df['n']))
-    for n_param, key in itertools.product(n_params,
-                                          args.y_keys
-                                          ):
-        
+    for n_param, (key,configs) in itertools.product(n_params, keys):
         relevant_df = df[df['n'] == n_param]
         relevant_df = relevant_df[relevant_df[key].notnull()]
         print(f'plotting {key} for n={n_param}, {len(relevant_df)} total values')
         print_stats_by_alg(relevant_df,algs,prefix='\t')
-        # commented out since we can do better by plotting mid run data
-        """
-        this_plot_dir = os.path.join(plt_dir, f'{key}_over_timeout')
-        save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
-        plot_wrt_param(
-            df=relevant_df[relevant_df['status']!="RUNNING"],
-            key=key,
-            x_param='timeout_param',
-            save_path=save_dir,
-            algs=algs,
-            x_log=True,
-        )
-        print(f'saved to {save_dir}')
-        """
-        this_plot_dir = os.path.join(plt_dir, f'{key}_over_time')
+        this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_time')
         save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
         # points from lowest to highest time value, spaced evenly on a logarithmic plot
         grid = {
@@ -225,6 +213,7 @@ if __name__ == '__main__':
             save_path=save_dir,
             algs=algs,
             x_log=True,
+            y_log='log' in configs,
             title="performance on graph coloring problems",
             args=args,
         )
