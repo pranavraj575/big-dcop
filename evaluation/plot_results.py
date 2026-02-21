@@ -167,6 +167,9 @@ if __name__ == '__main__':
 
     # get n parameter from problem file name
     df['n'] = df['problem'].map(lambda s: int(s.split('_')[1][1:]))
+    # add dummy rows to change later
+    for (key, configs) in keys:
+        df['rescaled_' + key] = df[key]
     if args.algorithms is None:
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
     else:
@@ -248,6 +251,39 @@ if __name__ == '__main__':
         kernel_smoothed_plot_wrt_value(
             df=relevant_df,
             key=key,
+            kernel_fn=gaussian_kernel,
+            grid=grid,
+            x_param='time',
+            save_path=save_dir,
+            algs=algs,
+            x_log=True,
+            y_log='log' in configs,
+            title="performance on graph coloring problems",
+            args=args,
+        )
+        print(f'saved to {save_dir}')
+
+    # plot the RESCALED y values wrt time, averaging over all trials
+    # rescaling by dividing by average value for each n param
+    for (key, configs) in keys:
+        relevant_df = df[df[key].notnull()]
+        for n_param in n_params:
+            rows = (relevant_df['n'] == n_param)
+            relevant_df.loc[rows, 'rescaled_' + key] = relevant_df.loc[rows, key]/np.mean(relevant_df.loc[rows, key])
+        print(f'plotting rescaled {key}, {len(relevant_df)} total values')
+        print_stats_by_alg(relevant_df, algs, prefix='\t')
+        this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_time')
+        save_dir = os.path.join(this_plot_dir, f'combined_rescaled_plt.png')
+        # points from lowest to highest time value, spaced evenly on a logarithmic plot
+        grid = {
+            alg: np.exp(np.linspace(np.log(min(relevant_df[relevant_df['algorithm'] == alg]['time'])),
+                                    np.log(max(relevant_df[relevant_df['algorithm'] == alg]['time'])),
+                                    num=args.grid_n))
+            for alg in algs
+        }
+        kernel_smoothed_plot_wrt_value(
+            df=relevant_df,
+            key='rescaled_' + key,
             kernel_fn=gaussian_kernel,
             grid=grid,
             x_param='time',
