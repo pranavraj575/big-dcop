@@ -173,7 +173,10 @@ if __name__ == '__main__':
         algs = args.algorithms
     print_stats_by_alg(df, algs)
 
+    """
     timeout_params = sorted(set(df['timeout_param']))
+    # plot the plots wrt timeout_param, splitting by values of timeout_param
+    #  outdated, we dont really change timeout param
     for timeout_param, (key, configs) in itertools.product(timeout_params, keys):
         this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_n')
         save_dir = os.path.join(this_plot_dir, f'timeout_{timeout_param}.png')
@@ -192,7 +195,11 @@ if __name__ == '__main__':
             args=args,
         )
         print(f'saved to {save_dir}')
+    """
 
+    # plot the plots wrt time, splitting by values of n
+    choose_gaussian_kernel_b = lambda x0: x0
+    gaussian_kernel = lambda x0, x: np.exp(-(x0 - x)**2/(2*choose_gaussian_kernel_b(x0)**2))
     n_params = sorted(set(df['n']))
     for n_param, (key, configs) in itertools.product(n_params, keys):
         relevant_df = df[df['n'] == n_param]
@@ -208,11 +215,40 @@ if __name__ == '__main__':
                                     num=args.grid_n))
             for alg in algs
         }
-        choose_gaussian_kernel_b = lambda x0: x0
+
         kernel_smoothed_plot_wrt_value(
             df=relevant_df,
             key=key,
-            kernel_fn=lambda x0, x: np.exp(-(x0 - x)**2/(2*choose_gaussian_kernel_b(x0)**2)),
+            kernel_fn=gaussian_kernel,
+            grid=grid,
+            x_param='time',
+            save_path=save_dir,
+            algs=algs,
+            x_log=True,
+            y_log='log' in configs,
+            title="performance on graph coloring problems",
+            args=args,
+        )
+        print(f'saved to {save_dir}')
+
+    # plot the y values wrt time, averaging over all trials
+    for (key, configs) in keys:
+        relevant_df = df[df[key].notnull()]
+        print(f'plotting {key}, {len(relevant_df)} total values')
+        print_stats_by_alg(relevant_df, algs, prefix='\t')
+        this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_time')
+        save_dir = os.path.join(this_plot_dir, f'combined_plt.png')
+        # points from lowest to highest time value, spaced evenly on a logarithmic plot
+        grid = {
+            alg: np.exp(np.linspace(np.log(min(relevant_df[relevant_df['algorithm'] == alg]['time'])),
+                                    np.log(max(relevant_df[relevant_df['algorithm'] == alg]['time'])),
+                                    num=args.grid_n))
+            for alg in algs
+        }
+        kernel_smoothed_plot_wrt_value(
+            df=relevant_df,
+            key=key,
+            kernel_fn=gaussian_kernel,
             grid=grid,
             x_param='time',
             save_path=save_dir,
