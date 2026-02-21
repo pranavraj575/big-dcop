@@ -51,12 +51,12 @@ def kernel_smoothed_plot_wrt_value(df,
             if args.subsample < 1.:
                 temp_df = temp_df[np.random.random(len(temp_df)) < args.subsample]
             else:
-                ss_n=int(args.subsample)
-                if ss_n<len(temp_df):
-                    idxs=np.random.default_rng().choice(len(temp_df),ss_n,replace=False)
-                    temp_df=temp_df.iloc[idxs]
-        g=grid[alg]
-        
+                ss_n = int(args.subsample)
+                if ss_n < len(temp_df):
+                    idxs = np.random.default_rng().choice(len(temp_df), ss_n, replace=False)
+                    temp_df = temp_df.iloc[idxs]
+        g = grid[alg]
+
         if g is None:
             g = sorted(set(temp_df[x_param]))
         means = []
@@ -106,9 +106,12 @@ def plot_wrt_param(df, key, x_param, save_path, args, x_log=False, y_log=False, 
                                    algs=algs,
                                    title=title,
                                    )
-def print_stats_by_alg(df,algs,prefix=''):
+
+
+def print_stats_by_alg(df, algs, prefix=''):
     for alg in algs:
-        print(prefix+f"algorithm {alg}:\t{len(df[df['algorithm'] == alg])} entries")
+        print(prefix + f"algorithm {alg}:\t{len(df[df['algorithm'] == alg])} entries")
+
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -142,23 +145,25 @@ if __name__ == '__main__':
                    type=str,
                    help='things to plot on y value, to specifiy log scale, use <key>:log',
                    )
-    p.add_argument("--subsample", type=float, default=None, help="subsample datapoints. if 0< subsample < 1, samples probabilistically, if subsample>=1, samples n values at random without replacement")
+    p.add_argument("--subsample", type=float, default=None,
+                   help="subsample datapoints. if 0< subsample < 1, samples probabilistically, if subsample>=1, samples n values at random without replacement")
     args = p.parse_args()
     if args.subsample is not None:
-        assert args.subsample>0, "--subsample value must be positive value, got {args.subsample}"
+        assert args.subsample > 0, "--subsample value must be positive value, got {args.subsample}"
     plt_dir = args.output
     os.makedirs(plt_dir, exist_ok=True)
 
     df = pd.read_csv(args.path)
     print(f'loaded df, length {len(df)}')
-    keys=[]
+    keys = []
     for key in args.y_keys:
-        configs=[]
+        configs = []
         if ':' in key:
-            key,m=key.split(':')
-            configs=m.split(',')
-        keys.append((key,configs))
-        assert key in set(df.keys()), f"key '{key}' with configs {modifier} is not in data. Valid keys: {set(df.keys())}"
+            key, m = key.split(':')
+            configs = m.split(',')
+        keys.append((key, configs))
+        assert key in set(
+            df.keys()), f"key '{key}' with configs {modifier} is not in data. Valid keys: {set(df.keys())}"
 
     # get n parameter from problem file name
     df['n'] = df['problem'].map(lambda s: int(s.split('_')[1][1:]))
@@ -166,10 +171,10 @@ if __name__ == '__main__':
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
     else:
         algs = args.algorithms
-    print_stats_by_alg(df,algs)
-    
+    print_stats_by_alg(df, algs)
+
     timeout_params = sorted(set(df['timeout_param']))
-    for timeout_param, (key,configs) in itertools.product(timeout_params, keys):
+    for timeout_param, (key, configs) in itertools.product(timeout_params, keys):
         this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_n')
         save_dir = os.path.join(this_plot_dir, f'timeout_{timeout_param}.png')
         relevant_df = df[df['timeout_param'] == timeout_param]
@@ -189,11 +194,11 @@ if __name__ == '__main__':
         print(f'saved to {save_dir}')
 
     n_params = sorted(set(df['n']))
-    for n_param, (key,configs) in itertools.product(n_params, keys):
+    for n_param, (key, configs) in itertools.product(n_params, keys):
         relevant_df = df[df['n'] == n_param]
         relevant_df = relevant_df[relevant_df[key].notnull()]
         print(f'plotting {key} for n={n_param}, {len(relevant_df)} total values')
-        print_stats_by_alg(relevant_df,algs,prefix='\t')
+        print_stats_by_alg(relevant_df, algs, prefix='\t')
         this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_time')
         save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
         # points from lowest to highest time value, spaced evenly on a logarithmic plot
