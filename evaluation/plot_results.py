@@ -42,18 +42,26 @@ def kernel_smoothed_plot_wrt_value(df,
     """
     if algs is None:
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
-    if grid is None:
-        grid = sorted(set(df[x_param]))
     if type(grid) != dict:
         grid = {alg: grid for alg in algs}
     styles = set()
     for alg in algs:
         temp_df = df[df['algorithm'] == alg]
-        if args.subsample_p < 1.:
-            temp_df = temp_df[np.random.random(len(temp_df)) < args.subsample_p]
+        if args.subsample is not None:
+            if args.subsample < 1.:
+                temp_df = temp_df[np.random.random(len(temp_df)) < args.subsample]
+            else:
+                ss_n=int(args.subsample)
+                if ss_n<len(temp_df):
+                    idxs=np.random.default_rng().choice(len(temp_df),ss_n,replace=False)
+                    temp_df=temp_df.iloc[idxs]
+        g=grid[alg]
+        
+        if g is None:
+            g = sorted(set(temp_df[x_param]))
         means = []
         std_errors = []
-        for x0 in grid[alg]:
+        for x0 in g:
             weights = temp_df[x_param].map(lambda x: kernel_fn(x0, x))
             y = temp_df[key]
             cum_weight = weights.sum()
@@ -63,7 +71,7 @@ def kernel_smoothed_plot_wrt_value(df,
             std_error = np.sqrt(sample_variance)/np.sqrt(cum_weight)
             std_errors.append(std_error)
         means, std_errors = np.array(means), np.array(std_errors)
-        t, = plt.plot(grid[alg], means, label=alg)
+        t, = plt.plot(g, means, label=alg)
         style = (t.get_c(), t.get_linestyle())
         if style in styles:
             # todo: can make this more fancy, but this works up until 2*(# of colors) = 20 lines
@@ -71,7 +79,7 @@ def kernel_smoothed_plot_wrt_value(df,
         style = (t.get_c(), t.get_linestyle())
         styles.add(style)
 
-        plt.fill_between(grid[alg], means - std_errors*z_score, means + std_errors*z_score, color=t.get_c(), alpha=.2)
+        plt.fill_between(g, means - std_errors*z_score, means + std_errors*z_score, color=t.get_c(), alpha=.2)
     plt.legend()
     plt.ylabel(key)
     plt.xlabel(x_param)
@@ -98,7 +106,9 @@ def plot_wrt_param(df, key, x_param, save_path, args, x_log=False, y_log=False, 
                                    algs=algs,
                                    title=title,
                                    )
-
+def print_stats_by_alg(df,algs,prefix=''):
+    for alg in algs:
+        print(prefix+f"algorithm {alg}:\t{len(df[df['algorithm'] == alg])} entries")
 
 if __name__ == '__main__':
     DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -132,13 +142,17 @@ if __name__ == '__main__':
                    type=str,
                    help='things to plot on y value',
                    )
-    p.add_argument("--subsample_p", type=float, default=1., help="proportion of datapoints to sample")
+    p.add_argument("--subsample", type=float, default=None, help="subsample datapoints. if 0< subsample < 1, samples probabilistically, if subsample>=1, samples n values at random without replacement")
     args = p.parse_args()
-
+    if args.subsample is not None:
+        assert args.subsample>0, "--subsample value must be positive value, got {args.subsample}"
     plt_dir = args.output
     os.makedirs(plt_dir, exist_ok=True)
 
     df = pd.read_csv(args.path)
+    print(f'loaded df, length {len(df)}')
+    for key in args.y_keys:
+        assert key in set(df.keys()), f"key '{key}' is not in data. Valid keys: {set(df.keys())}"
 
     # get n parameter from problem file name
     df['n'] = df['problem'].map(lambda s: int(s.split('_')[1][1:]))
@@ -146,6 +160,8 @@ if __name__ == '__main__':
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
     else:
         algs = args.algorithms
+    print_stats_by_alg(df,algs)
+    
     timeout_params = sorted(set(df['timeout_param']))
     for timeout_param, key in itertools.product(timeout_params,
                                                 args.y_keys
@@ -171,8 +187,11 @@ if __name__ == '__main__':
     for n_param, key in itertools.product(n_params,
                                           args.y_keys
                                           ):
+        
         relevant_df = df[df['n'] == n_param]
         relevant_df = relevant_df[relevant_df[key].notnull()]
+        print(f'plotting {key} for n={n_param}, {len(relevant_df)} total values')
+        print_stats_by_alg(relevant_df,algs,prefix='\t')
         # commented out since we can do better by plotting mid run data
         """
         this_plot_dir = os.path.join(plt_dir, f'{key}_over_timeout')
