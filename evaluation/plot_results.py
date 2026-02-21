@@ -163,7 +163,7 @@ if __name__ == '__main__':
             configs = m.split(',')
         keys.append((key, configs))
         assert key in set(
-            df.keys()), f"key '{key}' with configs {modifier} is not in data. Valid keys: {set(df.keys())}"
+            df.keys()), f"key '{key}' with configs {configs} is not in data. Valid keys: {set(df.keys())}"
 
     # get n parameter from problem file name
     df['n'] = df['problem'].map(lambda s: int(s.split('_')[1][1:]))
