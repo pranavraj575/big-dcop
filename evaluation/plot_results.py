@@ -212,8 +212,8 @@ if __name__ == '__main__':
         )
         print(f'saved to {save_dir}')
         del relevant_df
-    for graph_config in (
-                         {'split_by': [('graph_type', graph_types), ]},
+    for graph_config in ({'split_by': [('graph_type', graph_types), ]},
+                         {'split_by': [('graph_type', graph_types), ('n', n_params), ]},
                          {'split_by': [('n', n_params), ]},
                          {'split_by': []},
                          {'key_modifier': lambda key: f'rescaled_{key}',
