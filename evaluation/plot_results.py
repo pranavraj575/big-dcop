@@ -193,37 +193,19 @@ if __name__ == '__main__':
 
     timeout_params = sorted(set(df['timeout_param']))
 
-    # plot the plots wrt n, splitting by values of timeout_param
-    for (key, configs) in keys:
-        this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_n')
-        save_dir = os.path.join(this_plot_dir, f'plot.png')
-        # dont consider mid-run data for this plot
-        relevant_df = df[df['status'] != "RUNNING"]
-        relevant_df = relevant_df[relevant_df[key].notnull()]
-        plot_wrt_param(
-            df=relevant_df,
-            key=key,
-            x_param='n',
-            save_path=save_dir,
-            algs=algs,
-            y_log='log' in configs,
-            title="performance on graph coloring problems",
-            args=args,
-        )
-        print(f'saved to {save_dir}')
-        del relevant_df
-    for graph_config in ({'split_by': [('graph_type', graph_types), ]},
-                         {'split_by': [('graph_type', graph_types), ('n', n_params), ]},
-                         {'split_by': [('n', n_params), ]},
-                         {'split_by': []},
-                         {'key_mod': lambda key: f'rescaled_{key}',
-                          'prefix': 'rescaled_'
-                          },
-                         {'key_mod': lambda key: f'rescaled_{key}',
-                          'prefix': 'rescaled_',
-                          'split_by': [('graph_type', graph_types)],
-                          },
-                         ):
+    for graph_config in (
+            {'split_by': [('graph_type', graph_types), ], 'kernel': None, 'x_param': 'n', 'mid-run': False},
+            {'split_by': [], 'kernel': None, 'x_param': 'n', 'mid-run': False},
+            {'split_by': [('graph_type', graph_types), ]},
+            # {'split_by': [('graph_type', graph_types), ('n', n_params), ]},
+            # {'split_by': [('n', n_params), ]},
+            {'split_by': []},
+            {'key_mod': lambda k: f'rescaled_{k}', 'prefix': 'rescaled_'},
+            {'key_mod': lambda k: f'rescaled_{k}', 'prefix': 'rescaled_', 'split_by': [('graph_type', graph_types)]},
+    ):
+        x_param = graph_config.get('x_param', 'time')
+        collect_mid_run = graph_config.get('mid-run', True)
+        kernel = graph_config.get('kernel', gaussian_kernel)
         if graph_config.get('split_by'):
             split_by_keys, split_by_values = list(zip(*graph_config['split_by']))
         else:
@@ -237,39 +219,52 @@ if __name__ == '__main__':
                 real_key = key
 
             relevant_df = df[df[real_key].notnull()]
+            if not collect_mid_run:
+                relevant_df = relevant_df[relevant_df['status'] != "RUNNING"]
             for k, v in zip(split_by_keys, splits):
                 relevant_df = relevant_df[relevant_df[k] == v]
             split_str = {k: v for k, v in zip(split_by_keys, splits)}
-            print(f'plotting {key} for {split_str}, {len(relevant_df)} total values')
+            print(f'plotting {key} over {x_param} for {split_str}, {len(relevant_df)} total values')
             print_stats_by_alg(relevant_df, algs, prefix='\t')
 
-            this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_time')
+            this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_{x_param}')
             if not split_by_keys:
                 plt_name = 'combined_plot'
             else:
                 plt_name = '_'.join([f'{k}_{v}' for k, v in zip(split_by_keys, splits)])
             plt_name = graph_config.get('prefix', '') + plt_name
             save_dir = os.path.join(this_plot_dir, f'{plt_name}.png')
-            # points from lowest to highest time value, spaced evenly on a logarithmic plot
+            # points from lowest to highest x_param value, spaced evenly on a logarithmic plot
             grid = {
-                alg: np.exp(np.linspace(np.log(min(relevant_df[relevant_df['algorithm'] == alg]['time'])),
-                                        np.log(max(relevant_df[relevant_df['algorithm'] == alg]['time'])),
+                alg: np.exp(np.linspace(np.log(min(relevant_df[relevant_df['algorithm'] == alg][x_param])),
+                                        np.log(max(relevant_df[relevant_df['algorithm'] == alg][x_param])),
                                         num=args.grid_n))
                 for alg in algs
             }
-
-            kernel_smoothed_plot_wrt_value(
-                df=relevant_df,
-                key=real_key,
-                kernel_fn=gaussian_kernel,
-                grid=grid,
-                x_param='time',
-                save_path=save_dir,
-                algs=algs,
-                x_log=True,
-                y_log='log' in configs,
-                title="performance on graph coloring problems",
-                args=args,
-            )
+            if kernel is None:
+                plot_wrt_param(
+                    df=relevant_df,
+                    key=key,
+                    x_param=x_param,
+                    save_path=save_dir,
+                    algs=algs,
+                    y_log='log' in configs,
+                    title="performance on graph coloring problems",
+                    args=args,
+                )
+            else:
+                kernel_smoothed_plot_wrt_value(
+                    df=relevant_df,
+                    key=real_key,
+                    kernel_fn=gaussian_kernel,
+                    grid=grid,
+                    x_param=x_param,
+                    save_path=save_dir,
+                    algs=algs,
+                    x_log=True,
+                    y_log='log' in configs,
+                    title="performance on graph coloring problems",
+                    args=args,
+                )
             print(f'saved to {save_dir}')
             del relevant_df
