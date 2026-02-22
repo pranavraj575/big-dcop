@@ -178,8 +178,8 @@ if __name__ == '__main__':
         df['rescaled_' + key] = df[key]
         relevant_df = df[df[key].notnull()]
         for n_param in n_params:
-            rows = (relevant_df['n'] == n_param)
-            relevant_df.loc[rows, 'rescaled_' + key] = relevant_df.loc[rows, key]/np.mean(relevant_df.loc[rows, key])
+            rows = (df['n'] == n_param)
+            df.loc[rows, 'rescaled_' + key] = df.loc[rows, key]/np.mean(relevant_df.loc[rows, key])
     if args.algorithms is None:
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
     else:
