@@ -4,6 +4,7 @@ import pandas as pd
 
 import numpy as np
 import json
+from algo_configs import get_display_name
 
 
 def kernel_smoothed_plot_wrt_value(df,
@@ -177,7 +178,6 @@ if __name__ == '__main__':
             algs = [get_display_name(alg_config) for alg_config in json.load(f)]
     print_stats_by_alg(df, algs)
 
-    """
     timeout_params = sorted(set(df['timeout_param']))
     # plot the plots wrt timeout_param, splitting by values of timeout_param
     #  outdated, we dont really change timeout param
@@ -199,7 +199,6 @@ if __name__ == '__main__':
             args=args,
         )
         print(f'saved to {save_dir}')
-    """
 
     # plot the plots wrt time, splitting by values of n
     choose_gaussian_kernel_b = lambda x0: x0

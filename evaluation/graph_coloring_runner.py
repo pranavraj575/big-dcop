@@ -26,7 +26,7 @@ def run_pydcop(problem_file, algo_config, args):
     # append the specific args from the dict
     cmd.extend(extra_alg_params)
 
-    if args.collect_on is not None:
+    if args.collect_on !='NONE':
         cmd.extend(['--collect_on', args.collect_on])
         if args.period is not None:
             cmd.extend(['--period', str(args.period)])
@@ -82,9 +82,9 @@ def main():
     parser.add_argument(
         "-c",
         "--collect_on",
-        choices=["value_change", "cycle_change", "period"],
-        default=None,
-        help='collect mid-run data upon this event',
+        choices=["value_change", "cycle_change", "period", "NONE"],
+        default="value_change",
+        help='collect mid-run data upon this event (use NONE for collecting no mid-run data)',
     )
     parser.add_argument(
         "--period",
