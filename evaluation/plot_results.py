@@ -216,9 +216,9 @@ if __name__ == '__main__':
                          {'split_by': [('graph_type', graph_types), ('n', n_params), ]},
                          {'split_by': [('n', n_params), ]},
                          {'split_by': []},
-                         {'key_modifier': lambda key: f'rescaled_{key}',
+                         {'key_mod': lambda key: f'rescaled_{key}',
                           'prefix': 'rescaled_'
-                          }
+                          },
                          ):
         if graph_config.get('split_by'):
             split_by_keys, split_by_values = list(zip(*graph_config['split_by']))
