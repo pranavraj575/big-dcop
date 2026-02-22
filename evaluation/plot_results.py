@@ -180,6 +180,7 @@ if __name__ == '__main__':
         for n_param in n_params:
             rows = (df['n'] == n_param)
             df.loc[rows, 'rescaled_' + key] = df.loc[rows, key]/np.mean(relevant_df.loc[rows, key])
+    # get all algorithms used across trials
     if args.algorithms is None:
         algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
     else:
@@ -190,8 +191,6 @@ if __name__ == '__main__':
 
     choose_gaussian_kernel_b = lambda x0: x0
     gaussian_kernel = lambda x0, x: np.exp(-(x0 - x)**2/(2*choose_gaussian_kernel_b(x0)**2))
-
-    timeout_params = sorted(set(df['timeout_param']))
 
     for graph_config in (
             {'split_by': [('graph_type', graph_types), ], 'kernel': None, 'x_param': 'n', 'mid-run': False},
