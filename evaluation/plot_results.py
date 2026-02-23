@@ -197,7 +197,7 @@ if __name__ == '__main__':
             {'split_by': [], 'kernel': None, 'x_param': 'n', 'mid-run': False},
             {'split_by': [('graph_type', graph_types), ]},
             # {'split_by': [('graph_type', graph_types), ('n', n_params), ]},
-            # {'split_by': [('n', n_params), ]},
+            {'split_by': [('n', n_params), ]},
             {'split_by': []},
             {'key_mod': lambda k: f'rescaled_{k}', 'prefix': 'rescaled_'},
             {'key_mod': lambda k: f'rescaled_{k}', 'prefix': 'rescaled_', 'split_by': [('graph_type', graph_types)]},
