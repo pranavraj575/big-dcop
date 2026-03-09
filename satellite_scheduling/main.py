@@ -8,7 +8,7 @@ from utils import parse_json_to_dcop_and_overlaps, run_global_dispatcher
 
 
 def main():
-    raw_json = "satellite_scheduling/test.json"
+    raw_json = "satellite_scheduling/test_large.json"
     temp_yaml = "output/dcop_global.yaml"
     pydcop_results = "output/pydcop_results.json"
     
