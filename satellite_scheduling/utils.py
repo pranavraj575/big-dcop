@@ -75,10 +75,10 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
     req_to_vars = defaultdict(list)
     
     # Create one PyDCOP variable per (Agent, Request) combination
-    var_counter = 0
     for agent_id, reqs in agent_to_reqs.items():
+        var_counter = 0
         for req_id in reqs:
-            var_name = f"v_{var_counter}"
+            var_name = f"v_{agent_id}_{var_counter}"
             var_counter += 1
             
             pydcop['variables'][var_name] = {'domain': 'binary_domain'}
