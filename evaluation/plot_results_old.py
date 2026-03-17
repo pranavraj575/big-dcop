@@ -7,19 +7,20 @@ import json
 from algo_configs import get_display_name
 
 
-def kernel_smoothed_plot_wrt_value(df,
-                                   key,
-                                   x_param,
-                                   save_path,
-                                   kernel_fn,
-                                   args,
-                                   z_score=1.96,
-                                   grid=None,
-                                   x_log=False,
-                                   y_log=False,
-                                   algs=None,
-                                   title=None,
-                                   ):
+def kernel_smoothed_plot_wrt_value(
+    df,
+    key,
+    x_param,
+    save_path,
+    kernel_fn,
+    args,
+    z_score=1.96,
+    grid=None,
+    x_log=False,
+    y_log=False,
+    algs=None,
+    title=None,
+):
     """
     Parameters
     ----------
@@ -43,19 +44,21 @@ def kernel_smoothed_plot_wrt_value(df,
 
     """
     if algs is None:
-        algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
+        algs = sorted(set(df["algorithm"]), key=lambda s: s.lower())
     if type(grid) != dict:
         grid = {alg: grid for alg in algs}
     styles = set()
     for alg in algs:
-        temp_df = df[df['algorithm'] == alg]
+        temp_df = df[df["algorithm"] == alg]
         if args.subsample is not None:
-            if args.subsample < 1.:
+            if args.subsample < 1.0:
                 temp_df = temp_df[np.random.random(len(temp_df)) < args.subsample]
             else:
                 ss_n = int(args.subsample)
                 if ss_n < len(temp_df):
-                    idxs = np.random.default_rng().choice(len(temp_df), ss_n, replace=False)
+                    idxs = np.random.default_rng().choice(
+                        len(temp_df), ss_n, replace=False
+                    )
                     temp_df = temp_df.iloc[idxs]
         g = grid[alg]
 
@@ -67,21 +70,27 @@ def kernel_smoothed_plot_wrt_value(df,
             weights = temp_df[x_param].map(lambda x: kernel_fn(x0, x))
             y = temp_df[key]
             cum_weight = weights.sum()
-            mu = (weights*y).sum()/cum_weight
+            mu = (weights * y).sum() / cum_weight
             means.append(mu)
-            sample_variance = (((y - mu)**2)*weights).sum()/(cum_weight - 1)
-            std_error = np.sqrt(sample_variance)/np.sqrt(cum_weight)
+            sample_variance = (((y - mu) ** 2) * weights).sum() / (cum_weight - 1)
+            std_error = np.sqrt(sample_variance) / np.sqrt(cum_weight)
             std_errors.append(std_error)
         means, std_errors = np.array(means), np.array(std_errors)
-        t, = plt.plot(g, means, label=alg)
+        (t,) = plt.plot(g, means, label=alg)
         style = (t.get_c(), t.get_linestyle())
         if style in styles:
             # todo: can make this more fancy, but this works up until 2*(# of colors) = 20 lines
-            t.set_linestyle('--')
+            t.set_linestyle("--")
         style = (t.get_c(), t.get_linestyle())
         styles.add(style)
 
-        plt.fill_between(g, means - std_errors*z_score, means + std_errors*z_score, color=t.get_c(), alpha=.2)
+        plt.fill_between(
+            g,
+            means - std_errors * z_score,
+            means + std_errors * z_score,
+            color=t.get_c(),
+            alpha=0.2,
+        )
     plt.legend()
     plt.ylabel(key)
     plt.xlabel(x_param)
@@ -91,31 +100,34 @@ def kernel_smoothed_plot_wrt_value(df,
         plt.yscale("log")
     plt.title(title)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    plt.savefig(save_path, bbox_inches='tight')
+    plt.savefig(save_path, bbox_inches="tight")
     plt.close()
 
 
-def plot_wrt_param(df, key, x_param, save_path, args, x_log=False, y_log=False, algs=None, title=None):
-    kernel_smoothed_plot_wrt_value(df=df,
-                                   key=key,
-                                   x_param=x_param,
-                                   save_path=save_path,
-                                   kernel_fn=lambda x0, x: int(x0 == x),
-                                   args=args,
-                                   grid=None,
-                                   x_log=x_log,
-                                   y_log=y_log,
-                                   algs=algs,
-                                   title=title,
-                                   )
+def plot_wrt_param(
+    df, key, x_param, save_path, args, x_log=False, y_log=False, algs=None, title=None
+):
+    kernel_smoothed_plot_wrt_value(
+        df=df,
+        key=key,
+        x_param=x_param,
+        save_path=save_path,
+        kernel_fn=lambda x0, x: int(x0 == x),
+        args=args,
+        grid=None,
+        x_log=x_log,
+        y_log=y_log,
+        algs=algs,
+        title=title,
+    )
 
 
-def print_stats_by_alg(df, algs, prefix=''):
+def print_stats_by_alg(df, algs, prefix=""):
     for alg in algs:
         print(prefix + f"algorithm {alg}:\t{len(df[df['algorithm'] == alg])} entries")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     p = argparse.ArgumentParser()
     p.add_argument(
@@ -125,97 +137,118 @@ if __name__ == '__main__':
         type=str,
         help="Directory of csv result file.",
     )
-    p.add_argument('--output',
-                   required=False,
-                   default=os.path.join(DIR, "output", "plots"),
-                   type=str,
-                   help='output dir',
-                   )
-    p.add_argument('--algorithms',
-                   required=False,
-                   default=None,
-                   type=str,
-                   help='json file with algorithms to include (defaults to using all algorithms found in data)',
-                   )
+    p.add_argument(
+        "--output",
+        required=False,
+        default=os.path.join(DIR, "output", "plots"),
+        type=str,
+        help="output dir",
+    )
+    p.add_argument(
+        "--algorithms",
+        required=False,
+        default=None,
+        type=str,
+        help="json file with algorithms to include (defaults to using all algorithms found in data)",
+    )
 
-    p.add_argument("--grid_n", type=int, default=10, help="number of points to put on plotting grid")
-    p.add_argument('--y_keys',
-                   required=False,
-                   nargs="+",
-                   default=['cost'],
-                   type=str,
-                   help='things to plot on y value, to specifiy log scale, use <key>:log',
-                   )
-    p.add_argument("--subsample", type=float, default=None,
-                   help="subsample datapoints. if 0< subsample < 1, samples probabilistically, if subsample>=1, samples n values at random without replacement")
+    p.add_argument(
+        "--grid_n",
+        type=int,
+        default=10,
+        help="number of points to put on plotting grid",
+    )
+    p.add_argument(
+        "--y_keys",
+        required=False,
+        nargs="+",
+        default=["cost"],
+        type=str,
+        help="things to plot on y value, to specifiy log scale, use <key>:log",
+    )
+    p.add_argument(
+        "--subsample",
+        type=float,
+        default=None,
+        help="subsample datapoints. if 0< subsample < 1, samples probabilistically, if subsample>=1, samples n values at random without replacement",
+    )
     args = p.parse_args()
     if args.subsample is not None:
-        assert args.subsample > 0, "--subsample value must be positive value, got {args.subsample}"
+        assert args.subsample > 0, (
+            "--subsample value must be positive value, got {args.subsample}"
+        )
     plt_dir = args.output
     os.makedirs(plt_dir, exist_ok=True)
 
     df = pd.read_csv(args.path)
-    print(f'loaded df, length {len(df)}')
+    print(f"loaded df, length {len(df)}")
     keys = []
     for key in args.y_keys:
         configs = []
-        if ':' in key:
-            key, m = key.split(':')
-            configs = m.split(',')
+        if ":" in key:
+            key, m = key.split(":")
+            configs = m.split(",")
         keys.append((key, configs))
-        assert key in set(
-            df.keys()), f"key '{key}' with configs {configs} is not in data. Valid keys: {set(df.keys())}"
+        assert key in set(df.keys()), (
+            f"key '{key}' with configs {configs} is not in data. Valid keys: {set(df.keys())}"
+        )
 
     # get n parameter from problem file name
-    df['n'] = df['problem'].map(lambda s: int(s.split('_')[1][1:]))
+    df["n"] = df["problem"].map(lambda s: int(s.split("_")[1][1:]))
     # add dummy rows to change later
-    for (key, configs) in keys:
-        df['rescaled_' + key] = df[key]
+    for key, configs in keys:
+        df["rescaled_" + key] = df[key]
     if args.algorithms is None:
-        algs = sorted(set(df['algorithm']), key=lambda s: s.lower())
+        algs = sorted(set(df["algorithm"]), key=lambda s: s.lower())
     else:
         with open(args.algorithms) as f:
             algs = [get_display_name(alg_config) for alg_config in json.load(f)]
     print_stats_by_alg(df, algs)
 
-    timeout_params = sorted(set(df['timeout_param']))
+    timeout_params = sorted(set(df["timeout_param"]))
     # plot the plots wrt timeout_param, splitting by values of timeout_param
     #  outdated, we dont really change timeout param
     for timeout_param, (key, configs) in itertools.product(timeout_params, keys):
-        this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_n')
-        save_dir = os.path.join(this_plot_dir, f'timeout_{timeout_param}.png')
-        relevant_df = df[df['timeout_param'] == timeout_param]
+        this_plot_dir = os.path.join(plt_dir, f"{'_'.join(configs)}{key}_over_n")
+        save_dir = os.path.join(this_plot_dir, f"timeout_{timeout_param}.png")
+        relevant_df = df[df["timeout_param"] == timeout_param]
         # dont consider mid-run data for this plot
-        relevant_df = relevant_df[relevant_df['status'] != "RUNNING"]
+        relevant_df = relevant_df[relevant_df["status"] != "RUNNING"]
         relevant_df = relevant_df[relevant_df[key].notnull()]
         plot_wrt_param(
             df=relevant_df,
             key=key,
-            x_param='n',
+            x_param="n",
             save_path=save_dir,
             algs=algs,
-            y_log='log' in configs,
+            y_log="log" in configs,
             title="performance on graph coloring problems",
             args=args,
         )
-        print(f'saved to {save_dir}')
+        print(f"saved to {save_dir}")
 
     # plot the plots wrt time, splitting by values of n
     choose_gaussian_kernel_b = lambda x0: x0
-    gaussian_kernel = lambda x0, x: np.exp(-(x0 - x)**2/(2*choose_gaussian_kernel_b(x0)**2))
-    n_params = sorted(set(df['n']))
+    gaussian_kernel = lambda x0, x: np.exp(
+        -((x0 - x) ** 2) / (2 * choose_gaussian_kernel_b(x0) ** 2)
+    )
+    n_params = sorted(set(df["n"]))
     for n_param, (key, configs) in itertools.product(n_params, keys):
-        relevant_df = df[df['n'] == n_param]
+        relevant_df = df[df["n"] == n_param]
         relevant_df = relevant_df[relevant_df[key].notnull()]
-        print(f'plotting {key} for n={n_param}, {len(relevant_df)} total values')
-        print_stats_by_alg(relevant_df, algs, prefix='\t')
-        this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_time')
-        save_dir = os.path.join(this_plot_dir, f'n_prm_{n_param}.png')
+        print(f"plotting {key} for n={n_param}, {len(relevant_df)} total values")
+        print_stats_by_alg(relevant_df, algs, prefix="\t")
+        this_plot_dir = os.path.join(plt_dir, f"{'_'.join(configs)}{key}_over_time")
+        save_dir = os.path.join(this_plot_dir, f"n_prm_{n_param}.png")
         # points from lowest to highest time value, spaced evenly on a logarithmic plot
         grid = {
-            alg: np.exp(np.linspace(np.log(min(relevant_df[relevant_df['algorithm'] == alg]['time'])),
-                                    np.log(max(relevant_df[relevant_df['algorithm'] == alg]['time'])),
-                                    num=args.grid_n))
+            alg: np.exp(
+                np.linspace(
+                    np.log(min(relevant_df[relevant_df["algorithm"] == alg]["time"])),
+                    np.log(max(relevant_df[relevant_df["algorithm"] == alg]["time"])),
+                    num=args.grid_n,
+                )
+            )
             for alg in algs
         }
 
@@ -224,28 +257,32 @@ if __name__ == '__main__':
             key=key,
             kernel_fn=gaussian_kernel,
             grid=grid,
-            x_param='time',
+            x_param="time",
             save_path=save_dir,
             algs=algs,
             x_log=True,
-            y_log='log' in configs,
+            y_log="log" in configs,
             title="performance on graph coloring problems",
             args=args,
         )
-        print(f'saved to {save_dir}')
+        print(f"saved to {save_dir}")
 
     # plot the y values wrt time, averaging over all trials
-    for (key, configs) in keys:
+    for key, configs in keys:
         relevant_df = df[df[key].notnull()]
-        print(f'plotting {key}, {len(relevant_df)} total values')
-        print_stats_by_alg(relevant_df, algs, prefix='\t')
-        this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_time')
-        save_dir = os.path.join(this_plot_dir, f'combined_plt.png')
+        print(f"plotting {key}, {len(relevant_df)} total values")
+        print_stats_by_alg(relevant_df, algs, prefix="\t")
+        this_plot_dir = os.path.join(plt_dir, f"{'_'.join(configs)}{key}_over_time")
+        save_dir = os.path.join(this_plot_dir, f"combined_plt.png")
         # points from lowest to highest time value, spaced evenly on a logarithmic plot
         grid = {
-            alg: np.exp(np.linspace(np.log(min(relevant_df[relevant_df['algorithm'] == alg]['time'])),
-                                    np.log(max(relevant_df[relevant_df['algorithm'] == alg]['time'])),
-                                    num=args.grid_n))
+            alg: np.exp(
+                np.linspace(
+                    np.log(min(relevant_df[relevant_df["algorithm"] == alg]["time"])),
+                    np.log(max(relevant_df[relevant_df["algorithm"] == alg]["time"])),
+                    num=args.grid_n,
+                )
+            )
             for alg in algs
         }
         kernel_smoothed_plot_wrt_value(
@@ -253,45 +290,51 @@ if __name__ == '__main__':
             key=key,
             kernel_fn=gaussian_kernel,
             grid=grid,
-            x_param='time',
+            x_param="time",
             save_path=save_dir,
             algs=algs,
             x_log=True,
-            y_log='log' in configs,
+            y_log="log" in configs,
             title="performance on graph coloring problems",
             args=args,
         )
-        print(f'saved to {save_dir}')
+        print(f"saved to {save_dir}")
 
     # plot the RESCALED y values wrt time, averaging over all trials
     # rescaling by dividing by average value for each n param
-    for (key, configs) in keys:
+    for key, configs in keys:
         relevant_df = df[df[key].notnull()]
         for n_param in n_params:
-            rows = (relevant_df['n'] == n_param)
-            relevant_df.loc[rows, 'rescaled_' + key] = relevant_df.loc[rows, key]/np.mean(relevant_df.loc[rows, key])
-        print(f'plotting rescaled {key}, {len(relevant_df)} total values')
-        print_stats_by_alg(relevant_df, algs, prefix='\t')
-        this_plot_dir = os.path.join(plt_dir, f'{"_".join(configs)}{key}_over_time')
-        save_dir = os.path.join(this_plot_dir, f'combined_rescaled_plt.png')
+            rows = relevant_df["n"] == n_param
+            relevant_df.loc[rows, "rescaled_" + key] = relevant_df.loc[
+                rows, key
+            ] / np.mean(relevant_df.loc[rows, key])
+        print(f"plotting rescaled {key}, {len(relevant_df)} total values")
+        print_stats_by_alg(relevant_df, algs, prefix="\t")
+        this_plot_dir = os.path.join(plt_dir, f"{'_'.join(configs)}{key}_over_time")
+        save_dir = os.path.join(this_plot_dir, f"combined_rescaled_plt.png")
         # points from lowest to highest time value, spaced evenly on a logarithmic plot
         grid = {
-            alg: np.exp(np.linspace(np.log(min(relevant_df[relevant_df['algorithm'] == alg]['time'])),
-                                    np.log(max(relevant_df[relevant_df['algorithm'] == alg]['time'])),
-                                    num=args.grid_n))
+            alg: np.exp(
+                np.linspace(
+                    np.log(min(relevant_df[relevant_df["algorithm"] == alg]["time"])),
+                    np.log(max(relevant_df[relevant_df["algorithm"] == alg]["time"])),
+                    num=args.grid_n,
+                )
+            )
             for alg in algs
         }
         kernel_smoothed_plot_wrt_value(
             df=relevant_df,
-            key='rescaled_' + key,
+            key="rescaled_" + key,
             kernel_fn=gaussian_kernel,
             grid=grid,
-            x_param='time',
+            x_param="time",
             save_path=save_dir,
             algs=algs,
             x_log=True,
-            y_log='log' in configs,
+            y_log="log" in configs,
             title="performance on graph coloring problems",
             args=args,
         )
-        print(f'saved to {save_dir}')
+        print(f"saved to {save_dir}")

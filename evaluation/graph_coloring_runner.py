@@ -18,26 +18,30 @@ def run_pydcop(problem_file, algo_config, args):
 
     # build Command
     cmd = [
-        "pydcop", "--timeout", str(args.timeout), "solve",
+        "pydcop",
+        "--timeout",
+        str(args.timeout),
+        "solve",
         problem_file,
-        "--algo", base_name,
+        "--algo",
+        base_name,
     ]
 
     # append the specific args from the dict
     cmd.extend(extra_alg_params)
 
-    if args.collect_on !='NONE':
-        cmd.extend(['--collect_on', args.collect_on])
+    if args.collect_on != "NONE":
+        cmd.extend(["--collect_on", args.collect_on])
         if args.period is not None:
-            cmd.extend(['--period', str(args.period)])
-        cmd.extend(['--run_metrics', args.temp_csv])
+            cmd.extend(["--period", str(args.period)])
+        cmd.extend(["--run_metrics", args.temp_csv])
 
     try:
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            check=False  # We handle return codes manually
+            check=False,  # We handle return codes manually
         )
 
         # Parse Output
@@ -53,11 +57,15 @@ def run_pydcop(problem_file, algo_config, args):
                 "time": float(final_data.get("time", -1)),
                 "msg_count": int(final_data.get("msg_count", 0)),
                 "cycles": int(final_data.get("cycles", 0)),
-                "assignment": str(final_data.get("assignment", {}))  # store as string to fit in DF
+                "assignment": str(
+                    final_data.get("assignment", {})
+                ),  # store as string to fit in DF
             }
         else:
             # failed or timed out
-            err_msg = result.stderr.strip() if result.stderr else result.stdout.strip()[-200:]
+            err_msg = (
+                result.stderr.strip() if result.stderr else result.stdout.strip()[-200:]
+            )
             return mid_df, {"status": "FAILED", "error": err_msg}
 
     except Exception as e:
@@ -67,36 +75,60 @@ def run_pydcop(problem_file, algo_config, args):
 def main():
     DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     parser = argparse.ArgumentParser(description="Run pyDCOP benchmark")
-    parser.add_argument("--algorithms", type=str,
-                        default=os.path.join(DIR, "evaluation", "configs", "algorithm_configs.json"),
-                        help="json file with algorithm configs to use")
-    parser.add_argument("--input_dir", type=str, default=os.path.join(DIR, "output", "graph_coloring_instances_hard"),
-                        help="Directory containing .yaml problem files")
-    parser.add_argument("--output_csv", type=str, default=os.path.join(DIR, "output", "results.csv"),
-                        help="Path to save the results DataFrame")
-    parser.add_argument("--temp_csv", type=str, default=os.path.join(DIR, "output", "temp.csv"),
-                        help="Path to save mid-run results into (cleared after running each experiemnt)")
-    parser.add_argument("--trials", type=int, default=1, help="Number of trials per algorithm per problem")
-    parser.add_argument("--timeout", type=float, default=30.,
-                        help="Timeout in seconds per run")
+    parser.add_argument(
+        "--algorithms",
+        type=str,
+        default=os.path.join(DIR, "evaluation", "configs", "algorithm_configs.json"),
+        help="json file with algorithm configs to use",
+    )
+    parser.add_argument(
+        "--input_dir",
+        type=str,
+        default=os.path.join(DIR, "output", "graph_coloring_instances_hard"),
+        help="Directory containing .yaml problem files",
+    )
+    parser.add_argument(
+        "--output_csv",
+        type=str,
+        default=os.path.join(DIR, "output", "results.csv"),
+        help="Path to save the results DataFrame",
+    )
+    parser.add_argument(
+        "--temp_csv",
+        type=str,
+        default=os.path.join(DIR, "output", "temp.csv"),
+        help="Path to save mid-run results into (cleared after running each experiemnt)",
+    )
+    parser.add_argument(
+        "--trials",
+        type=int,
+        default=1,
+        help="Number of trials per algorithm per problem",
+    )
+    parser.add_argument(
+        "--timeout", type=float, default=30.0, help="Timeout in seconds per run"
+    )
     parser.add_argument(
         "-c",
         "--collect_on",
         choices=["value_change", "cycle_change", "period", "NONE"],
         default="value_change",
-        help='collect mid-run data upon this event (use NONE for collecting no mid-run data)',
+        help="collect mid-run data upon this event (use NONE for collecting no mid-run data)",
     )
     parser.add_argument(
         "--period",
         type=float,
         default=None,
         help="Period for collecting metrics. only available "
-             "when using --collect_on period. Defaults to 1 "
-             "second if not specified",
+        "when using --collect_on period. Defaults to 1 "
+        "second if not specified",
     )
 
-    parser.add_argument("--append_results", action='store_true',
-                        help='append results to end of csv file')
+    parser.add_argument(
+        "--append_results",
+        action="store_true",
+        help="append results to end of csv file",
+    )
     args = parser.parse_args()
 
     if not os.path.exists(args.algorithms):
@@ -152,7 +184,7 @@ def main():
                             "msg_count": row.msg_count,
                             "cycles": row.cycle,
                             "timeout_param": args.timeout,
-                            "error_msg": final_metrics.get("error", "")
+                            "error_msg": final_metrics.get("error", ""),
                         }
                         trial_records.append(mid_record)
                 else:
@@ -167,13 +199,14 @@ def main():
                         "msg_count": final_metrics.get("msg_count"),
                         "cycles": final_metrics.get("cycles"),
                         "timeout_param": args.timeout,
-                        "error_msg": final_metrics.get("error", "")
+                        "error_msg": final_metrics.get("error", ""),
                     }
                     trial_records.append(record)
                 print(
                     f"        Trial {trial + 1}: {final_metrics.get('status')},"
                     f" Cost: {final_metrics.get('cost', 'N/A')},"
-                    f" Time: {final_metrics.get('time', 'N/A')}")
+                    f" Time: {final_metrics.get('time', 'N/A')}"
+                )
                 error_msg = final_metrics.get("error", "")
                 if error_msg:
                     print(f"        ERROR: {error_msg}")
@@ -182,11 +215,12 @@ def main():
                 df = pd.DataFrame(trial_records)
                 # Ensure output directory exists
                 os.makedirs(os.path.dirname(args.output_csv), exist_ok=True)
-                df.to_csv(args.output_csv,
-                          index=False,
-                          mode='a' if added_header else 'w',
-                          header=not added_header,
-                          )
+                df.to_csv(
+                    args.output_csv,
+                    index=False,
+                    mode="a" if added_header else "w",
+                    header=not added_header,
+                )
                 added_header = True
                 del df
 

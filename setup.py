@@ -31,86 +31,63 @@
 
 # Basic dependencies, required to run pyDCOP:
 deps = [
-    'pulp',
-    'numpy',
-    'networkx',
-    'pyyaml',
-    'requests',
-    'websocket-server',
-    'tqdm',
-    'matplotlib',
-    'pandas',
+    "pulp",
+    "numpy",
+    "networkx",
+    "pyyaml",
+    "requests",
+    "websocket-server",
+    "tqdm",
+    "matplotlib",
+    "pandas",
 ]
 
 # Extra dependencies, used to run tests
-test_deps = [
-    'coverage',
-    'pytest',
-    'mypy'
-]
+test_deps = ["coverage", "pytest", "mypy"]
 
 # Extra dependencies, used to generate docs
-doc_deps = [
-    'sphinx',
-    'sphinx_rtd_theme',
-    ' sphinxcontrib-bibtex'
-]
+doc_deps = ["sphinx", "sphinx_rtd_theme", " sphinxcontrib-bibtex"]
 
 # Required to install dev dependencies with pip
 #    pip install -e .[test]
-extras = {
-    'test': test_deps,
-    'doc': doc_deps
-}
+extras = {"test": test_deps, "doc": doc_deps}
 
 from setuptools import setup, find_packages
 from os import path
 
 here = path.abspath(path.dirname(__file__))
 # Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-with open(path.join(here, 'pydcop', 'version.py'), encoding='utf-8') as f:
+with open(path.join(here, "pydcop", "version.py"), encoding="utf-8") as f:
     exec(f.read())
 
 setup(
-    name='pydcop',
+    name="pydcop",
     version=__version__,
-    description='Several dcop algo implementation',
-
+    description="Several dcop algo implementation",
     long_description=long_description,
-    long_description_content_type='text/markdown',
-
+    long_description_content_type="text/markdown",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
-
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.8",
-
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    author='Pierre Rust (Orange)',
-    author_email='pierre.rust@orange.com',
-
-    keywords=['dcop', 'MAS'],
-
+    author="Pierre Rust (Orange)",
+    author_email="pierre.rust@orange.com",
+    keywords=["dcop", "MAS"],
     install_requires=deps,
     tests_require=test_deps,
     extras_require=extras,
-
-    scripts=[
-        'pydcop/pydcop',
-        'pydcop/dcop_cli.py'
-    ],
-
+    scripts=["pydcop/pydcop", "pydcop/dcop_cli.py"],
     packages=find_packages(),
-
     project_urls={
-        'Documentation': 'http://pydcop.readthedocs.io',
-        'Source': 'https://github.com/Orange-OpenSource/pyDcop',
-        'Bug Reports': 'https://github.com/Orange-OpenSource/pyDcop/issues'
-    }
+        "Documentation": "http://pydcop.readthedocs.io",
+        "Source": "https://github.com/Orange-OpenSource/pyDcop",
+        "Bug Reports": "https://github.com/Orange-OpenSource/pyDcop/issues",
+    },
 )
