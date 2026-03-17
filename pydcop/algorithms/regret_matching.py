@@ -21,14 +21,14 @@ algo_params = [
     AlgoParameterDef("context_based", "int", [0, 1], 0),
     AlgoParameterDef("stop_cycle", "int", None, 0),
     AlgoParameterDef("update_prob", "float", None, 1.0),
-    AlgoParameterDef("alpha", "float", None, 1.5), # Discount for positive regrets
+    AlgoParameterDef("alpha", "float", None, 1.5),  # Discount for positive regrets
     AlgoParameterDef("beta", "float", None, 0.0),  # Discount for negative regrets
-    AlgoParameterDef("damping", "float", None, 0.0)
+    AlgoParameterDef("damping", "float", None, 0.0),
 ]
 
 
 def computation_memory(computation: VariableComputationNode) -> float:
-    return UNIT_SIZE*len(computation.variable.domain)*2
+    return UNIT_SIZE * len(computation.variable.domain) * 2
 
 
 def communication_load(src: VariableComputationNode, target: str) -> float:
@@ -55,7 +55,7 @@ class RMMessage(Message):
         return "RMMessage({})".format(self.value)
 
     def __eq__(self, other):
-        if type(other) != RMMessage:
+        if type(other) is not RMMessage:
             return False
         if self.value == other.value:
             return True
@@ -63,7 +63,6 @@ class RMMessage(Message):
 
 
 class RMComputation(VariableComputation):
-
     def __init__(self, comp_def: ComputationDef):
         super().__init__(comp_def.node.variable, comp_def)
 
@@ -97,7 +96,7 @@ class RMComputation(VariableComputation):
         return {val: 0 for val in self.variable.domain}
 
     def get_uniform_policy(self):
-        return {val: 1/len(self.variable.domain) for val in self.variable.domain}
+        return {val: 1 / len(self.variable.domain) for val in self.variable.domain}
 
     def on_start(self):
         if not self.neighbors:
@@ -106,10 +105,7 @@ class RMComputation(VariableComputation):
             value, cost = optimal_cost_value(self._variable, self.mode)
             self.value_selection(value, cost)
             if self.logger.isEnabledFor(logging.INFO):
-                self.logger.info(
-                    f"Select initial value {self.current_value} "
-                    f"based on cost function for var {self._variable.name}"
-                )
+                self.logger.info(f"Select initial value {self.current_value} based on cost function for var {self._variable.name}")
             self.finished()
             self.stop()
         else:
@@ -120,9 +116,7 @@ class RMComputation(VariableComputation):
             self.ordered_neighbors = tuple(self.neighbors)
             self.last_strategy = self.get_uniform_policy()
             self.random_value_selection()
-            self.logger.debug(
-                "RM starts: randomly select value %s", self.current_value
-            )
+            self.logger.debug("RM starts: randomly select value %s", self.current_value)
             self.post_to_all_neighbors(RMMessage(self.current_value))
 
             # As everything is asynchronous, we might have received our
@@ -133,7 +127,7 @@ class RMComputation(VariableComputation):
     def _on_value_msg(self, variable_name, recv_msg, t):
         if not self._running:
             return
-            
+
         # In synchronous mode, we strictly separate current and next
         # If we get a message for a cycle we already processed, it's for the next one.
         if variable_name not in self.current_cycle:
@@ -155,18 +149,19 @@ class RMComputation(VariableComputation):
 
             self.current_cycle[self.variable.name] = self.current_value
             assignment = self.current_cycle.copy()
-            costs = find_costs(variable=self.variable, assignment=assignment, constraints=self.constraints)
-            if self.mode == 'min':
+            costs = find_costs(
+                variable=self.variable,
+                assignment=assignment,
+                constraints=self.constraints,
+            )
+            if self.mode == "min":
                 utilities = {k: -v for k, v in costs.items()}
             else:
                 utilities = costs
-            last_u = sum(utilities[k]*self.last_strategy[k] for k in utilities)
+            last_u = sum(utilities[k] * self.last_strategy[k] for k in utilities)
 
             # calc instantaneous regret
-            instant_regrets = {
-                k: u_action - last_u
-                for k, u_action in utilities.items()
-            }
+            instant_regrets = {k: u_action - last_u for k, u_action in utilities.items()}
 
             t = self.cycle_count + 1
             pos_discount = (t**self.alpha) / (t**self.alpha + 1)
@@ -180,7 +175,7 @@ class RMComputation(VariableComputation):
                 cum_regrets = self.regrets[context]
             else:
                 cum_regrets = self.regrets
-            
+
             for k in cum_regrets:
                 if cum_regrets[k] > 0:
                     discounted_old = cum_regrets[k] * pos_discount
@@ -194,29 +189,26 @@ class RMComputation(VariableComputation):
 
             # get probability distribution, (if predictive RM, use prediction of the most recent utilities obtained)
             if self.use_predictive:  # predictive RM
-                regret_basis = {
-                    k: cum_regrets[k] + instant_regrets[k]
-                    for k in cum_regrets
-                }
+                regret_basis = {k: cum_regrets[k] + instant_regrets[k] for k in cum_regrets}
             else:  # default vanilla RM
                 regret_basis = cum_regrets
             pos_sum = sum(max(0, rT) for _, rT in regret_basis.items())
             if pos_sum <= 0:
                 new_strat = self.get_uniform_policy()
             else:
-                new_strat = {k: max(0, r)/pos_sum for k, r in regret_basis.items()}
+                new_strat = {k: max(0, r) / pos_sum for k, r in regret_basis.items()}
 
             if self.damping > 0:
                 for k in new_strat:
-                    new_strat[k] = (self.damping * self.last_strategy[k]) + ((1 - self.damping) * new_strat[k])
-            
+                    new_strat[k] = (self.damping * self.last_strategy[k]) + (1 - self.damping) * new_strat[k]
+
             self.last_strategy = new_strat
             self.assign_sampled_value(self.last_strategy, costs)
 
             self.new_cycle()
             self.current_cycle = self.next_cycle
             self.next_cycle = {}
-            
+
             self.post_to_all_neighbors(RMMessage(self.current_value))
 
             # Check if this was the last cycle
@@ -224,10 +216,9 @@ class RMComputation(VariableComputation):
                 self.finished()
                 self.stop()
                 return
-            
+
             if len(self.current_cycle) == len(self.neighbors):
                 self.evaluate_cycle()
-
 
     def assign_sampled_value(self, strategy, costs):
         if np.random.random() < self.update_prob:
