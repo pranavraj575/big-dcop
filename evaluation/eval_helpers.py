@@ -37,36 +37,8 @@ def reformat_file_for_maxsum(problem_file):
             with open(problem_file, "w") as f:
                 yaml.dump(data, f, sort_keys=False)
 
-    except Exception as e:
+    except Exception:
         pass
-
-
-def extract_json_from_output(output_str):
-    """
-    Robustly attempts to find and parse JSON from mixed console output.
-    """
-    try:
-        return json.loads(output_str)
-    except json.JSONDecodeError:
-        pass
-
-    try:
-        end_idx = output_str.rfind("}")
-        if end_idx == -1:
-            return None
-
-        # Simple heuristic: scan backwards for start bracket
-        # (This is simplistic; a regex or stack-based parser is better for complex nesting,
-        # but pydcop output is usually flat enough at the top level).
-        start_idx = output_str.find("{")
-
-        if start_idx != -1 and start_idx < end_idx:
-            json_str = output_str[start_idx : end_idx + 1]
-            return json.loads(json_str)
-    except:
-        pass
-
-    return None
 
 
 def extract_json_from_output(output_str):
@@ -95,7 +67,7 @@ def extract_json_from_output(output_str):
         if start_idx != -1 and start_idx < end_idx:
             json_str = output_str[start_idx : end_idx + 1]
             return json.loads(json_str)
-    except:
+    except Exception:
         pass
 
     return None

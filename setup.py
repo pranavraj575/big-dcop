@@ -29,6 +29,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
+from setuptools import setup, find_packages
+from os import path
+
 # Basic dependencies, required to run pyDCOP:
 deps = [
     "pulp",
@@ -43,7 +46,7 @@ deps = [
 ]
 
 # Extra dependencies, used to run tests
-test_deps = ["coverage", "pytest", "mypy"]
+test_deps = ["coverage", "pytest", "mypy", "ruff"]
 
 # Extra dependencies, used to generate docs
 doc_deps = ["sphinx", "sphinx_rtd_theme", " sphinxcontrib-bibtex"]
@@ -52,8 +55,6 @@ doc_deps = ["sphinx", "sphinx_rtd_theme", " sphinxcontrib-bibtex"]
 #    pip install -e .[test]
 extras = {"test": test_deps, "doc": doc_deps}
 
-from setuptools import setup, find_packages
-from os import path
 
 here = path.abspath(path.dirname(__file__))
 # Get the long description from the README file
@@ -65,7 +66,7 @@ with open(path.join(here, "pydcop", "version.py"), encoding="utf-8") as f:
 
 setup(
     name="pydcop",
-    version=__version__,
+    version="6.9",
     description="Several dcop algo implementation",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -77,8 +78,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    author="Pierre Rust (Orange)",
-    author_email="pierre.rust@orange.com",
     keywords=["dcop", "MAS"],
     install_requires=deps,
     tests_require=test_deps,

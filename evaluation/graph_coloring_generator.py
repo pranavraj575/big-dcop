@@ -1,6 +1,6 @@
-import os, shutil
+import os
+import shutil
 import subprocess
-import sys
 import argparse
 import itertools
 import time
@@ -17,10 +17,7 @@ def generate_graph_coloring_problems(
     use_seed=False,  # whether to use fixed random seed
 ):
     if not os.path.exists(output_dir):
-        try:
-            os.makedirs(output_dir)
-        except:
-            pass
+        os.makedirs(output_dir, exist_ok=True)
 
     print(f"Generating {n_problems} problems in '{output_dir}'...")
 
@@ -50,7 +47,7 @@ def generate_graph_coloring_problems(
         cmd = base_cmd + cmd_args
 
         try:
-            with open(os.path.join(output_dir, filename), "w") as outfile:
+            with open(filepath, "w") as outfile:
                 subprocess.run(cmd, stdout=outfile, check=True)
             print(f"[{i}/{n_problems}] Generated: {filename}")
 

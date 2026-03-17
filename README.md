@@ -22,15 +22,21 @@ Test installation
 ```bash
 pydcop solve tests/instances/graph_coloring1.yaml --algo regret_matching --algo_param "stop_cycle:100"
 ```
-Run experiment
+## Run experiments
 
 ```bash
 python evaluation/graph_coloring_generator.py
 python evaluation/graph_coloring_runner.py 
 python evaluation/plot_results.py 
 ```
+## Formatting
 
-# pyDCOP info
+To format (and check for errors) before pushing:
+```shell
+ruff check; ruff format;
+```
+
+## pyDCOP info
 [![Documentation Status](https://readthedocs.org/projects/pydcop/badge/?version=latest)](http://pydcop.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/Orange-OpenSource/pyDcop.svg?branch=master)](https://travis-ci.org/Orange-OpenSource/pyDcop)
 

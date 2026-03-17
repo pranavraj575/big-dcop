@@ -1,4 +1,6 @@
-import argparse, itertools, matplotlib.pyplot as plt
+import argparse
+import itertools
+import matplotlib.pyplot as plt
 import os.path
 import pandas as pd
 
@@ -45,7 +47,7 @@ def kernel_smoothed_plot_wrt_value(
     """
     if algs is None:
         algs = sorted(set(df["algorithm"]), key=lambda s: s.lower())
-    if type(grid) != dict:
+    if type(grid) is not dict:
         grid = {alg: grid for alg in algs}
     styles = set()
     for alg in algs:
@@ -218,10 +220,9 @@ if __name__ == "__main__":
 
     print_stats_by_alg(df, algs)
 
-    choose_gaussian_kernel_b = lambda x0: x0
-    gaussian_kernel = lambda x0, x: np.exp(
-        -((x0 - x) ** 2) / (2 * choose_gaussian_kernel_b(x0) ** 2)
-    )
+    def gaussian_kernel(x0, x):
+        # kernel width is x0
+        return np.exp(-((x0 - x) ** 2) / (2 * x0**2))
 
     for graph_config in (
         {

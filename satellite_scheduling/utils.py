@@ -1,4 +1,4 @@
-import json, time
+import json
 import yaml
 import subprocess
 from collections import defaultdict
@@ -11,7 +11,7 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
     Reads JSON, builds PyDCOP with Request-level variables,
     and extracts tasks and memory bounds for the local solver.
     """
-    start_time = time.time()
+    # start_time = time.time()
 
     with open(json_filepath, "r") as f:
         data = json.load(f)
@@ -145,7 +145,7 @@ def run_global_dispatcher(pydcop_dict, yaml_filepath, output_json):
 
     try:
         subprocess.run(cmd, check=True)
-        print(f"PyDCOP finished successfully.")
-    except subprocess.CalledProcessError as e:
+        print("PyDCOP finished successfully.")
+    except subprocess.CalledProcessError:
         print("Error running PyDCOP. Check terminal output.")
         exit(1)
