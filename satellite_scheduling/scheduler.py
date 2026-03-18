@@ -40,9 +40,7 @@ def solve_local_schedule(agent_id, assigned_reqs, all_tasks, downlinks, capacity
     # Continuous Memory Tracking
     events = []
     for t in valid_tasks:
-        events.append(
-            {"time": t["end"], "type": "task", "data": t["data"], "id": t["task_id"]}
-        )
+        events.append({"time": t["end"], "type": "task", "data": t["data"], "id": t["task_id"]})
     for dl in downlinks:
         events.append({"time": dl["end"], "type": "dl", "data": dl["data"], "id": None})
 
@@ -106,11 +104,7 @@ def get_constraints(assigned_reqs, scheduled_reqs, agent_id, pydcop_dict):
     for c in constraints:
         variables = []
         for req_id in c:
-            relevant_vars = [
-                v
-                for v in pydcop_dict["constraints"][f"reward_req_{req_id}"]["variables"]
-                if agent_of(v) == agent_id
-            ]
+            relevant_vars = [v for v in pydcop_dict["constraints"][f"reward_req_{req_id}"]["variables"] if agent_of(v) == agent_id]
             assert len(relevant_vars) == 1
             variables += relevant_vars
         assert len(set(variables)) == len(c)

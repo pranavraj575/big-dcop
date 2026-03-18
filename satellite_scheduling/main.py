@@ -44,9 +44,7 @@ def main():
             print(f"Agent {agent_id}: 0 requests assigned by DCOP.")
             continue
 
-        print(
-            f"Agent {agent_id} received {len(assigned_reqs)} requests. Computing exact schedule..."
-        )
+        print(f"Agent {agent_id} received {len(assigned_reqs)} requests. Computing exact schedule...")
 
         # Now returns the set of request IDs instead of just an integer
         scheduled_reqs, final_schedule = solve_local_schedule(
@@ -59,9 +57,7 @@ def main():
 
         # Merge this agent's scheduled requests into the global set
         global_scheduled_reqs.update(scheduled_reqs)
-        print(
-            f"  -> Successfully scheduled: {len(scheduled_reqs)} requests (Tasks chosen: {final_schedule})"
-        )
+        print(f"  -> Successfully scheduled: {len(scheduled_reqs)} requests (Tasks chosen: {final_schedule})")
         additional_constraints = get_constraints(
             assigned_reqs=assigned_reqs,
             scheduled_reqs=scheduled_reqs,
@@ -73,9 +69,7 @@ def main():
     # The true length of the global set is our final, accurate count
     true_total_scheduled = len(global_scheduled_reqs)
 
-    print(
-        f"Total requests successfully scheduled across network: {true_total_scheduled} of {len(requests)}"
-    )
+    print(f"Total requests successfully scheduled across network: {true_total_scheduled} of {len(requests)}")
     pydcop_dict, additional_constraint_counter = add_constraints(
         constraints=constraints,
         counter=additional_constraint_counter,
