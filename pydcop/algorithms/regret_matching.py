@@ -18,11 +18,12 @@ GRAPH_TYPE = "constraints_hypergraph"
 algo_params = [
     AlgoParameterDef("rm_plus", "int", [0, 1], 0),
     AlgoParameterDef("predictive", "int", [0, 1], 0),
+    AlgoParameterDef("ir_prm", "int", [0, 1], 0),
     AlgoParameterDef("context_based", "int", [0, 1], 0),
     AlgoParameterDef("stop_cycle", "int", None, 0),
     AlgoParameterDef("update_prob", "float", None, 1.0),
-    AlgoParameterDef("alpha", "float", None, 1.5),  # Discount for positive regrets
-    AlgoParameterDef("beta", "float", None, 0.0),  # Discount for negative regrets
+    AlgoParameterDef("alpha", "float", None, float("inf")),  # Discount for negative regrets, use float('inf') for no discount
+    AlgoParameterDef("beta", "float", None, float("inf")),  # Discount for negative regrets, use float('inf') for no discount
     AlgoParameterDef("damping", "float", None, 0.0),
 ]
 
@@ -67,6 +68,7 @@ class RMComputation(VariableComputation):
         super().__init__(comp_def.node.variable, comp_def)
 
         self.regrets = None
+        self.hist_utilities = None
         self.last_strategy = None
         self.ordered_neighbors = None
         # technically, the order of neighbors in self.neighbors might change time
@@ -80,11 +82,18 @@ class RMComputation(VariableComputation):
 
         self.use_rm_plus = bool(comp_def.algo.param_value("rm_plus"))
         self.use_predictive = bool(comp_def.algo.param_value("predictive"))
+        self.use_ir_prm = bool(comp_def.algo.param_value("ir_prm"))
+        if self.use_ir_prm:
+            raise NotImplementedError
         self.context_based = bool(comp_def.algo.param_value("context_based"))
         self.stop_cycle = comp_def.algo.param_value("stop_cycle")
         self.update_prob = float(comp_def.algo.param_value("update_prob"))
         self.alpha = float(comp_def.algo.param_value("alpha"))
         self.beta = float(comp_def.algo.param_value("beta"))
+        if self.alpha == float("inf"):
+            self.alpha = None
+        if self.beta == float("inf"):
+            self.beta = None
         self.damping = float(comp_def.algo.param_value("damping"))
         self.constraints = comp_def.node.constraints
 
@@ -92,7 +101,7 @@ class RMComputation(VariableComputation):
         self.current_cycle = {}
         self.next_cycle = {}
 
-    def get_initial_regrets(self):
+    def get_zero_vector(self):
         return {val: 0 for val in self.variable.domain}
 
     def get_uniform_policy(self):
@@ -112,7 +121,9 @@ class RMComputation(VariableComputation):
             if self.context_based:
                 self.regrets = dict()
             else:
-                self.regrets = self.get_initial_regrets()
+                self.regrets = self.get_zero_vector()
+            if self.use_ir_prm:
+                self.hist_utilities = self.get_zero_vector()
             self.ordered_neighbors = tuple(self.neighbors)
             self.last_strategy = self.get_uniform_policy()
             self.random_value_selection()
@@ -158,20 +169,28 @@ class RMComputation(VariableComputation):
                 utilities = {k: -v for k, v in costs.items()}
             else:
                 utilities = costs
-            last_u = sum(utilities[k] * self.last_strategy[k] for k in utilities)
 
             # calc instantaneous regret
+            last_u = sum(utilities[k] * self.last_strategy[k] for k in utilities)
             instant_regrets = {k: u_action - last_u for k, u_action in utilities.items()}
 
             t = self.cycle_count + 1
-            pos_discount = (t**self.alpha) / (t**self.alpha + 1)
-            neg_discount = (t**self.beta) / (t**self.beta + 1)
+
+            if self.alpha is None:
+                pos_discount = 1
+            else:
+                pos_discount = (t**self.alpha) / (t**self.alpha + 1)
+
+            if self.beta is None:
+                neg_discount = 1
+            else:
+                neg_discount = (t**self.beta) / (t**self.beta + 1)
 
             # update regrets, (if context based, update based on neighbors context)
             if self.context_based:
                 context = tuple(self.current_cycle[n] for n in self.neighbors)
                 if context not in self.regrets:
-                    self.regrets[context] = self.get_initial_regrets()
+                    self.regrets[context] = self.get_zero_vector()
                 cum_regrets = self.regrets[context]
             else:
                 cum_regrets = self.regrets

@@ -57,15 +57,11 @@ def run_pydcop(problem_file, algo_config, args):
                 "time": float(final_data.get("time", -1)),
                 "msg_count": int(final_data.get("msg_count", 0)),
                 "cycles": int(final_data.get("cycles", 0)),
-                "assignment": str(
-                    final_data.get("assignment", {})
-                ),  # store as string to fit in DF
+                "assignment": str(final_data.get("assignment", {})),  # store as string to fit in DF
             }
         else:
             # failed or timed out
-            err_msg = (
-                result.stderr.strip() if result.stderr else result.stdout.strip()[-200:]
-            )
+            err_msg = result.stderr.strip() if result.stderr else result.stdout.strip()[-200:]
             return mid_df, {"status": "FAILED", "error": err_msg}
 
     except Exception as e:
@@ -105,9 +101,7 @@ def main():
         default=10,
         help="Number of trials per algorithm per problem",
     )
-    parser.add_argument(
-        "--timeout", type=float, default=30.0, help="Timeout in seconds per run"
-    )
+    parser.add_argument("--timeout", type=float, default=30.0, help="Timeout in seconds per run")
     parser.add_argument(
         "-c",
         "--collect_on",
@@ -119,9 +113,7 @@ def main():
         "--period",
         type=float,
         default=None,
-        help="Period for collecting metrics. only available "
-        "when using --collect_on period. Defaults to 1 "
-        "second if not specified",
+        help="Period for collecting metrics. only available when using --collect_on period. Defaults to 1 second if not specified",
     )
     args = parser.parse_args()
 

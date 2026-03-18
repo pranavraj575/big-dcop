@@ -58,9 +58,7 @@ def kernel_smoothed_plot_wrt_value(
             else:
                 ss_n = int(args.subsample)
                 if ss_n < len(temp_df):
-                    idxs = np.random.default_rng().choice(
-                        len(temp_df), ss_n, replace=False
-                    )
+                    idxs = np.random.default_rng().choice(len(temp_df), ss_n, replace=False)
                     temp_df = temp_df.iloc[idxs]
         g = grid[alg]
 
@@ -106,9 +104,7 @@ def kernel_smoothed_plot_wrt_value(
     plt.close()
 
 
-def plot_wrt_param(
-    df, key, x_param, save_path, args, x_log=False, y_log=False, algs=None, title=None
-):
+def plot_wrt_param(df, key, x_param, save_path, args, x_log=False, y_log=False, algs=None, title=None):
     kernel_smoothed_plot_wrt_value(
         df=df,
         key=key,
@@ -176,9 +172,7 @@ if __name__ == "__main__":
     )
     args = p.parse_args()
     if args.subsample is not None:
-        assert args.subsample > 0, (
-            f"--subsample value must be positive value, got {args.subsample}"
-        )
+        assert args.subsample > 0, f"--subsample value must be positive value, got {args.subsample}"
     plt_dir = args.output
     os.makedirs(plt_dir, exist_ok=True)
 
@@ -191,9 +185,7 @@ if __name__ == "__main__":
             key, m = key.split(":")
             configs = m.split(",")
         keys.append((key, configs))
-        assert key in set(df.keys()), (
-            f"key '{key}' with configs {configs} is not in data. Valid keys: {set(df.keys())}"
-        )
+        assert key in set(df.keys()), f"key '{key}' with configs {configs} is not in data. Valid keys: {set(df.keys())}"
 
     # ADD ROWS TO DF
     # get n parameter from problem file name
@@ -208,9 +200,7 @@ if __name__ == "__main__":
         relevant_df = df[df[key].notnull()]
         for n_param in n_params:
             rows = df["n"] == n_param
-            df.loc[rows, "rescaled_" + key] = df.loc[rows, key] / np.mean(
-                relevant_df.loc[rows, key]
-            )
+            df.loc[rows, "rescaled_" + key] = df.loc[rows, key] / np.mean(relevant_df.loc[rows, key])
     # get all algorithms used across trials
     if args.algorithms is None:
         algs = sorted(set(df["algorithm"]), key=lambda s: s.lower())
@@ -274,14 +264,10 @@ if __name__ == "__main__":
             for k, v in zip(split_by_keys, splits):
                 relevant_df = relevant_df[relevant_df[k] == v]
             split_str = {k: v for k, v in zip(split_by_keys, splits)}
-            print(
-                f"plotting {key} over {x_param} for {split_str}, {len(relevant_df)} total values"
-            )
+            print(f"plotting {key} over {x_param} for {split_str}, {len(relevant_df)} total values")
             print_stats_by_alg(relevant_df, algs, prefix="\t")
 
-            this_plot_dir = os.path.join(
-                plt_dir, f"{'_'.join(configs)}{key}_over_{x_param}"
-            )
+            this_plot_dir = os.path.join(plt_dir, f"{'_'.join(configs)}{key}_over_{x_param}")
             if not split_by_keys:
                 plt_name = "combined_plot"
             else:
@@ -292,12 +278,8 @@ if __name__ == "__main__":
             grid = {
                 alg: np.exp(
                     np.linspace(
-                        np.log(
-                            min(relevant_df[relevant_df["algorithm"] == alg][x_param])
-                        ),
-                        np.log(
-                            max(relevant_df[relevant_df["algorithm"] == alg][x_param])
-                        ),
+                        np.log(min(relevant_df[relevant_df["algorithm"] == alg][x_param])),
+                        np.log(max(relevant_df[relevant_df["algorithm"] == alg][x_param])),
                         num=args.grid_n,
                     )
                 )
