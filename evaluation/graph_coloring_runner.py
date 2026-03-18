@@ -138,6 +138,9 @@ def main():
     if not problem_files:
         print(f"No .yaml files found in {args.input_dir}")
         return
+    if os.path.abspath(args.output_csv) == os.path.abspath(args.temp_csv):
+        print(f"both output and temp csv cannot be {os.path.abspath(args.temp_csv)}")
+        return
 
     # loop over problems
     added_header = False
