@@ -31,9 +31,9 @@ python evaluation/plot_results.py
 ```
 ## Formatting
 
-To allow tests and formatting, install the dev version:
+To allow tests and formatting, install tuff:
 ```shell
-pip install -e .[test]
+pip install ruff
 ```
 
 To format (and check for errors) before pushing:
