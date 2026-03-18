@@ -31,11 +31,21 @@ python evaluation/plot_results.py
 ```
 ## Formatting
 
+To allow tests and formatting, install the dev version:
+```shell
+pip install -e .[test]
+```
+
 To format (and check for errors) before pushing:
 ```shell
 ruff check; ruff format;
 ```
 
+Since pyDCOP does not use the formatting enforced by ruff, we ignore checking format of files in pydcop folders.
+To check a specific file anyway, specify this in the ruff command:
+```shell
+ruff check pydcop/algorithms/regret_matching.py; ruff format pydcop/algorithms/regret_matching.py;
+```
 ## pyDCOP info
 [![Documentation Status](https://readthedocs.org/projects/pydcop/badge/?version=latest)](http://pydcop.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/Orange-OpenSource/pyDcop.svg?branch=master)](https://travis-ci.org/Orange-OpenSource/pyDcop)
