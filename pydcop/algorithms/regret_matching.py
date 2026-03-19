@@ -8,6 +8,7 @@ from pydcop.dcop.relations import (
     find_costs,
     optimal_cost_value,
 )
+# TODO: probably better to convert to using np arrays instead of dicts, and keep an index or something
 
 HEADER_SIZE = 0
 UNIT_SIZE = 1
@@ -262,23 +263,33 @@ class RMComputation(VariableComputation):
         """
         different enough to warrant new method
         """
+        # ObserveUtility at timestep t
         last_u = sum((utilities[k] - self.ir_prm_prediction[k]) * self.last_strategy[k] for k in utilities)
         g = {k: (u_action - self.ir_prm_prediction[k]) - last_u for k, u_action in utilities.items()}
         cum_regrets = self.get_cum_regrets()
-        r_hat = {k: max(0, reg + g) for k, reg in cum_regrets.items()}
-        sum_r_hat = sum(t for _, t in r_hat.items())
-        if sum_r_hat == 0:
-            x_hat = self.last_strategy
+
+        if self.use_rm_plus:  # RM+
+            r_hat = {k: max(0, reg + g[k]) for k, reg in cum_regrets.items()}
         else:
-            x_hat = {k: t / sum_r_hat for k, t in r_hat.items()}
+            r_hat = {k: reg + g[k] for k, reg in cum_regrets.items()}
+        # ignore calculating x_hat for now
+
+        # the prediction of utilities for the t+1 step is the previous utility vector
+        #  a bit awkward here since we are changing timesteps mid cycle
+        self.ir_prm_prediction = utilities
+
+        # NextStrategy at timestep t+1
         if all(t <= 0 for _, t in r_hat.items()):
             # TODO: is this supposed to update regrets?
-            for k in cum_regrets:
-                cum_regrets[k] = 0
-            new_strat = x_hat
+            self.ir_prm_prediction = self.get_zero_vector()
+
+            # TODO: setting new_strat=x_hat does not make sense here,
+            #  as x_hat is not necessarily a prob distribution
+            #  (it only works for rm+), changed to a different defintioin
+            new_strat = self.last_strategy
         else:
-            l2_norm = sum(t**2 for _, t in r_hat.items())
-            gamma = self.ir_prm_get_gamma(
+            l2_norm = np.sqrt(sum(t**2 for _, t in r_hat.items()))
+            gamma = self.ir_prm_get_gamma_slow(
                 v={k: r_hat[k] + self.ir_prm_prediction[k] for k in r_hat},
                 t=l2_norm,
             )
@@ -286,10 +297,9 @@ class RMComputation(VariableComputation):
                 cum_regrets[k] = r_hat[k] + self.ir_prm_prediction[k] - gamma
             sum_r = sum(max(0, t) for _, t in cum_regrets.items())
             new_strat = {k: max(0, t) / sum_r for k, t in cum_regrets.items()}
-        self.ir_prm_prediction = utilities
         return new_strat
 
-    def ir_prm_get_gamma(self, v, t):
+    def ir_prm_get_gamma_slow(self, v, t):
         # v sorted in descending order
         keys = sorted(v.keys(), key=lambda k: v[k], reverse=True)
         s = 0

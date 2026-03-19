@@ -16,6 +16,23 @@
   },
   {
     "name": "regret_matching",
+    "display_name": "IR-PRM",
+    "algo_params": [
+      "stop_cycle:100",
+      "ir_prm:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "IR-PRM+",
+    "algo_params": [
+      "stop_cycle:100",
+      "ir_prm:1",
+      "rm_plus:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
     "display_name": "DRM(1.5,0)",
     "algo_params": [
       "stop_cycle:100",
