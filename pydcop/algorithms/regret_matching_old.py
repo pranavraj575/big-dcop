@@ -8,6 +8,7 @@ from pydcop.dcop.relations import (
     find_costs,
     optimal_cost_value,
 )
+# TODO: probably better to convert to using np arrays instead of dicts, and keep an index or something
 
 HEADER_SIZE = 0
 UNIT_SIZE = 1
@@ -70,8 +71,6 @@ class RMComputation(VariableComputation):
         self.regrets = None
         self.ir_prm_prediction = None
         self.last_strategy = None
-        self.ordered_domain = None
-        self.domain_size = None
         self.ordered_neighbors = None
         # technically, the order of neighbors in self.neighbors might change time
         # fix an order on initialization so we do not permute these accidentally
@@ -102,10 +101,10 @@ class RMComputation(VariableComputation):
         self.next_cycle = {}
 
     def get_zero_vector(self):
-        return np.zeros(self.domain_size)
+        return {val: 0 for val in self.variable.domain}
 
     def get_uniform_policy(self):
-        return np.ones(self.domain_size) / self.domain_size
+        return {val: 1 / len(self.variable.domain) for val in self.variable.domain}
 
     def on_start(self):
         if not self.neighbors:
@@ -125,8 +124,6 @@ class RMComputation(VariableComputation):
             if self.use_ir_prm:
                 self.ir_prm_prediction = self.get_zero_vector()
             self.ordered_neighbors = tuple(self.neighbors)
-            self.ordered_domain = tuple(self.variable.domain)
-            self.domain_size = len(self.ordered_domain)
             self.last_strategy = self.get_uniform_policy()
             self.random_value_selection()
             self.logger.debug("RM starts: randomly select value %s", self.current_value)
@@ -167,12 +164,10 @@ class RMComputation(VariableComputation):
                 assignment=assignment,
                 constraints=self.constraints,
             )
-            # convert to array
-            costs_arr = np.array([costs[k] for k in self.ordered_domain])
             if self.mode == "min":
-                utilities = -costs_arr
+                utilities = {k: -v for k, v in costs.items()}
             else:
-                utilities = costs_arr
+                utilities = costs
             if self.use_ir_prm:
                 new_strat = self.ir_prm_observe_utilities_get_next_strat(utilities=utilities)
             else:
@@ -197,43 +192,39 @@ class RMComputation(VariableComputation):
 
     def observe_utilities_get_next_strat(self, utilities):
         # calc instantaneous regret
-        instant_regrets = utilities - np.dot(utilities, self.last_strategy)
+        last_u = sum(utilities[k] * self.last_strategy[k] for k in utilities)
+        instant_regrets = {k: u_action - last_u for k, u_action in utilities.items()}
 
-        # observe utility at time t
         pos_discount, neg_discount = self.get_positive_and_negative_discounts()
+
         # update regrets, (if context based, update based on neighbors context)
         cum_regrets = self.get_cum_regrets()
-        if (pos_discount, neg_discount) != (1, 1):
-            # multiply positive values by pos_discount
-            # neg values by neg_discount
-            discounted_old = np.where(
-                cum_regrets > 0,
-                cum_regrets * pos_discount,
-                cum_regrets * neg_discount,
-            )
-        else:
-            discounted_old = cum_regrets
-        cum_regrets = discounted_old + instant_regrets
-        if self.use_rm_plus:  # RM+
-            cum_regrets = np.clip(cum_regrets, 0, np.inf)
-        self.set_cum_regrets(cum_regrets)
-        # next strategy (time t+1)
+
+        for k in cum_regrets:
+            if cum_regrets[k] > 0:
+                discounted_old = cum_regrets[k] * pos_discount
+            else:
+                discounted_old = cum_regrets[k] * neg_discount
+            discounted_sum = discounted_old + instant_regrets[k]
+            if self.use_rm_plus:  # RM+
+                cum_regrets[k] = max(0, discounted_sum)
+            else:
+                cum_regrets[k] = discounted_sum
+
         # get probability distribution, (if predictive RM, use prediction of the most recent utilities obtained)
         if self.use_predictive:  # predictive RM
-            regret_basis = cum_regrets + instant_regrets
+            regret_basis = {k: cum_regrets[k] + instant_regrets[k] for k in cum_regrets}
         else:  # default vanilla RM
             regret_basis = cum_regrets
-
-        positive_part = np.clip(regret_basis, 0, np.inf)
-        pos_sum = np.sum(positive_part)
-
+        pos_sum = sum(max(0, rT) for _, rT in regret_basis.items())
         if pos_sum <= 0:
             new_strat = self.get_uniform_policy()
         else:
-            new_strat = positive_part / pos_sum
+            new_strat = {k: max(0, r) / pos_sum for k, r in regret_basis.items()}
 
         if self.damping > 0:
-            new_strat = self.damping * self.last_strategy + (1 - self.damping) * new_strat
+            for k in new_strat:
+                new_strat[k] = (self.damping * self.last_strategy[k]) + (1 - self.damping) * new_strat[k]
         return new_strat
 
     def get_positive_and_negative_discounts(self):
@@ -259,16 +250,10 @@ class RMComputation(VariableComputation):
         else:
             return self.regrets
 
-    def set_cum_regrets(self, regrets):
-        if self.context_based:
-            context = tuple(self.current_cycle[n] for n in self.neighbors)
-            self.regrets[context] = regrets
-        else:
-            self.regrets = regrets
-
     def assign_sampled_value(self, strategy, costs):
         if np.random.random() < self.update_prob:
-            value = np.random.choice(self.ordered_domain, p=strategy)
+            dom = list(self.variable.domain)
+            value = np.random.choice(dom, p=[strategy[val] for val in dom])
         else:
             value = self.current_value
         self.value_selection(value, costs[value])
@@ -279,11 +264,14 @@ class RMComputation(VariableComputation):
         different enough to warrant new method
         """
         # ObserveUtility at timestep t
-        g = (utilities - self.ir_prm_prediction) - np.dot(utilities - self.ir_prm_prediction, self.last_strategy)
+        last_u = sum((utilities[k] - self.ir_prm_prediction[k]) * self.last_strategy[k] for k in utilities)
+        g = {k: (u_action - self.ir_prm_prediction[k]) - last_u for k, u_action in utilities.items()}
         cum_regrets = self.get_cum_regrets()
-        r_hat = cum_regrets + g
+
         if self.use_rm_plus:  # RM+
-            r_hat = np.clip(r_hat, 0, np.inf)
+            r_hat = {k: max(0, reg + g[k]) for k, reg in cum_regrets.items()}
+        else:
+            r_hat = {k: reg + g[k] for k, reg in cum_regrets.items()}
         # ignore calculating x_hat for now
 
         # the prediction of utilities for the t+1 step is the previous utility vector
@@ -291,7 +279,7 @@ class RMComputation(VariableComputation):
         self.ir_prm_prediction = utilities
 
         # NextStrategy at timestep t+1
-        if np.all(r_hat <= 0):
+        if all(t <= 0 for _, t in r_hat.items()):
             # TODO: is this supposed to update regrets?
             self.ir_prm_prediction = self.get_zero_vector()
 
@@ -300,28 +288,29 @@ class RMComputation(VariableComputation):
             #  (it only works for rm+), changed to a different defintioin
             new_strat = self.last_strategy
         else:
-            l2_norm = np.linalg.norm(r_hat)
+            l2_norm = np.sqrt(sum(t**2 for _, t in r_hat.items()))
             gamma = self.ir_prm_get_gamma_slow(
-                v=r_hat + self.ir_prm_prediction,
+                v={k: r_hat[k] + self.ir_prm_prediction[k] for k in r_hat},
                 t=l2_norm,
             )
-            cum_regrets = r_hat + self.ir_prm_prediction - gamma
-            self.set_cum_regrets(cum_regrets)
-            positive_part = np.clip(cum_regrets, 0, np.inf)
-            new_strat = positive_part / np.sum(positive_part)
+            for k in cum_regrets:
+                cum_regrets[k] = r_hat[k] + self.ir_prm_prediction[k] - gamma
+            sum_r = sum(max(0, t) for _, t in cum_regrets.items())
+            new_strat = {k: max(0, t) / sum_r for k, t in cum_regrets.items()}
         return new_strat
 
     def ir_prm_get_gamma_slow(self, v, t):
         # v sorted in descending order
-        v = -np.sort(-v)
+        keys = sorted(v.keys(), key=lambda k: v[k], reverse=True)
         s = 0
         s2 = 0
         gamma = 1
-        for k in range(len(v)):
-            # k is zero indexed, using (k+1) when this is relevant
-            s += v[k]
-            s2 += (v[k]) ** 2
-            gamma = (1 / (k + 1)) * (s - np.sqrt(s**2 - (k + 1) * (s2 - t**2)))
-            if (k + 1) >= len(v) or gamma > v[k + 1]:
+        for kp in range(len(keys)):
+            k = kp + 1  # 1 idx
+            idx = keys[kp]
+            s += v[idx]
+            s2 += (v[idx]) ** 2
+            gamma = (1 / k) * (s - np.sqrt(s**2 - k * (s2 - t**2)))
+            if k >= len(keys) or gamma > v[keys[kp + 1]]:
                 return gamma
         return gamma
