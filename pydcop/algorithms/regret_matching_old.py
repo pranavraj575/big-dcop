@@ -66,6 +66,7 @@ class RMMessage(Message):
 
 class RMComputation(VariableComputation):
     def __init__(self, comp_def: ComputationDef):
+        raise DeprecationWarning
         super().__init__(comp_def.node.variable, comp_def)
 
         self.regrets = None

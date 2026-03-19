@@ -174,7 +174,7 @@ class RMComputation(VariableComputation):
             else:
                 utilities = costs_arr
             if self.use_ir_prm:
-                new_strat = self.ir_prm_observe_utilities_get_next_strat(utilities=utilities)
+                new_strat = self.ir_prm_ioannis_version(utilities=utilities)
             else:
                 new_strat = self.observe_utilities_get_next_strat(utilities=utilities)
             self.last_strategy = new_strat
@@ -274,6 +274,29 @@ class RMComputation(VariableComputation):
         self.value_selection(value, costs[value])
         return costs[value]
 
+    def ir_prm_ioannis_version(self, utilities):
+        """
+        different enough to warrant new method
+        """
+        # ObserveUtility at timestep t
+        u = utilities - self.ir_prm_prediction
+        cum_regrets = self.get_cum_regrets() + u - np.dot(u, self.last_strategy)
+        if self.use_rm_plus:  # RM+
+            cum_regrets = np.clip(cum_regrets, 0, np.inf)
+        # NextStrategy at timestep t+1
+        if np.all(cum_regrets <= 0):
+            new_strat = self.last_strategy
+        else:
+            self.ir_prm_prediction = utilities
+            old_norm = np.linalg.norm(np.clip(cum_regrets, 0, np.inf))
+            cum_regrets = cum_regrets + utilities
+            gamma = self.ir_prm_get_gamma_slow(cum_regrets, old_norm)
+            cum_regrets = cum_regrets - gamma
+            positive_part = np.clip(cum_regrets, 0, np.inf)
+            new_strat = positive_part / np.sum(positive_part)
+        self.set_cum_regrets(cum_regrets)
+        return new_strat
+
     def ir_prm_observe_utilities_get_next_strat(self, utilities):
         """
         different enough to warrant new method
@@ -312,16 +335,16 @@ class RMComputation(VariableComputation):
         return new_strat
 
     def ir_prm_get_gamma_slow(self, v, t):
+        t = t**2
         # v sorted in descending order
         v = -np.sort(-v)
         s = 0
         s2 = 0
-        gamma = 1
-        for k in range(len(v)):
+        for k, v_k in enumerate(v):
             # k is zero indexed, using (k+1) when this is relevant
-            s += v[k]
-            s2 += (v[k]) ** 2
-            gamma = (1 / (k + 1)) * (s - np.sqrt(s**2 - (k + 1) * (s2 - t**2)))
-            if (k + 1) >= len(v) or gamma > v[k + 1]:
+            s += v_k
+            s2 += v_k**2
+            gamma = (s - np.sqrt(s**2 - (k + 1) * (s2 - t))) / (k + 1)
+            if (k + 1) >= len(v) or gamma >= v[k + 1]:
                 return gamma
-        return gamma
+        assert False
