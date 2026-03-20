@@ -100,7 +100,7 @@ def kernel_smoothed_plot_wrt_value(
         plt.yscale("log")
     plt.title(title)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    plt.savefig(save_path, bbox_inches="tight")
+    plt.savefig(save_path, bbox_inches="tight", dpi=args.dpi)
     plt.close()
 
 
@@ -169,6 +169,12 @@ if __name__ == "__main__":
         type=float,
         default=None,
         help="subsample datapoints. if 0< subsample < 1, samples probabilistically, if subsample>=1, samples n values at random without replacement",
+    )
+    p.add_argument(
+        "--dpi",
+        type=int,
+        default=100,
+        help="dpi of plots",
     )
     args = p.parse_args()
     if args.subsample is not None:
