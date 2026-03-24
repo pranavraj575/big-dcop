@@ -99,7 +99,10 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
         pydcop["constraints"][c_name] = {
             "type": "intention",
             "variables": var_list,
-            "function": f"1 if ({sum_expr}) == 1 else ({HARD_PENALTY} if ({sum_expr}) > 1 else 0)",
+            # "function": f"1 if ({sum_expr}) == 1 else ({HARD_PENALTY} if ({sum_expr}) > 1 else 0)",
+            # TODO: try different constraints here, want f(1)=1, nf(n)<1, and (n+1)f(n+1)<nf(n)
+            #  currently, nf(n)=1/n, which seems too strong
+            "function": f"1 if {sum_expr} == 1 else (0 if {sum_expr}==0 else 1/(({sum_expr})*({sum_expr})))",
         }
 
     return (
