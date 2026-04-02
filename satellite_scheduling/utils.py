@@ -2,6 +2,7 @@ import json
 import yaml
 import subprocess
 from collections import defaultdict
+import time
 
 HARD_PENALTY = -1000000
 
@@ -102,8 +103,8 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
             # "function": f"1 if ({sum_expr}) == 1 else ({HARD_PENALTY} if ({sum_expr}) > 1 else 0)",
             # TODO: try different constraints here, want f(1)=1, nf(n)<1, and (n+1)f(n+1)<nf(n)
             #  currently, nf(n)=1/n, which seems too strong
-            "function": f"1 if {sum_expr} == 1 else (0 if {sum_expr}==0 else 1/(({sum_expr})*({sum_expr})))",
-        }
+            "function": f"0 if {sum_expr} == 0 else 1 / ({sum_expr} ** 2)",
+    }
 
     return (
         pydcop,
@@ -114,40 +115,51 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
         requests,
     )
 
+def load_assignments(pydcop_results):
 
-def run_global_dispatcher(pydcop_dict, yaml_filepath, output_json):
+    with open(pydcop_results, "r") as f:
+            results = json.load(f)
+
+    assignments = results.get("assignment", {})
+    return assignments
+
+
+
+def run_global_dispatcher(pydcop_dict, algorithm_config, json_filepath, output_json):
     """
     Writes the PyDCOP dict to a temporary YAML and executes the solver.
     """
 
-    with open(yaml_filepath, "w") as f:
-        yaml.dump(pydcop_dict, f, default_flow_style=False, sort_keys=False)
-
-    # hardcoded call right now, TODO: intake algorithm config
+    with open(json_filepath, "w") as f:
+        json.dump(pydcop_dict, f)
     cmd = [
         "pydcop",
         "--output",
         output_json,
         "solve",
+        "--mode", "thread",
         "--algo",
-        "regret_matching",
-        "--algo_param",
-        "stop_cycle:50",
-        "--algo_param",
-        "rm_plus:1",
-        "--algo_param",
-        "update_prob:0.2",
-        "--algo_param",
-        "predictive:1",
-        "--algo_param",
-        "context_based:1",
-        "--distribution",
-        yaml_filepath,
-        yaml_filepath,
+        algorithm_config["name"]
     ]
 
+    # add algorithm parameters
+    if "algo_params" in algorithm_config:
+        for param in algorithm_config["algo_params"]:
+            cmd.extend(["--algo_param", param])
+
+    # add the distribution and filepaths at the end
+    cmd.extend([
+        "--distribution",
+        json_filepath,
+        json_filepath,
+    ])
+
     try:
-        subprocess.run(cmd, check=True)
+        ts = time.time()
+        subprocess.run(cmd, check=True) #capture_output=True, text=True)
+        te = time.time()
+        print(f"Run in {te-ts} seconds")
+
         print("PyDCOP finished successfully.")
     except subprocess.CalledProcessError:
         print("Error running PyDCOP. Check terminal output.")
