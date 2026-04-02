@@ -1,4 +1,4 @@
-import json
+import json,os
 from collections import defaultdict
 from scheduler import solve_local_schedule, get_constraints, add_constraints
 from constraint_generation import solve_constraint_generation
@@ -14,8 +14,12 @@ ITAI: something really weird happens where when running this script pydcop runs 
 def main(constraint_generation):
 
     raw_json = "satellite_scheduling/test_large.json"
-    temp_json = "output/dcop_global.json"
-    pydcop_results = "output/pydcop_results.json"
+    output_dir="output"
+    os.makedirs(output_dir,exist_ok=True)
+    temp_json = os.path.join( output_dir,"/dcop_global.json")
+    pydcop_results = (output_dir,"/pydcop_results.json")
+    
+    
     with open("satellite_scheduling/algorithm_configs.json", "r") as f:
             algorithms = json.load(f)
 
