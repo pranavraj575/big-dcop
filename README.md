@@ -14,7 +14,8 @@ Clone and install project
 ```bash
 git clone https://github.com/pranavraj575/big-dcop
 cd big-dcop
-pip install -e .
+pip install uv
+uv pip install -e .
 ```
 
 Test installation
