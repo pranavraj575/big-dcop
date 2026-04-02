@@ -43,6 +43,7 @@ deps = [
     "tqdm",
     "matplotlib",
     "pandas",
+    "ortools",
 ]
 
 # Extra dependencies, used to run tests
