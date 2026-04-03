@@ -44,6 +44,7 @@ deps = [
     "matplotlib",
     "pandas",
     "ortools",
+    "shortuuid",
 ]
 
 # Extra dependencies, used to run tests
