@@ -1,0 +1,362 @@
+[
+    {
+        "percentSatPerIter": [
+            0.73,
+            0.615,
+            0.81,
+            0.875,
+            0.91,
+            0.955,
+            0.96,
+            0.965,
+            0.965,
+            0.97
+        ],
+        "messages": 16000,
+        "percentSatisfied": 0.97,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.745,
+            0.615,
+            0.8,
+            0.81,
+            0.905,
+            0.91,
+            0.935,
+            0.93,
+            0.945,
+            0.945
+        ],
+        "messages": 15545,
+        "percentSatisfied": 0.945,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.755,
+            0.58,
+            0.8,
+            0.805,
+            0.885,
+            0.93,
+            0.935,
+            0.95,
+            0.95,
+            0.95
+        ],
+        "messages": 16360,
+        "percentSatisfied": 0.95,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.725,
+            0.595,
+            0.81,
+            0.84,
+            0.89,
+            0.89,
+            0.92,
+            0.92,
+            0.92,
+            0.935
+        ],
+        "messages": 15145,
+        "percentSatisfied": 0.935,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.725,
+            0.6,
+            0.795,
+            0.82,
+            0.87,
+            0.895,
+            0.91,
+            0.925,
+            0.925,
+            0.945
+        ],
+        "messages": 15855,
+        "percentSatisfied": 0.945,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.695,
+            0.58,
+            0.805,
+            0.82,
+            0.9,
+            0.92,
+            0.94,
+            0.94,
+            0.94,
+            0.945
+        ],
+        "messages": 15195,
+        "percentSatisfied": 0.945,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.7,
+            0.545,
+            0.795,
+            0.795,
+            0.87,
+            0.91,
+            0.915,
+            0.925,
+            0.92,
+            0.93
+        ],
+        "messages": 15665,
+        "percentSatisfied": 0.93,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.73,
+            0.575,
+            0.795,
+            0.815,
+            0.9,
+            0.935,
+            0.96,
+            0.965,
+            0.955,
+            0.975
+        ],
+        "messages": 16315,
+        "percentSatisfied": 0.975,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.735,
+            0.645,
+            0.82,
+            0.8,
+            0.895,
+            0.915,
+            0.94,
+            0.95,
+            0.955,
+            0.965
+        ],
+        "messages": 16590,
+        "percentSatisfied": 0.965,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.75,
+            0.645,
+            0.86,
+            0.85,
+            0.925,
+            0.92,
+            0.945,
+            0.955,
+            0.945,
+            0.955
+        ],
+        "messages": 16310,
+        "percentSatisfied": 0.955,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.77,
+            0.62,
+            0.845,
+            0.87,
+            0.92,
+            0.915,
+            0.955,
+            0.94,
+            0.945,
+            0.95
+        ],
+        "messages": 16015,
+        "percentSatisfied": 0.95,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.74,
+            0.6,
+            0.84,
+            0.805,
+            0.925,
+            0.92,
+            0.935,
+            0.93,
+            0.935,
+            0.935
+        ],
+        "messages": 15450,
+        "percentSatisfied": 0.935,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.705,
+            0.63,
+            0.83,
+            0.82,
+            0.895,
+            0.895,
+            0.925,
+            0.92,
+            0.935,
+            0.925
+        ],
+        "messages": 14945,
+        "percentSatisfied": 0.925,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.725,
+            0.575,
+            0.795,
+            0.795,
+            0.87,
+            0.865,
+            0.885,
+            0.91,
+            0.91,
+            0.91
+        ],
+        "messages": 15145,
+        "percentSatisfied": 0.91,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.755,
+            0.6,
+            0.775,
+            0.82,
+            0.88,
+            0.915,
+            0.93,
+            0.935,
+            0.955,
+            0.955
+        ],
+        "messages": 15595,
+        "percentSatisfied": 0.955,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.715,
+            0.57,
+            0.815,
+            0.84,
+            0.91,
+            0.905,
+            0.935,
+            0.93,
+            0.94,
+            0.94
+        ],
+        "messages": 15820,
+        "percentSatisfied": 0.94,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.755,
+            0.575,
+            0.825,
+            0.865,
+            0.895,
+            0.935,
+            0.955,
+            0.97,
+            0.965,
+            0.97
+        ],
+        "messages": 16040,
+        "percentSatisfied": 0.97,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.735,
+            0.63,
+            0.8,
+            0.825,
+            0.915,
+            0.9,
+            0.945,
+            0.945,
+            0.955,
+            0.95
+        ],
+        "messages": 15500,
+        "percentSatisfied": 0.95,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.73,
+            0.56,
+            0.785,
+            0.815,
+            0.84,
+            0.875,
+            0.91,
+            0.92,
+            0.92,
+            0.925
+        ],
+        "messages": 14910,
+        "percentSatisfied": 0.925,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    },
+    {
+        "percentSatPerIter": [
+            0.745,
+            0.625,
+            0.775,
+            0.8,
+            0.895,
+            0.93,
+            0.94,
+            0.95,
+            0.955,
+            0.95
+        ],
+        "messages": 16150,
+        "percentSatisfied": 0.95,
+        "requestsInCampaign": 200,
+        "evaluatedPolicy": "nss"
+    }
+]
