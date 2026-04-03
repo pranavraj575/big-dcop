@@ -1,20 +1,21 @@
 import json
 from collections import defaultdict
 from scheduler import solve_local_schedule, get_constraints, add_constraints
-from utils import parse_json_to_dcop_and_overlaps, run_global_dispatcher
+from utils import run_global_dispatcher
+
 
 def solve_constraint_generation(
-        pydcop_dict,
-        agent_tasks,
-        agent_downlinks,
-        agent_capacities,
-        var_to_details,
-        requests,
-        algorithm_config,
-        temp_yaml = "output/dcop_global.yaml",
-        pydcop_results = "output/pydcop_results.json",
-        max_iterations = 10
-    ):
+    pydcop_dict,
+    agent_tasks,
+    agent_downlinks,
+    agent_capacities,
+    var_to_details,
+    requests,
+    algorithm_config,
+    temp_yaml="output/dcop_global.yaml",
+    pydcop_results="output/pydcop_results.json",
+    max_iterations=10,
+):
     num_constraints_added = 0
     best_total_scheduled = 0
     iteration = 0
@@ -71,7 +72,7 @@ def solve_constraint_generation(
             best_total_scheduled = true_total_scheduled
 
         print(f"Total requests successfully scheduled across network: {true_total_scheduled} of {len(requests)}")
-        
+
         pydcop_dict, new_num_constraints_added = add_constraints(
             constraints=constraints,
             counter=num_constraints_added,
@@ -83,6 +84,6 @@ def solve_constraint_generation(
             break
         num_constraints_added = new_num_constraints_added
         iteration += 1
-    
+
     # return ratio satisifed
-    return best_total_scheduled*1.0 / len(requests)
+    return best_total_scheduled * 1.0 / len(requests)

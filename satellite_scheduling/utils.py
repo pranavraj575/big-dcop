@@ -1,5 +1,4 @@
 import json
-import yaml
 import subprocess
 from collections import defaultdict
 import time
@@ -104,7 +103,7 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
             # TODO: try different constraints here, want f(1)=1, nf(n)<1, and (n+1)f(n+1)<nf(n)
             #  currently, nf(n)=1/n, which seems too strong
             "function": f"0 if {sum_expr} == 0 else 1 / ({sum_expr} ** 2)",
-    }
+        }
 
     return (
         pydcop,
@@ -115,14 +114,14 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
         requests,
     )
 
+
 def load_assignments(pydcop_results):
 
     with open(pydcop_results, "r") as f:
-            results = json.load(f)
+        results = json.load(f)
 
     assignments = results.get("assignment", {})
     return assignments
-
 
 
 def run_global_dispatcher(pydcop_dict, algorithm_config, json_filepath, output_json):
@@ -132,15 +131,7 @@ def run_global_dispatcher(pydcop_dict, algorithm_config, json_filepath, output_j
 
     with open(json_filepath, "w") as f:
         json.dump(pydcop_dict, f)
-    cmd = [
-        "pydcop",
-        "--output",
-        output_json,
-        "solve",
-        "--mode", "thread",
-        "--algo",
-        algorithm_config["name"]
-    ]
+    cmd = ["pydcop", "--output", output_json, "solve", "--mode", "thread", "--algo", algorithm_config["name"]]
 
     # add algorithm parameters
     if "algo_params" in algorithm_config:
@@ -148,17 +139,19 @@ def run_global_dispatcher(pydcop_dict, algorithm_config, json_filepath, output_j
             cmd.extend(["--algo_param", param])
 
     # add the distribution and filepaths at the end
-    cmd.extend([
-        "--distribution",
-        json_filepath,
-        json_filepath,
-    ])
+    cmd.extend(
+        [
+            "--distribution",
+            json_filepath,
+            json_filepath,
+        ]
+    )
 
     try:
         ts = time.time()
-        subprocess.run(cmd, check=True) #capture_output=True, text=True)
+        subprocess.run(cmd, check=True)  # capture_output=True, text=True)
         te = time.time()
-        print(f"Run in {te-ts} seconds")
+        print(f"Run in {te - ts} seconds")
 
         print("PyDCOP finished successfully.")
     except subprocess.CalledProcessError:
