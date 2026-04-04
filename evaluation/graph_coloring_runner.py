@@ -6,7 +6,7 @@ import pandas as pd
 import json
 
 from eval_helpers import reformat_file_for_maxsum, extract_json_from_output
-from algo_configs import get_algo_info, get_display_name
+from utils.algo_configs import get_algo_info, get_display_name
 
 
 def run_pydcop(problem_file, algo_config, args):

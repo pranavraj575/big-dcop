@@ -4,7 +4,7 @@ from scheduler import solve_local_schedule
 import copy
 import os
 from shortuuid import uuid
-import utils
+import satellite_utils
 import json
 
 
@@ -93,10 +93,10 @@ def solve_iterative_pricing(
         current_pydcop_dict = update_dcop_utilities(pydcop_dict, lambda_penalties, var_to_details)
         # Run global DCOP
         print("Running global dispatch")
-        utils.run_global_dispatcher(current_pydcop_dict, algorithm_config, temp_json, pydcop_results_json)
+        satellite_utils.run_global_dispatcher(current_pydcop_dict, algorithm_config, temp_json, pydcop_results_json)
         print("Done global dispatch")
         run_files.append(pydcop_results_json)
-        assignments = utils.load_assignments(pydcop_results_json)
+        assignments = satellite_utils.load_assignments(pydcop_results_json)
 
         # Group assigned requests by agent
         agent_assigned_reqs = defaultdict(set)
