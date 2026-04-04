@@ -148,7 +148,7 @@ algo_params = [
     AlgoParameterDef("stability", "float", None, STABILITY_COEFF),
     AlgoParameterDef("noise", "float", None, 0.01),
     AlgoParameterDef("start_messages", "str", ["leafs", "leafs_vars", "all"], "leafs"),
-    AlgoParameterDef("stop_cycle", "int", None, 100),
+    AlgoParameterDef("stop_cycle", "int", None, 0),
 ]
 
 
@@ -201,6 +201,7 @@ class MaxSumADVPFactorComputation(SynchronousComputationMixin, DcopComputation):
         self.damping_nodes = comp_def.algo.params.get("damping_nodes", "both")
         self.stability_coef = comp_def.algo.params.get("stability", STABILITY_COEFF)
         self.start_messages = comp_def.algo.params.get("start_messages", "leafs")
+        self.stop_cycle = comp_def.algo.param_value("stop_cycle")
         
         self._prev_messages = defaultdict(lambda: (None, 0))
 
@@ -247,6 +248,11 @@ class MaxSumADVPFactorComputation(SynchronousComputationMixin, DcopComputation):
                 # Converged locally
                 pass
 
+        # Check if this was the last cycle
+        if self.stop_cycle and self.cycle_count >= self.stop_cycle:
+            self.finished()
+            self.stop()
+            return
         return None
 
 
@@ -333,7 +339,8 @@ class MaxSumADVPVariableComputation(SynchronousComputationMixin, VariableComputa
         self.damping_nodes = comp_def.algo.params.get("damping_nodes", "both")
         self.stability_coef = comp_def.algo.params.get("stability", STABILITY_COEFF)
         self.start_messages = comp_def.algo.params.get("start_messages", "leafs")
-        
+        self.stop_cycle = comp_def.algo.param_value("stop_cycle")
+
         self.factors = [link.factor_node for link in comp_def.node.links]
         self.costs = {}
         self._prev_messages = defaultdict(lambda: (None, 0))
@@ -393,6 +400,11 @@ class MaxSumADVPVariableComputation(SynchronousComputationMixin, VariableComputa
                 self.post_msg(f_name, MaxSumADVPMessage(costs_f))
                 self._prev_messages[f_name] = costs_f, count + 1
 
+        # Check if this was the last cycle
+        if self.stop_cycle and self.cycle_count >= self.stop_cycle:
+            self.finished()
+            self.stop()
+            return
         return None
 
 
