@@ -6,7 +6,7 @@ import pandas as pd
 
 import numpy as np
 import json
-from utils.algo_configs import get_display_name
+from algo_configs import get_display_name
 
 
 def kernel_smoothed_plot_wrt_value(

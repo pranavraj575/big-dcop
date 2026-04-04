@@ -1,6 +1,6 @@
 from collections import defaultdict
 from ortools.linear_solver import pywraplp
-from utils.satellite_utils import HARD_PENALTY
+from utils import HARD_PENALTY
 
 
 def solve_local_schedule(agent_id, assigned_reqs, all_tasks, downlinks, capacity):

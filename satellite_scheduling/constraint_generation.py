@@ -1,7 +1,7 @@
 import json
 from collections import defaultdict
 from scheduler import solve_local_schedule, get_constraints, add_constraints
-from utils.satellite_utils import run_global_dispatcher
+from utils import run_global_dispatcher
 
 
 def solve_constraint_generation(
