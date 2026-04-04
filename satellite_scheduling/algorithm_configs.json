@@ -109,7 +109,8 @@
     "algo_params": [
       "modifier:A",
       "violation:NZ",
-      "increase_mode:E"
+      "increase_mode:E",
+      "stop_cycle:100"
     ]
   },
   {

@@ -96,7 +96,7 @@ def computation_memory(computation: VariableComputationNode) -> float:
         # Just count the number of neighbors.
         # This is sufficient for the heuristic.
         count = len(computation.neighbors)
-        
+
     return count * UNIT_SIZE
 
 
@@ -185,6 +185,7 @@ algo_params = [
     AlgoParameterDef("modifier", "str", ["A", "M"], "A"),
     AlgoParameterDef("violation", "str", ["NZ", "NM", "MX"], "NZ"),
     AlgoParameterDef("increase_mode", "str", ["E", "R", "C", "T"], "E"),
+    AlgoParameterDef("stop_cycle", "int", None, 0),
 ]
 
 
@@ -218,6 +219,7 @@ class GdbaComputation(VariableComputation):
         modifier="A",
         violation="NZ",
         increase_mode="E",
+            stop_cycle=0,
         msg_sender=None,
         comp_def=None,
     ):
@@ -247,6 +249,7 @@ class GdbaComputation(VariableComputation):
         self._modifier_mode = modifier
         self._violation_mode = violation
         self._increase_mode = increase_mode
+        self.stop_cycle=stop_cycle
         base_modifier = 0 if self._modifier_mode == "A" else 1
         self.__constraints__ = list()
         self.__constraints_modifiers__ = dict()
@@ -423,6 +426,12 @@ class GdbaComputation(VariableComputation):
         self.new_cycle()
         #       #########TO DO#########
         # This is where to put an eventual stop condition
+
+        # Check if this was the last cycle
+        if self.stop_cycle and self.cycle_count >= self.stop_cycle:
+            self.finished()
+            self.stop()
+            return
         for n in self.neighbors:
             msg = GdbaOkMessage(self.current_value)
             self.post_msg(n.name, msg)
