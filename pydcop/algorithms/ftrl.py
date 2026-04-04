@@ -17,7 +17,7 @@ GRAPH_TYPE = "constraints_hypergraph"
 
 algo_params = [
     AlgoParameterDef("regularization", "str", ["mwu", "none"], "mwu"),
-    AlgoParameterDef('eta_reg', 'float', None, 1.0),
+    AlgoParameterDef("eta_reg", "float", None, 1.0),
     AlgoParameterDef("predictive", "int", [0, 1], 0),
     AlgoParameterDef("context_based", "int", [0, 1], 0),
     AlgoParameterDef("stop_cycle", "int", None, 0),
@@ -26,7 +26,7 @@ algo_params = [
 
 
 def computation_memory(computation: VariableComputationNode) -> float:
-    return UNIT_SIZE*len(computation.variable.domain)*2
+    return UNIT_SIZE * len(computation.variable.domain) * 2
 
 
 def communication_load(src: VariableComputationNode, target: str) -> float:
@@ -61,7 +61,6 @@ class FTRLMessage(Message):
 
 
 class FTRLComputation(VariableComputation):
-
     def __init__(self, comp_def: ComputationDef):
         super().__init__(comp_def.node.variable, comp_def)
 
@@ -91,7 +90,7 @@ class FTRLComputation(VariableComputation):
         return np.zeros(len(self.ordered_domain))
 
     def get_uniform_policy(self):
-        return np.ones(len(self.ordered_domain))/len(self.ordered_domain)
+        return np.ones(len(self.ordered_domain)) / len(self.ordered_domain)
 
     def on_start(self):
         if not self.neighbors:
@@ -100,10 +99,7 @@ class FTRLComputation(VariableComputation):
             value, cost = optimal_cost_value(self._variable, self.mode)
             self.value_selection(value, cost)
             if self.logger.isEnabledFor(logging.INFO):
-                self.logger.info(
-                    f"Select initial value {self.current_value} "
-                    f"based on cost function for var {self._variable.name}"
-                )
+                self.logger.info(f"Select initial value {self.current_value} based on cost function for var {self._variable.name}")
             self.finished()
             self.stop()
         else:
@@ -114,9 +110,7 @@ class FTRLComputation(VariableComputation):
                 self.utilities = self.get_initial_utilities()
             self.last_strategy = self.get_uniform_policy()
             self.random_value_selection()
-            self.logger.debug(
-                "FTRL starts: randomly select value %s", self.current_value
-            )
+            self.logger.debug("FTRL starts: randomly select value %s", self.current_value)
             self.post_to_all_neighbors(FTRLMessage(self.current_value))
 
             # As everything is asynchronous, we might have received our
@@ -129,9 +123,7 @@ class FTRLComputation(VariableComputation):
             return
         if variable_name not in self.current_cycle:
             self.current_cycle[variable_name] = recv_msg.value
-            self.logger.debug(
-                "Receiving value %s from %s", recv_msg.value, variable_name
-            )
+            self.logger.debug("Receiving value %s from %s", recv_msg.value, variable_name)
             self.evaluate_cycle()
 
         else:
@@ -154,7 +146,7 @@ class FTRLComputation(VariableComputation):
             assignment = self.current_cycle.copy()
             costs = find_costs(variable=self.variable, assignment=assignment, constraints=self.constraints)
             costs = np.array([costs[k] for k in self.ordered_domain])
-            if self.mode == 'min':
+            if self.mode == "min":
                 utilities = -costs
             else:
                 utilities = costs
@@ -179,11 +171,11 @@ class FTRLComputation(VariableComputation):
             if self.regularization == "mwu":
                 # subtract max to reduce precision error between high values
                 # very negative values may be pushed towards zero, but these were very low probability anyway
-                dist = np.exp(self.eta_reg*(basis - np.max(basis)))
-                dist = dist/np.sum(dist)
-            elif self.regularization == 'none':
+                dist = np.exp(self.eta_reg * (basis - np.max(basis)))
+                dist = dist / np.sum(dist)
+            elif self.regularization == "none":
                 support = np.equal(basis, np.max(basis))
-                dist = support/np.sum(support)
+                dist = support / np.sum(support)
             else:
                 raise ValueError(self.regularization)
 

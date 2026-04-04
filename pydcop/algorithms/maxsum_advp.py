@@ -100,9 +100,7 @@ def build_computation(comp_def: ComputationDef):
         return MaxSumADVPFactorComputation(comp_def=comp_def)
 
 
-def computation_memory(
-    computation: Union[FactorComputationNode, VariableComputationNode]
-) -> float:
+def computation_memory(computation: Union[FactorComputationNode, VariableComputationNode]) -> float:
     """Memory footprint associated with the maxsum computation node."""
     if isinstance(computation, FactorComputationNode):
         m = 0
@@ -114,16 +112,14 @@ def computation_memory(
     elif isinstance(computation, VariableComputationNode):
         domain_size = len(computation.variable.domain)
         # Handle cases where neighbors might not be populated in ad-hoc distributions
-        num_neighbors = len(list(computation.links)) if hasattr(computation, 'links') else 0
+        num_neighbors = len(list(computation.links)) if hasattr(computation, "links") else 0
         return num_neighbors * domain_size * VARIABLE_UNIT_SIZE
-    
+
     # Fallback for simple heuristics
     return 100.0
 
 
-def communication_load(
-    src: Union[FactorComputationNode, VariableComputationNode], target: str
-) -> float:
+def communication_load(src: Union[FactorComputationNode, VariableComputationNode], target: str) -> float:
     """The communication cost of an edge between a variable and a factor."""
     if isinstance(src, VariableComputationNode):
         d_size = len(src.variable.domain)
@@ -142,9 +138,7 @@ def communication_load(
 
 algo_params = [
     AlgoParameterDef("damping", "float", None, 0.5),
-    AlgoParameterDef(
-        "damping_nodes", "str", ["vars", "factors", "both", "none"], "both"
-    ),
+    AlgoParameterDef("damping_nodes", "str", ["vars", "factors", "both", "none"], "both"),
     AlgoParameterDef("stability", "float", None, STABILITY_COEFF),
     AlgoParameterDef("noise", "float", None, 0.01),
     AlgoParameterDef("start_messages", "str", ["leafs", "leafs_vars", "all"], "leafs"),
@@ -190,7 +184,7 @@ class MaxSumADVPFactorComputation(SynchronousComputationMixin, DcopComputation):
         # Allow "maxsum_advp" or "maxsum" to support running with generic config
         assert comp_def.algo.algo in ["maxsum", "maxsum_advp"]
         super().__init__(comp_def.node.factor.name, comp_def)
-        
+
         self.mode = comp_def.algo.mode
         self.factor = comp_def.node.factor
         self.variables = self.factor.dimensions
@@ -202,7 +196,7 @@ class MaxSumADVPFactorComputation(SynchronousComputationMixin, DcopComputation):
         self.stability_coef = comp_def.algo.params.get("stability", STABILITY_COEFF)
         self.start_messages = comp_def.algo.params.get("start_messages", "leafs")
         self.stop_cycle = comp_def.algo.param_value("stop_cycle")
-        
+
         self._prev_messages = defaultdict(lambda: (None, 0))
 
     def on_start(self):
@@ -262,10 +256,10 @@ def factor_costs_for_var(factor: Constraint, variable: Variable, recv_costs, mod
     """
     costs = {}
     other_vars = [v for v in factor.dimensions if v != variable]
-    
+
     # Optimization: If binary constraint, avoid generic assignment generation
     is_binary = len(factor.dimensions) == 2
-    
+
     # Pre-fetch costs to avoid lookups in inner loop
     other_costs_cache = {}
     for other in other_vars:
@@ -282,19 +276,21 @@ def factor_costs_for_var(factor: Constraint, variable: Variable, recv_costs, mod
             other_v = other_vars[0]
             other_name = other_v.name
             known_costs = other_costs_cache[other_name]
-            
+
             for d_other in other_v.domain:
                 # Calculate F(v=d, other=d_other)
                 # Note: factor check assumes kwargs
                 f_val = factor(**{variable.name: d, other_name: d_other})
-                
+
                 cost_from_other = known_costs.get(d_other, 0)
                 current_val = f_val + cost_from_other
-                
+
                 if mode == "min":
-                    if current_val < optimal_value: optimal_value = current_val
+                    if current_val < optimal_value:
+                        optimal_value = current_val
                 else:
-                    if current_val > optimal_value: optimal_value = current_val
+                    if current_val > optimal_value:
+                        optimal_value = current_val
 
         else:
             # Generic N-ary Path (Slower)
@@ -304,25 +300,27 @@ def factor_costs_for_var(factor: Constraint, variable: Variable, recv_costs, mod
 
                 sum_cost = 0
                 valid_assignment = True
-                
+
                 for another_var_obj in other_vars:
                     a_name = another_var_obj.name
                     val_in_asgt = assignment[a_name]
-                    
+
                     # Add cost from this neighbor if available
                     known_costs = other_costs_cache[a_name]
                     if val_in_asgt in known_costs:
                         sum_cost += known_costs[val_in_asgt]
-                    
+
                     # Note: Original logic allowed proceeding even if cost not received
                     # We stick to that logic here.
 
                 if valid_assignment:
                     current_val = f_val + sum_cost
                     if mode == "min":
-                        if current_val < optimal_value: optimal_value = current_val
+                        if current_val < optimal_value:
+                            optimal_value = current_val
                     else:
-                        if current_val > optimal_value: optimal_value = current_val
+                        if current_val > optimal_value:
+                            optimal_value = current_val
 
         costs[d] = optimal_value
 
@@ -333,7 +331,7 @@ class MaxSumADVPVariableComputation(SynchronousComputationMixin, VariableComputa
     def __init__(self, comp_def: ComputationDef):
         super().__init__(comp_def.node.variable, comp_def)
         assert comp_def.algo.algo in ["maxsum", "maxsum_advp"]
-        
+
         self.mode = comp_def.algo.mode
         self.damping = comp_def.algo.params.get("damping", 0.5)
         self.damping_nodes = comp_def.algo.params.get("damping_nodes", "both")
@@ -411,7 +409,7 @@ class MaxSumADVPVariableComputation(SynchronousComputationMixin, VariableComputa
 def select_value(variable: Variable, costs: Dict[str, Dict], mode: str) -> Tuple[Any, float]:
     """Select the value for `variable` with the best cost."""
     d_costs = {d: variable.cost_for_val(d) for d in variable.domain}
-    
+
     for f_costs in costs.values():
         for d in variable.domain:
             if d in f_costs:
@@ -425,19 +423,19 @@ def select_value(variable: Variable, costs: Dict[str, Dict], mode: str) -> Tuple
     return optimal_d[0], optimal_d[1]
 
 
-def costs_for_factor(
-    variable: Variable, factor: FactorName, factors: List[Constraint], costs: Dict
-) -> Dict[VarVal, Cost]:
-    
+def costs_for_factor(variable: Variable, factor: FactorName, factors: List[Constraint], costs: Dict) -> Dict[VarVal, Cost]:
+
     # Base costs (unary)
     msg_costs = {d: variable.cost_for_val(d) for d in variable.domain}
     sum_cost = 0
 
     # Sum costs from all OTHER factors
     for f in factors:
-        if f == factor: continue # Skip target
-        if f not in costs: continue # Skip if no message yet
-        
+        if f == factor:
+            continue  # Skip target
+        if f not in costs:
+            continue  # Skip if no message yet
+
         f_costs = costs[f]
         for d in variable.domain:
             if d in f_costs:
@@ -452,7 +450,7 @@ def costs_for_factor(
         avg_cost = total_sum / len(msg_costs)
         normalized_msg_costs = {d: c - avg_cost for d, c in msg_costs.items()}
         return normalized_msg_costs
-    
+
     return msg_costs
 
 
@@ -469,7 +467,7 @@ def apply_damping(costs_f, prev_costs, damping):
 def approx_match(costs, prev_costs, stability_coef):
     if prev_costs is None:
         return False
-    
+
     # Check keys match
     if set(costs.keys()) != set(prev_costs.keys()):
         return False
@@ -482,8 +480,8 @@ def approx_match(costs, prev_costs, stability_coef):
             denom = abs(prev_c + c)
             if denom == 0:
                 # Both zero -> match. One zero -> mismatch (caught by prev_c != c)
-                return False 
-            
+                return False
+
             if not ((2 * delta / denom) < stability_coef):
                 return False
     return True
