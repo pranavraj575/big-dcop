@@ -4,7 +4,7 @@ from scheduler import solve_local_schedule
 import copy
 import os
 from shortuuid import uuid
-import satellite_utils
+from utils import satellite_utils
 import json
 
 

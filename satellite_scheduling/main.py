@@ -1,7 +1,7 @@
 import json
 import os
 from shortuuid import uuid
-from satellite_utils import parse_json_to_dcop_and_overlaps
+from utils.satellite_utils import parse_json_to_dcop_and_overlaps
 from iterative_pricing import solve_iterative_pricing
 from utils.algo_configs import get_display_name
 import argparse
