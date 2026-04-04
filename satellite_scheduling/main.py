@@ -4,6 +4,7 @@ from shortuuid import uuid
 from utils import parse_json_to_dcop_and_overlaps
 from iterative_pricing import solve_iterative_pricing
 from evaluation.algo_configs import get_display_name
+import argparse
 
 MAX_ITERATIONS = 4
 
@@ -15,7 +16,7 @@ ITAI: something really weird happens where when running this script pydcop runs 
 def main(
     scenario,
     output_json,
-    algorithms_json="satellite_scheduling/algorithm_configs.json",
+    algorithms_json,
 ):
     assert not os.path.exists(output_json), f"{output_json} already exists"
     run_info = {
@@ -79,4 +80,11 @@ def main(
 
 
 if __name__ == "__main__":
-    main(scenario="satellite_scheduling/test.json", output_json="output/test_main.json")
+    p = argparse.ArgumentParser()
+    p.add_argument("--scenario", default="satellite_scheduling/test.json", type=str, help="scenario json to evaluate")
+    p.add_argument("--output_json", default="output/test_main.json", type=str, help="output file to save results to")
+    p.add_argument(
+        "--algorithms_json", default="satellite_scheduling/algorithm_configs.json", type=str, help="json with list of algorithm configs to test"
+    )
+    args = p.parse_args()
+    main(scenario=args.scenario, output_json=args.output_json, algorithms_json=args.algorithms_json)
