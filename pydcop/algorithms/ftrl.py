@@ -145,11 +145,11 @@ class FTRLComputation(VariableComputation):
             self.current_cycle[self.variable.name] = self.current_value
             assignment = self.current_cycle.copy()
             costs = find_costs(variable=self.variable, assignment=assignment, constraints=self.constraints)
-            costs = np.array([costs[k] for k in self.ordered_domain])
+            costs_arr = np.array([costs[k] for k in self.ordered_domain])
             if self.mode == "min":
-                utilities = -costs
+                utilities = -costs_arr
             else:
-                utilities = costs
+                utilities = costs_arr
             # update utilities
             if self.context_based:
                 context = tuple(self.current_cycle[n] for n in self.neighbors)
@@ -194,8 +194,11 @@ class FTRLComputation(VariableComputation):
 
     def assign_sampled_value(self, strategy, costs):
         if np.random.random() < self.update_prob:
-            idx = np.random.choice(np.arange(len(self.ordered_domain)), p=strategy)
+            # CANNOT just do the following line, as it converts value to a np.int64 if it is an int
+            #  this breaks json encoding
+            # value = np.random.choice(self.ordered_domain, p=strategy)
+            value = self.ordered_domain[np.random.choice(range(len(strategy)), p=strategy)]
         else:
-            idx = self.ordered_domain.index(self.current_value)
-        self.value_selection(self.ordered_domain[idx], costs[idx])
-        return costs[idx]
+            value = self.current_value
+        self.value_selection(value, costs[value])
+        return costs[value]

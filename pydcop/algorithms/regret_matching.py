@@ -264,7 +264,10 @@ class RMComputation(VariableComputation):
 
     def assign_sampled_value(self, strategy, costs):
         if np.random.random() < self.update_prob:
-            value = np.random.choice(self.ordered_domain, p=strategy)
+            # CANNOT just do the following line, as it converts value to a np.int64 if it is an int
+            #  this breaks json encoding
+            # value = np.random.choice(self.ordered_domain, p=strategy)
+            value = self.ordered_domain[np.random.choice(range(len(strategy)), p=strategy)]
         else:
             value = self.current_value
         self.value_selection(value, costs[value])

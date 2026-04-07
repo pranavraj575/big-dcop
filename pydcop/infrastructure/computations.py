@@ -1083,7 +1083,7 @@ class VariableComputation(DcopComputation):
         VariableComputation.
 
         """
-        value = random.choice(self.variable.domain)
+        value = self.variable.domain[random.randint(len(self.variable.domain))]
         self.value_selection(value)
 
     def _on_value_selection(self, val, cost, cycle_count):
