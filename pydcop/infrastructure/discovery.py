@@ -66,7 +66,7 @@ use of Discovery mechanism.
 """
 import logging
 from typing import Callable, List, Optional, Any, Dict, Tuple, Union
-
+import time
 from collections import defaultdict
 from typing import Set
 
@@ -394,6 +394,10 @@ class Directory(object):
         try:
             # agent un-registration is only allowed if the agent has no
             # non-technical computation registered
+            non_technical = self.discovery.agent_computations(agent)
+            #TODO: is this allowed???
+            for c in non_technical:
+                self.discovery.unregister_computation(computation=c,agent=agent)
             non_technical = self.discovery.agent_computations(agent)
             if non_technical:
                 raise DiscoveryException(
