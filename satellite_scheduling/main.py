@@ -17,6 +17,7 @@ def main(
     scenario,
     output_json,
     algorithms_json,
+    pydcop_mode,
 ):
     assert not os.path.exists(output_json), f"{output_json} already exists"
     run_info = {
@@ -53,6 +54,7 @@ def main(
             var_to_details,
             requests,
             algorithm_config,
+            pydcop_mode=pydcop_mode,
             max_iterations=MAX_ITERATIONS,
             output_json=temp_output_json,
             working_dir=working_dir,
@@ -86,5 +88,12 @@ if __name__ == "__main__":
     p.add_argument(
         "--algorithms_json", default="satellite_scheduling/algorithm_configs.json", type=str, help="json with list of algorithm configs to test"
     )
+    p.add_argument(
+        "--pydcop_mode",
+        default="process",
+        type=str,
+        help="mode to run pydcop in (https://pydcop.readthedocs.io/en/latest/usage/cli/solve.html)",
+        choices=["thread", "process"],
+    )
     args = p.parse_args()
-    main(scenario=args.scenario, output_json=args.output_json, algorithms_json=args.algorithms_json)
+    main(scenario=args.scenario, output_json=args.output_json, algorithms_json=args.algorithms_json, pydcop_mode=args.pydcop_mode)

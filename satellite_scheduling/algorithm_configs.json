@@ -28,6 +28,7 @@
     "display_name": "DRM(1.5,0)",
     "algo_params": [
       "stop_cycle:20",
+      "discounted_rm:1",
       "alpha:1.5",
       "beta:0"
     ]
@@ -37,6 +38,7 @@
     "display_name": "Damped DRM+",
     "algo_params": [
       "stop_cycle:20",
+      "discounted_rm:1",
       "alpha:1.5",
       "beta:0",
       "rm_plus:1",
@@ -48,6 +50,7 @@
     "display_name": "DRM",
     "algo_params": [
       "stop_cycle:20",
+      "discounted_rm:1",
       "alpha:1.5",
       "beta:0"
     ]

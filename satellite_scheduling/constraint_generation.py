@@ -12,6 +12,7 @@ def solve_constraint_generation(
     var_to_details,
     requests,
     algorithm_config,
+    mode,
     temp_yaml="output/dcop_global.yaml",
     pydcop_results="output/pydcop_results.json",
     max_iterations=10,
@@ -22,7 +23,7 @@ def solve_constraint_generation(
 
     while iteration < max_iterations:
         # Run DCOP
-        run_global_dispatcher(pydcop_dict, algorithm_config, temp_yaml, pydcop_results)
+        run_global_dispatcher(pydcop_dict, algorithm_config, temp_yaml, pydcop_results, pydcop_mode=mode)
 
         # Load assignments
         with open(pydcop_results, "r") as f:

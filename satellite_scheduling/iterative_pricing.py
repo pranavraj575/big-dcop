@@ -57,6 +57,7 @@ def solve_iterative_pricing(
     var_to_details,
     requests,
     algorithm_config,
+    pydcop_mode,
     output_json=None,
     ignore_keys=("agt_metrics",),
     clear_temp_files=True,
@@ -93,7 +94,7 @@ def solve_iterative_pricing(
         current_pydcop_dict = update_dcop_utilities(pydcop_dict, lambda_penalties, var_to_details)
         # Run global DCOP
         print("Running global dispatch")
-        utils.run_global_dispatcher(current_pydcop_dict, algorithm_config, temp_json, pydcop_results_json)
+        utils.run_global_dispatcher(current_pydcop_dict, algorithm_config, temp_json, pydcop_results_json, pydcop_mode=pydcop_mode)
         print("Done global dispatch")
         run_files.append(pydcop_results_json)
         assignments = utils.load_assignments(pydcop_results_json)

@@ -22,8 +22,9 @@ algo_params = [
     AlgoParameterDef("context_based", "int", [0, 1], 0),
     AlgoParameterDef("stop_cycle", "int", None, 0),
     AlgoParameterDef("update_prob", "float", None, 1.0),
-    AlgoParameterDef("alpha", "float", None, float("inf")),  # Discount for negative regrets, use float('inf') for no discount
-    AlgoParameterDef("beta", "float", None, float("inf")),  # Discount for negative regrets, use float('inf') for no discount
+    AlgoParameterDef("discounted_rm", "int", [0, 1], 0),
+    AlgoParameterDef("alpha", "float", None, 1.5),  # Discount for negative regrets
+    AlgoParameterDef("beta", "float", None, 0),  # Discount for negative regrets
     AlgoParameterDef("damping", "float", None, 0.0),
 ]
 
@@ -90,10 +91,7 @@ class RMComputation(VariableComputation):
         self.update_prob = float(comp_def.algo.param_value("update_prob"))
         self.alpha = float(comp_def.algo.param_value("alpha"))
         self.beta = float(comp_def.algo.param_value("beta"))
-        if self.alpha == float("inf"):
-            self.alpha = None
-        if self.beta == float("inf"):
-            self.beta = None
+        self.use_discounted = bool(comp_def.algo.param_value("discounted_rm"))
         self.damping = float(comp_def.algo.param_value("damping"))
         self.constraints = comp_def.node.constraints
 
@@ -239,15 +237,13 @@ class RMComputation(VariableComputation):
     def get_positive_and_negative_discounts(self):
         t = self.cycle_count + 1
 
-        if self.alpha is None:
-            pos_discount = 1
-        else:
+        if self.use_discounted:
             pos_discount = (t**self.alpha) / (t**self.alpha + 1)
-
-        if self.beta is None:
-            neg_discount = 1
-        else:
             neg_discount = (t**self.beta) / (t**self.beta + 1)
+        else:
+            pos_discount = 1
+            neg_discount = 1
+
         return pos_discount, neg_discount
 
     def get_cum_regrets(self):

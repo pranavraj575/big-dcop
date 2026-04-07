@@ -124,14 +124,17 @@ def load_assignments(pydcop_results):
     return assignments
 
 
-def run_global_dispatcher(pydcop_dict, algorithm_config, json_filepath, output_json):
+def run_global_dispatcher(pydcop_dict, algorithm_config, json_filepath, output_json, pydcop_mode):
     """
     Writes the PyDCOP dict to a temporary YAML and executes the solver.
+    mode: uses the --mode parameter for pydcop
+        mode='thread' uses only a single core (which is lightweight but inefficient)
+        mode='process' uses multiple cores, which is heavier, but good parallelism across cores
     """
 
     with open(json_filepath, "w") as f:
         json.dump(pydcop_dict, f)
-    cmd = ["pydcop", "--output", output_json, "solve", "--mode", "thread", "--algo", algorithm_config["name"]]
+    cmd = ["pydcop", "--output", output_json, "solve", "--mode", pydcop_mode, "--algo", algorithm_config["name"]]
 
     # add algorithm parameters
     if "algo_params" in algorithm_config:
