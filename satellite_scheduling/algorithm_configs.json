@@ -3,14 +3,14 @@
     "name": "regret_matching",
     "display_name": "RM",
     "algo_params": [
-      "stop_cycle:100"
+      "stop_cycle:20"
     ]
   },
   {
     "name": "regret_matching",
     "display_name": "RM+",
     "algo_params": [
-      "stop_cycle:100",
+      "stop_cycle:20",
       "rm_plus:1"
     ]
   },
@@ -18,7 +18,7 @@
     "name": "regret_matching",
     "display_name": "IR-PRM+",
     "algo_params": [
-      "stop_cycle:100",
+      "stop_cycle:20",
       "ir_prm:1",
       "rm_plus:1"
     ]
@@ -27,7 +27,7 @@
     "name": "regret_matching",
     "display_name": "DRM(1.5,0)",
     "algo_params": [
-      "stop_cycle:100",
+      "stop_cycle:20",
       "alpha:1.5",
       "beta:0"
     ]
@@ -36,7 +36,7 @@
     "name": "regret_matching",
     "display_name": "Damped DRM+",
     "algo_params": [
-      "stop_cycle:100",
+      "stop_cycle:20",
       "alpha:1.5",
       "beta:0",
       "rm_plus:1",
@@ -47,7 +47,7 @@
     "name": "regret_matching",
     "display_name": "DRM",
     "algo_params": [
-      "stop_cycle:100",
+      "stop_cycle:20",
       "alpha:1.5",
       "beta:0"
     ]
@@ -55,7 +55,7 @@
   {
     "name": "ftrl",
     "algo_params": [
-      "stop_cycle:100"
+      "stop_cycle:20"
     ]
   },
   {
@@ -65,20 +65,20 @@
       "modifier:A",
       "violation:NZ",
       "increase_mode:E",
-      "stop_cycle:100"
+      "stop_cycle:20"
     ]
   },
   {
     "name": "dsa",
     "algo_params": [
-      "stop_cycle:100",
+      "stop_cycle:20",
       "variant:B"
     ]
   },
   {
     "name": "mgm2",
     "algo_params": [
-      "stop_cycle:100"
+      "stop_cycle:20"
     ]
   }
 ]
