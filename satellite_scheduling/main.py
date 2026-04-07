@@ -90,7 +90,7 @@ if __name__ == "__main__":
     )
     p.add_argument(
         "--pydcop_mode",
-        default="process",
+        default="thread",
         type=str,
         help="mode to run pydcop in (https://pydcop.readthedocs.io/en/latest/usage/cli/solve.html)",
         choices=["thread", "process"],
