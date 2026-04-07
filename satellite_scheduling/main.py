@@ -77,8 +77,8 @@ def main(
     with open(output_json, "w") as f:
         json.dump(output_dic, f, indent=2)
     # clear temp files
-    for _, fn in alg_to_info.items():
-        os.remove(fn)
+    for _, info in alg_to_info.items():
+        os.remove(info["file"])
 
 
 if __name__ == "__main__":
