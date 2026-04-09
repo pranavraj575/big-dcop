@@ -104,7 +104,9 @@ def get_constraints(assigned_reqs, scheduled_reqs, agent_id, pydcop_dict):
     for c in constraints:
         variables = []
         for req_id in c:
-            relevant_vars = [v for v in pydcop_dict["constraints"][f"reward_req_{req_id}"]["variables"] if agent_of(v) == agent_id]
+            relevant_vars = [
+                v for v in pydcop_dict["constraints"][f"reward_req_{req_id}"]["variables"] if agent_of(v) == agent_id
+            ]
             assert len(relevant_vars) == 1
             variables += relevant_vars
         assert len(set(variables)) == len(c)

@@ -18,6 +18,7 @@ def main(
     output_json,
     algorithms_json,
     pydcop_mode,
+    timeout,
 ):
     assert not os.path.exists(output_json), f"{output_json} already exists"
     run_info = {
@@ -54,6 +55,7 @@ def main(
             var_to_details,
             requests,
             algorithm_config,
+            timeout=timeout,
             pydcop_mode=pydcop_mode,
             max_iterations=MAX_ITERATIONS,
             output_json=temp_output_json,
@@ -61,7 +63,10 @@ def main(
             clear_temp_files=True,
         )
         print("result", best_total_scheduled)
-        alg_to_info[algo_name] = {"file": temp_output_json, "aux_info": {"best_total_scheduled": best_total_scheduled, "best_iter": best_iter}}
+        alg_to_info[algo_name] = {
+            "file": temp_output_json,
+            "aux_info": {"best_total_scheduled": best_total_scheduled, "best_iter": best_iter},
+        }
     # save results
     output_dic = {"run_info": run_info, "algorithm_configs": algorithms, "output": dict()}
 
@@ -86,7 +91,10 @@ if __name__ == "__main__":
     p.add_argument("--scenario", default="satellite_scheduling/test.json", type=str, help="scenario json to evaluate")
     p.add_argument("--output_json", default="output/test_main.json", type=str, help="output file to save results to")
     p.add_argument(
-        "--algorithms_json", default="satellite_scheduling/algorithm_configs.json", type=str, help="json with list of algorithm configs to test"
+        "--algorithms_json",
+        default="satellite_scheduling/algorithm_configs.json",
+        type=str,
+        help="json with list of algorithm configs to test",
     )
     p.add_argument(
         "--pydcop_mode",
@@ -95,5 +103,17 @@ if __name__ == "__main__":
         help="mode to run pydcop in (https://pydcop.readthedocs.io/en/latest/usage/cli/solve.html)",
         choices=["thread", "process"],
     )
+    p.add_argument(
+        "--timeout",
+        default=-1,
+        type=float,
+        help="force timeout after this number of seconds (-1 for infinity)",
+    )
     args = p.parse_args()
-    main(scenario=args.scenario, output_json=args.output_json, algorithms_json=args.algorithms_json, pydcop_mode=args.pydcop_mode)
+    main(
+        scenario=args.scenario,
+        output_json=args.output_json,
+        algorithms_json=args.algorithms_json,
+        pydcop_mode=args.pydcop_mode,
+        timeout=args.timeout,
+    )

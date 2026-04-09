@@ -62,6 +62,26 @@
     ]
   },
   {
+    "name": "maxsum_advp",
+    "dist": "adhoc",
+    "algo_params": [
+      "damping:0.9",
+      "stability:0.1",
+      "start_messages:leafs",
+      "stop_cycle:100"
+    ]
+  },
+  {
+    "name": "gdba",
+    "dist": "adhoc",
+    "algo_params": [
+      "modifier:A",
+      "violation:NZ",
+      "increase_mode:E",
+      "stop_cycle:20"
+    ]
+  },
+  {
     "name": "dsa",
     "algo_params": [
       "stop_cycle:20",
