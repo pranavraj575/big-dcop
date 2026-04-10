@@ -92,7 +92,7 @@ if __name__ == "__main__":
     p.add_argument("--output_json", default="output/test_main.json", type=str, help="output file to save results to")
     p.add_argument(
         "--algorithms_json",
-        default="satellite_scheduling/algorithm_configs.json",
+        default="satellite_scheduling/rm_algorithm_configs.json",
         type=str,
         help="json with list of algorithm configs to test",
     )
