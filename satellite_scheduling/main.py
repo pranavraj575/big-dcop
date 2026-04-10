@@ -6,7 +6,6 @@ from iterative_pricing import solve_iterative_pricing
 from evaluation.algo_configs import get_display_name
 import argparse
 
-MAX_ITERATIONS = 4
 
 """
 ITAI: something really weird happens where when running this script pydcop runs an entire dcop for a min. Not sure what this is. It happens before any imports or anything...
@@ -19,6 +18,7 @@ def main(
     algorithms_json,
     pydcop_mode,
     timeout,
+    max_iterations,
 ):
     assert not os.path.exists(output_json), f"{output_json} already exists"
     run_info = {
@@ -27,6 +27,7 @@ def main(
     }
     working_dir = os.path.join("output", "iterative_pricing_runs")
     os.makedirs(working_dir, exist_ok=True)
+    os.makedirs(os.path.dirname(output_json), exist_ok=True)
     # temp_json = os.path.join( output_dir,"dcop_global.json")
     with open(algorithms_json, "r") as f:
         algorithms = json.load(f)
@@ -57,7 +58,7 @@ def main(
             algorithm_config,
             timeout=timeout,
             pydcop_mode=pydcop_mode,
-            max_iterations=MAX_ITERATIONS,
+            max_iterations=max_iterations,
             output_json=temp_output_json,
             working_dir=working_dir,
             clear_temp_files=True,
@@ -109,6 +110,12 @@ if __name__ == "__main__":
         type=float,
         help="force timeout after this number of seconds (-1 for infinity)",
     )
+    p.add_argument(
+        "--max_iterations",
+        default=4,
+        type=int,
+        help="number of iterations to run subgradient loop",
+    )
     args = p.parse_args()
     main(
         scenario=args.scenario,
@@ -116,4 +123,5 @@ if __name__ == "__main__":
         algorithms_json=args.algorithms_json,
         pydcop_mode=args.pydcop_mode,
         timeout=args.timeout,
+        max_iterations=args.max_iterations,
     )
