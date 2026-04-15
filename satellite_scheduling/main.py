@@ -1,6 +1,8 @@
 import json
 import os
 from shortuuid import uuid
+
+from constraint_generation import solve_constraint_generation
 from utils import parse_json_to_dcop_and_overlaps
 from iterative_pricing import solve_iterative_pricing
 from evaluation.algo_configs import get_display_name
@@ -19,6 +21,7 @@ def main(
     pydcop_mode,
     timeout,
     max_iterations,
+    framework,
 ):
     assert not os.path.exists(output_json), f"{output_json} already exists"
     run_info = {
@@ -47,22 +50,40 @@ def main(
             var_to_details,
             requests,
         ) = parse_json_to_dcop_and_overlaps(scenario)
-
-        best_total_scheduled, best_iter, _ = solve_iterative_pricing(
-            pydcop_dict,
-            agent_tasks,
-            agent_downlinks,
-            agent_capacities,
-            var_to_details,
-            requests,
-            algorithm_config,
-            timeout=timeout,
-            pydcop_mode=pydcop_mode,
-            max_iterations=max_iterations,
-            output_json=temp_output_json,
-            working_dir=working_dir,
-            clear_temp_files=True,
-        )
+        if framework == "iterative_pricing":
+            best_total_scheduled, best_iter, _ = solve_iterative_pricing(
+                pydcop_dict,
+                agent_tasks,
+                agent_downlinks,
+                agent_capacities,
+                var_to_details,
+                requests,
+                algorithm_config,
+                timeout=timeout,
+                pydcop_mode=pydcop_mode,
+                max_iterations=max_iterations,
+                output_json=temp_output_json,
+                working_dir=working_dir,
+                clear_temp_files=True,
+            )
+        elif framework == "constraint_generation":
+            best_total_scheduled, best_iter, _ = solve_constraint_generation(
+                pydcop_dict,
+                agent_tasks,
+                agent_downlinks,
+                agent_capacities,
+                var_to_details,
+                requests,
+                algorithm_config,
+                timeout=timeout,
+                pydcop_mode=pydcop_mode,
+                max_iterations=max_iterations,
+                output_json=temp_output_json,
+                working_dir=working_dir,
+                clear_temp_files=True,
+            )
+        else:
+            raise NotImplementedError
         print("result", best_total_scheduled)
         alg_to_info[algo_name] = {
             "file": temp_output_json,
@@ -98,6 +119,13 @@ if __name__ == "__main__":
         help="json with list of algorithm configs to test",
     )
     p.add_argument(
+        "--framework",
+        default="iterative_pricing",
+        type=str,
+        help="use iterative pricing or constraint generation",
+        choices=["iterative_pricing", "constraint_generation"],
+    )
+    p.add_argument(
         "--pydcop_mode",
         default="thread",
         type=str,
@@ -124,4 +152,5 @@ if __name__ == "__main__":
         pydcop_mode=args.pydcop_mode,
         timeout=args.timeout,
         max_iterations=args.max_iterations,
+        framework=args.framework,
     )
