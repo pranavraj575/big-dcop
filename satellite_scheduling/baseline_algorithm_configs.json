@@ -10,13 +10,6 @@
     ]
   },
   {
-    "name": "dsa",
-    "algo_params": [
-      "stop_cycle:20",
-      "variant:B"
-    ]
-  },
-  {
     "name": "mgm2",
     "algo_params": [
       "stop_cycle:20"
