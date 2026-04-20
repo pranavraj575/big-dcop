@@ -100,12 +100,13 @@ def solve_constraint_generation(
             counter=num_constraints_added,
             pydcop_dict=pydcop_dict,
         )
-        num_constraints_added = new_num_constraints_added
+
         iteration += 1
         if num_constraints_added == new_num_constraints_added:
             # no new constraints added means our schedule is feasible
             # break here
             break
+        num_constraints_added = new_num_constraints_added
 
     # manually write to a json, to avoid having to store a bunch of stuff in memory
     if output_json is not None:

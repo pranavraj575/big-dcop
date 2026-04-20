@@ -81,6 +81,7 @@ if __name__ == "__main__":
     for scenario, files in (
         ("Constraint generation", constraint_generation_files),
         ("Iterative pricing", iterative_pricing_files),
+        ("Default", constraint_generation_files),
     ):
         stuff = []
         for fn in files:
@@ -96,7 +97,14 @@ if __name__ == "__main__":
         for alg in stuff[0]["output"]:
             print(stuff[0]["output"][alg]["data"][0].keys())
             break
-
+        if scenario == "Default":
+            reduce_fns = [(lambda x: [x[-1]]) for _ in range(3)]
+        else:
+            reduce_fns = [
+                lambda lst: [max(lst)],
+                lambda x: x,
+                lambda x: x,
+            ]
         make_bar_plot(
             key="cost",
             algorithms=algorithms,
@@ -104,6 +112,7 @@ if __name__ == "__main__":
             title=f"{scenario} Utility of best solution found",
             ylabel="Utility",
             save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "cost.png"),
+            reduce_fn=reduce_fns[0],
         )
         make_bar_plot(
             key="msg_count",
@@ -112,7 +121,7 @@ if __name__ == "__main__":
             title=f"{scenario} Average messages passed",
             ylabel="Messages",
             save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "msg_count.png"),
-            reduce_fn=lambda x: x,
+            reduce_fn=reduce_fns[1],
             log_y=True,
         )
         make_bar_plot(
@@ -122,6 +131,6 @@ if __name__ == "__main__":
             title=f"{scenario} Average time per iteration",
             ylabel="Time (s)",
             save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "time.png"),
-            reduce_fn=lambda x: x,
+            reduce_fn=reduce_fns[2],
             log_y=False,
         )
