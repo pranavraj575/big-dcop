@@ -41,7 +41,7 @@ def make_bar_plot(
         data = []
         for d in stuff:
             if alg in d["output"]:
-                data.append(reduce_fn([t[key] for t in d["output"][alg]["data"]]))
+                data.extend(reduce_fn([t[key] for t in d["output"][alg]["data"]]))
         return data
 
     all_data = {a: get_data(a) for a in algorithms}
@@ -76,44 +76,52 @@ if __name__ == "__main__":
     output_dir = os.path.join(DIR, "output", "sat_sched")
     plt_dir = os.path.join(DIR, "output", "sat_sched_plots")
     os.makedirs(plt_dir, exist_ok=True)
-    stuff = []
-    for fn in os.listdir(output_dir):
-        with open(os.path.join(output_dir, fn)) as f:
-            stuff.append(json.load(f))
-    algorithms = set()
-    for d in stuff:
-        algorithms.update(d["output"].keys())
-    algorithms = sorted(algorithms)
-    # manually remove dsa, as it only has one instance of being successful
-    algorithms.remove("dsa")
-    for alg in stuff[0]["output"]:
-        print(stuff[0]["output"][alg]["data"][0].keys())
-        break
-    make_bar_plot(
-        key="cost",
-        algorithms=algorithms,
-        stuff=stuff,
-        title="Utility of best solution found",
-        ylabel="Utility",
-        save_file=os.path.join(plt_dir, "cost.png"),
-    )
-    make_bar_plot(
-        key="msg_count",
-        algorithms=algorithms,
-        stuff=stuff,
-        title="Average messages passed",
-        ylabel="Messages",
-        save_file=os.path.join(plt_dir, "msg_count.png"),
-        reduce_fn=lambda x: x,
-        log_y=True,
-    )
-    make_bar_plot(
-        key="time",
-        algorithms=algorithms,
-        stuff=stuff,
-        title="Average time per iteration",
-        ylabel="Time (s)",
-        save_file=os.path.join(plt_dir, "time.png"),
-        reduce_fn=lambda x: x,
-        log_y=False,
-    )
+    constraint_generation_files = [fn for fn in os.listdir(output_dir) if "_cg_" in fn]
+    iterative_pricing_files = [fn for fn in os.listdir(output_dir) if "_cg_" not in fn]
+    for scenario, files in (
+        ("Constraint generation", constraint_generation_files),
+        ("Iterative pricing", iterative_pricing_files),
+    ):
+        stuff = []
+        for fn in files:
+            with open(os.path.join(output_dir, fn)) as f:
+                stuff.append(json.load(f))
+        algorithms = set()
+        for d in stuff:
+            algorithms.update(d["output"].keys())
+        algorithms = sorted(algorithms)
+        # manually remove dsa, as it only has one instance of being successful
+        if "dsa" in algorithms:
+            algorithms.remove("dsa")
+        for alg in stuff[0]["output"]:
+            print(stuff[0]["output"][alg]["data"][0].keys())
+            break
+
+        make_bar_plot(
+            key="cost",
+            algorithms=algorithms,
+            stuff=stuff,
+            title=f"{scenario} Utility of best solution found",
+            ylabel="Utility",
+            save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "cost.png"),
+        )
+        make_bar_plot(
+            key="msg_count",
+            algorithms=algorithms,
+            stuff=stuff,
+            title=f"{scenario} Average messages passed",
+            ylabel="Messages",
+            save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "msg_count.png"),
+            reduce_fn=lambda x: x,
+            log_y=True,
+        )
+        make_bar_plot(
+            key="time",
+            algorithms=algorithms,
+            stuff=stuff,
+            title=f"{scenario} Average time per iteration",
+            ylabel="Time (s)",
+            save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "time.png"),
+            reduce_fn=lambda x: x,
+            log_y=False,
+        )
