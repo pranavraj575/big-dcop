@@ -112,16 +112,19 @@ def solve_constraint_generation(
     if output_json is not None:
         f = open(output_json, "a")
         f.write("[\n")
+        first = True
         for i, fn in enumerate(run_files):
-            with open(fn, "r") as ff:
-                temp = json.load(ff)
-            if type(temp) is not dict:
-                # this shouldn't run, but just in case it does
-                temp = {"run_info": temp}
-            temp = {k: v for k, v in temp.items() if k not in ignore_keys}
-            json.dump(temp, f, indent=2)
-            if i < len(run_files) - 1:
-                f.write(",\n")
+            if os.path.exists(fn):
+                if not first:
+                    f.write(",\n")
+                first = False
+                with open(fn, "r") as ff:
+                    temp = json.load(ff)
+                if type(temp) is not dict:
+                    # this shouldn't run, but just in case it does
+                    temp = {"run_info": temp}
+                temp = {k: v for k, v in temp.items() if k not in ignore_keys}
+                json.dump(temp, f, indent=2)
         f.write("\n]")
         f.close()
     if clear_temp_files:
