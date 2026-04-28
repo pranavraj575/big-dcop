@@ -247,9 +247,15 @@ if __name__ == "__main__":
 
     def gaussian_kernel(x0, x):
         # kernel width is x0
-        return np.exp(-((x0 - x) ** 2) / (2 * x0**2))
+        return np.exp(-((x0 - x) ** 2) / (2 * (x0 / 2) ** 2))
 
     for graph_config in (
+        {"key_mod": lambda k: f"rescaled_{k}", "prefix": "rescaled_"},
+        {
+            "key_mod": lambda k: f"rescaled_{k}",
+            "prefix": "rescaled_",
+            "split_by": [("graph_type", graph_types)],
+        },
         {
             "split_by": [
                 ("graph_type", graph_types),
@@ -271,12 +277,6 @@ if __name__ == "__main__":
             ]
         },
         {"split_by": []},
-        {"key_mod": lambda k: f"rescaled_{k}", "prefix": "rescaled_"},
-        {
-            "key_mod": lambda k: f"rescaled_{k}",
-            "prefix": "rescaled_",
-            "split_by": [("graph_type", graph_types)],
-        },
     ):
         x_param = graph_config.get("x_param", "time")
         collect_mid_run = graph_config.get("mid-run", True)

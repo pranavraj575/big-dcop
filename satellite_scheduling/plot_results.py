@@ -66,10 +66,11 @@ def make_bar_plot(
         [np.mean(all_data[k]) for k in algorithms],
     )
     plt.xticks(rotation=45, ha="right")
+    std_errors = [np.std(all_data[k]) / np.sqrt(len(all_data[k])) for k in algorithms]
     plt.errorbar(
         labels,
         [np.mean(all_data[k]) for k in algorithms],
-        [np.std(all_data[k]) for k in algorithms],
+        std_errors,
         fmt="none",
         color="black",
         capsize=5,
@@ -102,7 +103,6 @@ if __name__ == "__main__":
             t = json.load(f)
         for alg_config in t:
             alg_to_plot_params[get_display_name(alg_config)] = alg_config
-    print(alg_to_plot_params)
     os.makedirs(plt_dir, exist_ok=True)
     constraint_generation_files = [fn for fn in os.listdir(output_dir) if "_cg_" in fn]
     iterative_pricing_files = [fn for fn in os.listdir(output_dir) if "_cg_" not in fn]
