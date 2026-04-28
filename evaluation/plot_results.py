@@ -24,6 +24,7 @@ def kernel_smoothed_plot_wrt_value(
     algs=None,
     title=None,
     config_by_alg=None,
+    include_legendless=True,
 ):
     """
     Parameters
@@ -109,7 +110,6 @@ def kernel_smoothed_plot_wrt_value(
             color=t.get_c(),
             alpha=0.2,
         )
-    plt.legend(fontsize=13, loc="center left", bbox_to_anchor=(1, 0.5))
     plt.grid(True, axis="both")
     plt.ylabel(key.replace("_", " ").capitalize(), size=17)
     plt.xlabel(x_param.capitalize(), size=17)
@@ -119,6 +119,10 @@ def kernel_smoothed_plot_wrt_value(
         plt.yscale("log")
     plt.title(title, size=17)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    if include_legendless:
+        assert save_path.count(".") == 1
+        plt.savefig(save_path.replace(".", "_legendless."), bbox_inches="tight", dpi=args.dpi)
+    plt.legend(fontsize=13, loc="center left", bbox_to_anchor=(1, 0.5))
     plt.savefig(save_path, bbox_inches="tight", dpi=args.dpi)
     plt.close()
 
