@@ -7,12 +7,14 @@
       "stability:0.1",
       "start_messages:leafs",
       "stop_cycle:100"
-    ]
+    ],
+    "plt_name": "Maxsum ADVP"
   },
   {
     "name": "mgm2",
     "algo_params": [
       "stop_cycle:20"
-    ]
+    ],
+    "plt_name": "MGM 2"
   }
 ]

@@ -4,6 +4,9 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
+from matplotlib import rc
+from evaluation.algo_configs import get_display_name
+
 
 def make_bar_plot(
     key,
@@ -12,10 +15,11 @@ def make_bar_plot(
     reduce_fn=lambda lst: [max(lst)],
     title=None,
     ylabel=None,
-    xlabel="algorithms",
+    xlabel="Algorithms",
     save_file=None,
     show=False,
     log_y=False,
+    alg_to_plot_params=None,
 ):
     """
 
@@ -36,6 +40,17 @@ def make_bar_plot(
     -------
 
     """
+    if alg_to_plot_params is None:
+        alg_to_plot_params = dict()
+    rc(
+        "font",
+        **{
+            "family": "serif",
+            "serif": ["Times"],
+        },
+    )
+    rc("text", usetex=True)
+    plt.tick_params(labelsize=15)
 
     def get_data(alg):
         data = []
@@ -45,26 +60,28 @@ def make_bar_plot(
         return data
 
     all_data = {a: get_data(a) for a in algorithms}
+    labels = [alg_to_plot_params.get(a, dict()).get("plt_name", a) for a in algorithms]
     plt.bar(
-        algorithms,
+        labels,
         [np.mean(all_data[k]) for k in algorithms],
     )
     plt.xticks(rotation=45, ha="right")
     plt.errorbar(
-        algorithms,
+        labels,
         [np.mean(all_data[k]) for k in algorithms],
         [np.std(all_data[k]) for k in algorithms],
         fmt="none",
         color="black",
         capsize=5,
     )
-    plt.title(title)
-    plt.ylabel(ylabel)
-    plt.xlabel(xlabel)
+    plt.title(title, size=17)
+    plt.ylabel(ylabel, size=17)
+    plt.xlabel(xlabel, size=17)
+    plt.grid(True, axis="y")
     if log_y:
         plt.yscale("log")
     if save_file is not None:
-        plt.savefig(save_file, bbox_inches="tight")
+        plt.savefig(save_file, bbox_inches="tight", dpi=300)
     if show:
         plt.show()
 
@@ -75,13 +92,24 @@ if __name__ == "__main__":
     DIR = os.path.dirname(os.path.dirname(__file__))
     output_dir = os.path.join(DIR, "output", "sat_sched")
     plt_dir = os.path.join(DIR, "output", "sat_sched_plots")
+    algorithm_dirs = [
+        os.path.join(DIR, "satellite_scheduling", "baseline_algorithm_configs.json"),
+        os.path.join(DIR, "satellite_scheduling", "rm_algorithm_configs.json"),
+    ]
+    alg_to_plot_params = dict()
+    for fn in algorithm_dirs:
+        with open(fn, "r") as f:
+            t = json.load(f)
+        for alg_config in t:
+            alg_to_plot_params[get_display_name(alg_config)] = alg_config
+    print(alg_to_plot_params)
     os.makedirs(plt_dir, exist_ok=True)
     constraint_generation_files = [fn for fn in os.listdir(output_dir) if "_cg_" in fn]
     iterative_pricing_files = [fn for fn in os.listdir(output_dir) if "_cg_" not in fn]
     for scenario, files in (
         ("Constraint generation", constraint_generation_files),
         ("Iterative pricing", iterative_pricing_files),
-        ("Default", constraint_generation_files),
+        ("Default", iterative_pricing_files),
     ):
         stuff = []
         for fn in files:
@@ -109,28 +137,31 @@ if __name__ == "__main__":
             key="cost",
             algorithms=algorithms,
             stuff=stuff,
-            title=f"{scenario} Utility of best solution found",
+            # title=f"{scenario} Utility of best solution found",
             ylabel="Utility",
-            save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "cost.png"),
+            save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "_cost.png"),
             reduce_fn=reduce_fns[0],
+            alg_to_plot_params=alg_to_plot_params,
         )
         make_bar_plot(
             key="msg_count",
             algorithms=algorithms,
             stuff=stuff,
-            title=f"{scenario} Average messages passed",
+            # title=f"{scenario} Average messages passed",
             ylabel="Messages",
-            save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "msg_count.png"),
+            save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "_msg_count.png"),
             reduce_fn=reduce_fns[1],
             log_y=True,
+            alg_to_plot_params=alg_to_plot_params,
         )
         make_bar_plot(
             key="time",
             algorithms=algorithms,
             stuff=stuff,
-            title=f"{scenario} Average time per iteration",
+            # title=f"{scenario} Average time per iteration",
             ylabel="Time (s)",
-            save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "time.png"),
+            save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "_time.png"),
             reduce_fn=reduce_fns[2],
             log_y=False,
+            alg_to_plot_params=alg_to_plot_params,
         )

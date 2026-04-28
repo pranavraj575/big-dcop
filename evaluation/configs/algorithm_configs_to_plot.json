@@ -1,0 +1,149 @@
+[
+  {
+    "name": "regret_matching",
+    "display_name": "Damped DRM+",
+    "algo_params": [
+      "stop_cycle:100",
+      "discounted_rm:1",
+      "alpha:1.5",
+      "beta:0",
+      "rm_plus:1",
+      "damping:0.3"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Damped RM (0.5)",
+    "algo_params": [
+      "stop_cycle:100",
+      "damping:0.5"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Damped PRM",
+    "algo_params": [
+      "stop_cycle:100",
+      "predictive:1",
+      "damping:0.5"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM",
+    "algo_params": [
+      "stop_cycle:100"
+    ],
+    "plot_config": {
+      "linestyle": "--"
+    }
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM+",
+    "algo_params": [
+      "stop_cycle:100",
+      "rm_plus:1"
+    ],
+    "plot_config": {
+      "linestyle": "--"
+    }
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "IR-PRM+",
+    "algo_params": [
+      "stop_cycle:100",
+      "ir_prm:1",
+      "rm_plus:1"
+    ],
+    "plot_config": {
+      "linestyle": "--"
+    }
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "DRM(1.5,0)",
+    "algo_params": [
+      "stop_cycle:100",
+      "discounted_rm:1",
+      "alpha:1.5",
+      "beta:0"
+    ],
+    "plot_config": {
+      "linestyle": "--"
+    }
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "DRM+",
+    "algo_params": [
+      "stop_cycle:100",
+      "discounted_rm:1",
+      "alpha:1.5",
+      "beta:0",
+      "rm_plus:1"
+    ],
+    "plot_config": {
+      "linestyle": "--"
+    }
+  },
+  {
+    "name": "ftrl",
+    "algo_params": [
+      "stop_cycle:100"
+    ],
+    "plt_name": "FTRL",
+    "plot_config": {
+      "linestyle": "--"
+    }
+  },
+  {
+    "name": "maxsum_advp",
+    "dist": "adhoc",
+    "algo_params": [
+      "damping:0.9",
+      "stability:0.1",
+      "start_messages:leafs",
+      "stop_cycle:100"
+    ],
+    "plt_name": "Maxsum ADVP",
+    "plot_config": {
+      "linestyle": "dotted"
+    }
+  },
+  {
+    "name": "gdba",
+    "dist": "adhoc",
+    "algo_params": [
+      "modifier:A",
+      "violation:NZ",
+      "increase_mode:E"
+    ],
+    "plt_name": "GDBA",
+    "plot_config": {
+      "linestyle": "dotted"
+    }
+  },
+  {
+    "name": "dsa",
+    "algo_params": [
+      "stop_cycle:100",
+      "variant:B"
+    ],
+    "plt_name": "DSA",
+    "plot_config": {
+      "linestyle": "dotted"
+    }
+  },
+  {
+    "name": "mgm2",
+    "algo_params": [
+      "stop_cycle:100"
+    ],
+    "plt_name": "MGM 2",
+    "plot_config": {
+      "linestyle": "dotted"
+    }
+  }
+]

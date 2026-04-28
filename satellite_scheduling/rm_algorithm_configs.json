@@ -59,6 +59,7 @@
     "name": "ftrl",
     "algo_params": [
       "stop_cycle:20"
-    ]
+    ],
+    "plt_name": "FTRL"
   }
 ]

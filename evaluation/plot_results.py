@@ -1,6 +1,7 @@
 import argparse
 import itertools
 import matplotlib.pyplot as plt
+from matplotlib import rc
 import os.path
 import pandas as pd
 
@@ -22,6 +23,7 @@ def kernel_smoothed_plot_wrt_value(
     y_log=False,
     algs=None,
     title=None,
+    config_by_alg=None,
 ):
     """
     Parameters
@@ -45,10 +47,21 @@ def kernel_smoothed_plot_wrt_value(
     -------
 
     """
+    rc(
+        "font",
+        **{
+            "family": "serif",
+            "serif": ["Times"],
+        },
+    )
+    rc("text", usetex=True)
+    plt.tick_params(labelsize=15)
     if algs is None:
         algs = sorted(set(df["algorithm"]), key=lambda s: s.lower())
     if type(grid) is not dict:
         grid = {alg: grid for alg in algs}
+    if config_by_alg is None:
+        config_by_alg = dict()
     styles = set()
     for alg in algs:
         temp_df = df[df["algorithm"] == alg]
@@ -76,11 +89,16 @@ def kernel_smoothed_plot_wrt_value(
             std_error = np.sqrt(sample_variance) / np.sqrt(cum_weight)
             std_errors.append(std_error)
         means, std_errors = np.array(means), np.array(std_errors)
-        (t,) = plt.plot(g, means, label=alg)
-        style = (t.get_c(), t.get_linestyle())
-        if style in styles:
-            # todo: can make this more fancy, but this works up until 2*(# of colors) = 20 lines
-            t.set_linestyle("--")
+        kwargs = config_by_alg.get(alg, dict()).get("plot_config", None)
+        label = config_by_alg.get(alg, dict()).get("plt_name", alg)
+        if kwargs is None:
+            (t,) = plt.plot(g, means, label=label)
+            style = (t.get_c(), t.get_linestyle())
+            if style in styles:
+                # todo: can make this more fancy, but this works up until 2*(# of colors) = 20 lines
+                t.set_linestyle("--")
+        else:
+            (t,) = plt.plot(g, means, label=label, **kwargs)
         style = (t.get_c(), t.get_linestyle())
         styles.add(style)
 
@@ -91,20 +109,21 @@ def kernel_smoothed_plot_wrt_value(
             color=t.get_c(),
             alpha=0.2,
         )
-    plt.legend()
-    plt.ylabel(key)
-    plt.xlabel(x_param)
+    plt.legend(fontsize=13, loc="center left", bbox_to_anchor=(1, 0.5))
+    plt.grid(True, axis="both")
+    plt.ylabel(key.replace("_", " ").capitalize(), size=17)
+    plt.xlabel(x_param.capitalize(), size=17)
     if x_log:
         plt.xscale("log")
     if y_log:
         plt.yscale("log")
-    plt.title(title)
+    plt.title(title, size=17)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, bbox_inches="tight", dpi=args.dpi)
     plt.close()
 
 
-def plot_wrt_param(df, key, x_param, save_path, args, x_log=False, y_log=False, algs=None, title=None):
+def plot_wrt_param(df, key, x_param, save_path, args, x_log=False, y_log=False, algs=None, title=None, config_by_alg=None):
     kernel_smoothed_plot_wrt_value(
         df=df,
         key=key,
@@ -117,6 +136,7 @@ def plot_wrt_param(df, key, x_param, save_path, args, x_log=False, y_log=False, 
         y_log=y_log,
         algs=algs,
         title=title,
+        config_by_alg=config_by_alg,
     )
 
 
@@ -208,11 +228,16 @@ if __name__ == "__main__":
             rows = df["n"] == n_param
             df.loc[rows, "rescaled_" + key] = df.loc[rows, key] / np.mean(relevant_df.loc[rows, key])
     # get all algorithms used across trials
+    config_by_alg = dict()
     if args.algorithms is None:
         algs = sorted(set(df["algorithm"]), key=lambda s: s.lower())
     else:
         with open(args.algorithms) as f:
-            algs = [get_display_name(alg_config) for alg_config in json.load(f)]
+            algs = []
+            for alg_config in json.load(f):
+                alg = get_display_name(alg_config)
+                algs.append(alg)
+                config_by_alg[alg] = alg_config
 
     print_stats_by_alg(df, algs)
 
@@ -299,8 +324,9 @@ if __name__ == "__main__":
                     save_path=save_dir,
                     algs=algs,
                     y_log="log" in configs,
-                    title="performance on graph coloring problems",
+                    # title="performance on graph coloring problems",
                     args=args,
+                    config_by_alg=config_by_alg,
                 )
             else:
                 kernel_smoothed_plot_wrt_value(
@@ -313,8 +339,9 @@ if __name__ == "__main__":
                     algs=algs,
                     x_log=True,
                     y_log="log" in configs,
-                    title="performance on graph coloring problems",
+                    # title="performance on graph coloring problems",
                     args=args,
+                    config_by_alg=config_by_alg,
                 )
             print(f"saved to {save_dir}")
             del relevant_df

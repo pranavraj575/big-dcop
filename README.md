@@ -23,6 +23,13 @@ Test installation
 ```bash
 pydcop solve tests/instances/graph_coloring1.yaml --algo regret_matching --algo_param "stop_cycle:100"
 ```
+
+Note: Some plotting may require latex installation:
+
+```shell
+sudo apt install cm-super
+sudo apt install dvipng
+```
 ## Run experiments
 
 ```bash
