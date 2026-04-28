@@ -20,6 +20,7 @@ def make_bar_plot(
     show=False,
     log_y=False,
     alg_to_plot_params=None,
+    ylim=None,
 ):
     """
 
@@ -78,6 +79,8 @@ def make_bar_plot(
     plt.title(title, size=17)
     plt.ylabel(ylabel, size=17)
     plt.xlabel(xlabel, size=17)
+    if ylim is not None:
+        plt.ylim(ylim)
     plt.grid(True, axis="y")
     if log_y:
         plt.yscale("log")
@@ -142,6 +145,7 @@ if __name__ == "__main__":
             save_file=os.path.join(plt_dir, scenario.lower().replace(" ", "_") + "_cost.png"),
             reduce_fn=reduce_fns[0],
             alg_to_plot_params=alg_to_plot_params,
+            ylim=(0, 120),
         )
         make_bar_plot(
             key="msg_count",
