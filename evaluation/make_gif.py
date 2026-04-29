@@ -113,12 +113,12 @@ if __name__ == "__main__":
 
             color_to_var = {c: [] for c in colors}
             for var in var_to_dec:
-                cost = round(cost, max_decimals)
+                t_cost = round(cost, max_decimals)
                 # prevent floating point errors by shifting one at a time
                 # idx=int(cost*(10**var_to_dec[var]))%10
                 for _ in range(var_to_dec[var]):
-                    cost = round((10 * cost) % 10, max_decimals)
-                c = colors[int(cost)]
+                    t_cost = round((10 * t_cost) % 10, max_decimals)
+                c = colors[int(t_cost)]
                 color_to_var[c].append(var)
             for c, var_list_c in color_to_var.items():
                 node_color = "tab:" + {"B": "blue", "R": "red", "G": "green"}[c]
