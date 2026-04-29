@@ -1084,6 +1084,7 @@ class VariableComputation(DcopComputation):
 
         """
         value = self.variable.domain[random.randint(len(self.variable.domain))]
+        # value = self.variable.domain[0]
         self.value_selection(value)
 
     def _on_value_selection(self, val, cost, cycle_count):
