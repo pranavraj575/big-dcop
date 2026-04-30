@@ -109,32 +109,25 @@ if __name__ == "__main__":
         help="dpi for plotting",
     )
     args = p.parse_args()
-    scenario = args.scenario
-    algorithms_dir = args.algorithms
-    plot_temp_dir = args.plot_temp_dir
 
-    gif_dir = args.gif_dir
-    duration = args.duration
-    node_size = args.node_size
-    seed = args.seed
-    collect_csv = os.path.join(plot_temp_dir, "temp_collect_metrics.csv")
-    temp_yaml = os.path.join(plot_temp_dir, "temp_yaml.yaml")
-    start_decimals = args.start_decimals
-
-    with open(algorithms_dir, "r") as f:
+    collect_csv = os.path.join(args.plot_temp_dir, "temp_collect_metrics.csv")
+    temp_yaml = os.path.join(args.plot_temp_dir, "temp_yaml.yaml")
+    with open(args.algorithms, "r") as f:
         algorithms = json.load(f)
-    os.makedirs(plot_temp_dir, exist_ok=True)
-    os.makedirs(gif_dir, exist_ok=True)
+    os.makedirs(args.plot_temp_dir, exist_ok=True)
+    os.makedirs(args.gif_dir, exist_ok=True)
     max_decimals = 0
     alg_to_info = dict()
-    with open(scenario, "r") as f:
+
+    # make pydcop instance, edit colors so we can recover assignment from just costs
+    with open(args.scenario, "r") as f:
         pydcop_dict = yaml.safe_load(f)
     colors = pydcop_dict["domains"]["colors"]["values"]
     var_to_dec = dict()
     for i, variable in enumerate(pydcop_dict["variables"]):
-        var_to_dec[variable] = i + start_decimals
-        max_decimals = max(max_decimals, i + start_decimals)
-        prefix = "0." + "0" * (i + start_decimals - 1)
+        var_to_dec[variable] = i + args.start_decimals
+        max_decimals = max(max_decimals, i + args.start_decimals)
+        prefix = "0." + "0" * (i + args.start_decimals - 1)
         cost_fn = ""
         for j, color in enumerate(colors[:-1]):
             cost_fn += f"{prefix}{j} if {variable} == '{color}' else ("
@@ -143,14 +136,15 @@ if __name__ == "__main__":
         pydcop_dict["variables"][variable]["cost_function"] = cost_fn
     with open(temp_yaml, "w") as f:
         yaml.safe_dump(pydcop_dict, f)
-
+    # make graph, precompute positions
     G = nx.Graph()
     G.add_edges_from([constraint["variables"] for _, constraint in pydcop_dict["constraints"].items()])
-    pos = nx.spring_layout(G, seed=seed)
+    pos = nx.spring_layout(G, seed=args.seed)
 
+    # do computation for each algorithm
     for algorithm_config in algorithms:
         algo_name = get_display_name(algorithm_config)
-        gif_path = os.path.join(gif_dir, algo_name.replace("+", "plus").replace(" ", "_") + ".gif")
+        gif_path = os.path.join(args.gif_dir, algo_name.replace("+", "plus").replace(" ", "_") + ".gif")
 
         cmd = [
             "pydcop",
@@ -174,7 +168,7 @@ if __name__ == "__main__":
         df = pd.read_csv(collect_csv)
         df = df[pd.notna(df["cost"])]
         variables = list(var_to_dec.keys())
-        options = {"edgecolors": "tab:gray", "node_size": node_size, "alpha": 1}
+        options = {"edgecolors": "tab:gray", "node_size": args.node_size, "alpha": 1}
         i = 0
         fns = []
         costs = list(df["cost"])
@@ -183,9 +177,11 @@ if __name__ == "__main__":
         if algorithm_config["name"].startswith("regret_matching"):
             costs = [int(costs[0])] + costs
             times = [0] + times
-        # linger on initial fram for longer
+        # linger on initial frame for longer
         costs = [costs[0]] + costs
         times = [times[0]] + times
+
+        # recover colorings from just the cost, generate gif from frames
         for time, cost in zip(times, costs):
             color_to_var = {c: [] for c in colors}
             for var in var_to_dec:
@@ -204,13 +200,14 @@ if __name__ == "__main__":
                 pos,
                 width=1.0,
             )
-            fn = os.path.join(plot_temp_dir, str(i) + ".png")
+            fn = os.path.join(args.plot_temp_dir, str(i) + ".png")
             if args.display_time:
                 plt.xlabel(f"Time (s): {time}", loc="left", size=13)
             plt.savefig(fn, dpi=args.dpi)
             plt.close()
             fns.append(fn)
             i += 1
-        create_gif(image_paths=fns, output_gif_path=gif_path, duration=duration)
+        create_gif(image_paths=fns, output_gif_path=gif_path, duration=args.duration)
+        # clean temp directory
         for fn in fns:
             os.remove(fn)
