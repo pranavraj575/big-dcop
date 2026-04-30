@@ -20,6 +20,7 @@ algo_params = [
     AlgoParameterDef("predictive", "int", [0, 1], 0),
     AlgoParameterDef("ir_prm", "int", [0, 1], 0),
     AlgoParameterDef("context_based", "int", [0, 1], 0),
+    AlgoParameterDef("deterministic_start", "int", [0, 1], 0),
     AlgoParameterDef("stop_cycle", "int", None, 0),
     AlgoParameterDef("update_prob", "float", None, 1.0),
     AlgoParameterDef("discounted_rm", "int", [0, 1], 0),
@@ -87,6 +88,7 @@ class RMComputation(VariableComputation):
         self.use_predictive = bool(comp_def.algo.param_value("predictive"))
         self.use_ir_prm = bool(comp_def.algo.param_value("ir_prm"))
         self.context_based = bool(comp_def.algo.param_value("context_based"))
+        self.deterministic_start = bool(comp_def.algo.param_value("deterministic_start"))
         self.stop_cycle = comp_def.algo.param_value("stop_cycle")
         self.update_prob = float(comp_def.algo.param_value("update_prob"))
         self.alpha = float(comp_def.algo.param_value("alpha"))
@@ -126,7 +128,10 @@ class RMComputation(VariableComputation):
             self.ordered_domain = tuple(self.variable.domain)
             self.domain_size = len(self.ordered_domain)
             self.last_strategy = self.get_uniform_policy()
-            self.random_value_selection()
+            if self.deterministic_start:
+                self.deterministic_value_selection()
+            else:
+                self.random_value_selection()
             self.logger.debug("RM starts: randomly select value %s", self.current_value)
             self.post_to_all_neighbors(RMMessage(self.current_value))
 

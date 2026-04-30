@@ -7,6 +7,7 @@ import pandas as pd
 from evaluation.algo_configs import get_display_name
 import networkx as nx
 import matplotlib.pyplot as plt
+import argparse
 
 
 def create_gif(image_paths, output_gif_path, duration=200):
@@ -46,16 +47,73 @@ def create_gif(image_paths, output_gif_path, duration=200):
 
 if __name__ == "__main__":
     DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    scenario = os.path.join(DIR, "output", "graph_coloring_instances_hard", "gc_n10_k3_random_1.yaml")
-    # scenario=os.path.join(DIR,'tests','instances','graph_coloring1.yaml')
-    temp_yaml = os.path.join(DIR, "output", "temp_yaml.yaml")
-    collect_csv = os.path.join(DIR, "output", "temp_collect_metrics.csv")
-    algorithms_dir = os.path.join(DIR, "evaluation", "configs", "algorithm_configs.json")
-    plot_dir = os.path.join(DIR, "output", "temp_color_plots")
+    p = argparse.ArgumentParser()
+
+    p.add_argument(
+        "scenario",
+        type=str,
+        help="yaml file with graph coloring scenario (run graph_coloring_generator.py for this)",
+    )
+    p.add_argument(
+        "--algorithms",
+        type=str,
+        default=os.path.join(DIR, "evaluation", "configs", "algorithm_configs.json"),
+        help="json file with algorithm configs",
+    )
+    p.add_argument(
+        "--plot_temp_dir",
+        type=str,
+        default=os.path.join(DIR, "output", "temp_color_plots"),
+        help="directory to save temporary plots",
+    )
+    p.add_argument(
+        "--gif_dir",
+        type=str,
+        default=os.path.join(DIR, "output", "graph_color_gifs"),
+        help="directory to save gifs",
+    )
+
+    p.add_argument(
+        "--duration",
+        type=int,
+        default=300,
+        help="duration of gif frames",
+    )
+    p.add_argument(
+        "--node_size",
+        type=int,
+        default=800,
+        help="size of nodes",
+    )
+    p.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+        help="random seed for node positions",
+    )
+    p.add_argument(
+        "--start_decimals",
+        type=int,
+        default=1,
+        help="number of decimals to start the positional encoding of colors",
+    )
+    args = p.parse_args()
+    scenario = args.scenario
+    algorithms_dir = args.algorithms
+    plot_temp_dir = args.plot_temp_dir
+
+    gif_dir = args.gif_dir
+    duration = args.duration
+    node_size = args.node_size
+    seed = args.seed
+    collect_csv = os.path.join(plot_temp_dir, "temp_collect_metrics.csv")
+    temp_yaml = os.path.join(plot_temp_dir, "temp_yaml.yaml")
+    start_decimals = args.start_decimals
+
     with open(algorithms_dir, "r") as f:
         algorithms = json.load(f)
-    os.makedirs(plot_dir, exist_ok=True)
-    decimals = 1
+    os.makedirs(plot_temp_dir, exist_ok=True)
+    os.makedirs(gif_dir, exist_ok=True)
     max_decimals = 0
     alg_to_info = dict()
     with open(scenario, "r") as f:
@@ -63,9 +121,9 @@ if __name__ == "__main__":
     colors = pydcop_dict["domains"]["colors"]["values"]
     var_to_dec = dict()
     for i, variable in enumerate(pydcop_dict["variables"]):
-        var_to_dec[variable] = i + decimals
-        max_decimals = max(max_decimals, i + decimals)
-        prefix = "0." + "0" * (i + decimals - 1)
+        var_to_dec[variable] = i + start_decimals
+        max_decimals = max(max_decimals, i + start_decimals)
+        prefix = "0." + "0" * (i + start_decimals - 1)
         cost_fn = ""
         for j, color in enumerate(colors[:-1]):
             cost_fn += f"{prefix}{j} if {variable} == '{color}' else ("
@@ -77,11 +135,11 @@ if __name__ == "__main__":
 
     G = nx.Graph()
     G.add_edges_from([constraint["variables"] for _, constraint in pydcop_dict["constraints"].items()])
-    pos = nx.spring_layout(G, seed=0)
+    pos = nx.spring_layout(G, seed=seed)
 
     for algorithm_config in algorithms:
         algo_name = get_display_name(algorithm_config)
-        gif_path = os.path.join(plot_dir, algo_name.replace("+", "plus").replace(" ", "_") + ".gif")
+        gif_path = os.path.join(gif_dir, algo_name.replace("+", "plus").replace(" ", "_") + ".gif")
 
         cmd = [
             "pydcop",
@@ -97,6 +155,8 @@ if __name__ == "__main__":
         if "algo_params" in algorithm_config:
             for param in algorithm_config["algo_params"]:
                 cmd.extend(["--algo_param", param])
+        if algorithm_config["name"].startswith("regret_matching"):
+            cmd.extend(["--algo_param", "deterministic_start:1"])
         cmd += [temp_yaml]
         subprocess.run(cmd, check=True)  # capture_output=True, text=True)
 
@@ -104,13 +164,16 @@ if __name__ == "__main__":
         costs = df["cost"]
         variables = list(var_to_dec.keys())
         plt.axis("off")
-        options = {"edgecolors": "tab:gray", "node_size": 800, "alpha": 1}
+        options = {"edgecolors": "tab:gray", "node_size": node_size, "alpha": 1}
         i = 0
         fns = []
+        costs = [c for c in costs if not pd.isnull(c)]
+        # add to the start the initial deterministic start
+        if algorithm_config["name"].startswith("regret_matching"):
+            costs = [int(costs[0])] + costs
+        # linger on initial fram for longer
+        costs = [costs[0]] + costs
         for cost in costs:
-            if pd.isnull(cost):
-                continue
-
             color_to_var = {c: [] for c in colors}
             for var in var_to_dec:
                 t_cost = round(cost, max_decimals)
@@ -121,18 +184,18 @@ if __name__ == "__main__":
                 c = colors[int(t_cost)]
                 color_to_var[c].append(var)
             for c, var_list_c in color_to_var.items():
-                node_color = "tab:" + {"B": "blue", "R": "red", "G": "green"}[c]
+                node_color = "tab:" + {"B": "blue", "R": "red", "G": "green", "O": "orange"}[c]
                 nx.draw_networkx_nodes(G, pos, nodelist=var_list_c, node_color=node_color, **options)
             nx.draw_networkx_edges(
                 G,
                 pos,
                 width=1.0,
             )
-            fn = os.path.join(plot_dir, str(i) + ".png")
+            fn = os.path.join(plot_temp_dir, str(i) + ".png")
             plt.savefig(fn)
             fns.append(fn)
             plt.close()
             i += 1
-        create_gif(image_paths=fns, output_gif_path=gif_path, duration=200)
+        create_gif(image_paths=fns, output_gif_path=gif_path, duration=duration)
         for fn in fns:
             os.remove(fn)
