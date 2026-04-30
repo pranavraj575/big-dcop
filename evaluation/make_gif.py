@@ -74,6 +74,11 @@ if __name__ == "__main__":
     )
 
     p.add_argument(
+        "--display_time",
+        action="store_true",
+        help="whether to display the clock time at each frame",
+    )
+    p.add_argument(
         "--duration",
         type=int,
         default=300,
@@ -96,6 +101,12 @@ if __name__ == "__main__":
         type=int,
         default=1,
         help="number of decimals to start the positional encoding of colors",
+    )
+    p.add_argument(
+        "--dpi",
+        type=int,
+        default=100,
+        help="dpi for plotting",
     )
     args = p.parse_args()
     scenario = args.scenario
@@ -161,19 +172,21 @@ if __name__ == "__main__":
         subprocess.run(cmd, check=True)  # capture_output=True, text=True)
 
         df = pd.read_csv(collect_csv)
-        costs = df["cost"]
+        df = df[pd.notna(df["cost"])]
         variables = list(var_to_dec.keys())
-        plt.axis("off")
         options = {"edgecolors": "tab:gray", "node_size": node_size, "alpha": 1}
         i = 0
         fns = []
-        costs = [c for c in costs if not pd.isnull(c)]
+        costs = list(df["cost"])
+        times = list(df["time"])
         # add to the start the initial deterministic start
         if algorithm_config["name"].startswith("regret_matching"):
             costs = [int(costs[0])] + costs
+            times = [0] + times
         # linger on initial fram for longer
         costs = [costs[0]] + costs
-        for cost in costs:
+        times = [times[0]] + times
+        for time, cost in zip(times, costs):
             color_to_var = {c: [] for c in colors}
             for var in var_to_dec:
                 t_cost = round(cost, max_decimals)
@@ -192,9 +205,11 @@ if __name__ == "__main__":
                 width=1.0,
             )
             fn = os.path.join(plot_temp_dir, str(i) + ".png")
-            plt.savefig(fn)
-            fns.append(fn)
+            if args.display_time:
+                plt.xlabel(f"Time (s): {time}", loc="left", size=13)
+            plt.savefig(fn, dpi=args.dpi)
             plt.close()
+            fns.append(fn)
             i += 1
         create_gif(image_paths=fns, output_gif_path=gif_path, duration=duration)
         for fn in fns:
