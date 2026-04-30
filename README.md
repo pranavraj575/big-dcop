@@ -50,6 +50,7 @@ To create a visualization:
   ```shell
   python evaluation/make_gif.py output/gif_graph_instances/gc_n10_k3_random_1.yaml --algorithms evaluation/configs/algorithm_configs.json --display_time --dpi 300 --seed 13
   ```
+![](https://github.com/pranavraj575/big-dcop/blob/master/output/graph_color_gifs_readme/RM.gif)
 
 ## Formatting
 
