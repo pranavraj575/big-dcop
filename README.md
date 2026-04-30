@@ -32,11 +32,25 @@ sudo apt install dvipng
 ```
 ## Run experiments
 
-```bash
+### Graph coloring
+To generate graphs, run experiments, then plot results:
+```shell
 python evaluation/graph_coloring_generator.py
 python evaluation/graph_coloring_runner.py 
 python evaluation/plot_results.py 
 ```
+(run each script with `--help` to see options)
+
+To create a visualization:
+* Make a graph coloring instance 
+  ```shell
+  python evaluation/graph_coloring_generator.py --output_dir output/gif_graph_instances/ --num_problems 1 --graph_n 10
+  ```
+* Run `make_gif.py`:
+  ```shell
+  python evaluation/make_gif.py output/gif_graph_instances/gc_n10_k3_random_1.yaml --algorithms evaluation/configs/algorithm_configs.json --display_time --dpi 300 --seed 13
+  ```
+
 ## Formatting
 
 To allow tests and formatting, install ruff:

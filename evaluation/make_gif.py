@@ -184,6 +184,7 @@ if __name__ == "__main__":
         # recover colorings from just the cost, generate gif from frames
         for time, cost in zip(times, costs):
             color_to_var = {c: [] for c in colors}
+            var_to_color = dict()
             for var in var_to_dec:
                 t_cost = round(cost, max_decimals)
                 # prevent floating point errors by shifting one at a time
@@ -192,13 +193,22 @@ if __name__ == "__main__":
                     t_cost = round((10 * t_cost) % 10, max_decimals)
                 c = colors[int(t_cost)]
                 color_to_var[c].append(var)
+                var_to_color[var] = c
             for c, var_list_c in color_to_var.items():
                 node_color = "tab:" + {"B": "blue", "R": "red", "G": "green", "O": "orange"}[c]
                 nx.draw_networkx_nodes(G, pos, nodelist=var_list_c, node_color=node_color, **options)
+
+            edge_colors = []
+            for u, v in G.edges():
+                if var_to_color[u] == var_to_color[v]:
+                    edge_colors.append("red")
+                else:
+                    edge_colors.append("black")
             nx.draw_networkx_edges(
                 G,
                 pos,
-                width=1.0,
+                width=2.0,
+                edge_color=edge_colors,
             )
             fn = os.path.join(args.plot_temp_dir, str(i) + ".png")
             if args.display_time:
