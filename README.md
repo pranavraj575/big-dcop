@@ -58,6 +58,7 @@ To get around this, we set the cost of breaking each constraint to 1000, and enc
 (e.g. a mid-run cost of 3000.021011 means 3 constraints were violated, color `c0` was assigned to variable `v0`, `c2` to `v1`, `c1` to `v2`, `c0` to `v3`, ... ).
 Because of our choice of encoding, we cannot have `color_count>10`. 
 Also, because of floating-point precision, we can encode only small graphs.
+There is almost certainly a better way to do this.
 
 ![](https://github.com/pranavraj575/big-dcop/blob/master/output/graph_color_gifs_readme/RM.gif)
 
