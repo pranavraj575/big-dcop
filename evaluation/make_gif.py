@@ -79,6 +79,11 @@ if __name__ == "__main__":
         help="whether to display the clock time at each frame",
     )
     p.add_argument(
+        "--uniform_start",
+        action="store_true",
+        help="whether to initialize all nodes to the same color (only implemented for RM algorithm)",
+    )
+    p.add_argument(
         "--duration",
         type=int,
         default=300,
@@ -143,7 +148,7 @@ if __name__ == "__main__":
         if "algo_params" in algorithm_config:
             for param in algorithm_config["algo_params"]:
                 cmd.extend(["--algo_param", param])
-        if algorithm_config["name"].startswith("regret_matching"):
+        if algorithm_config["name"].startswith("regret_matching") and args.uniform_start:
             cmd.extend(["--algo_param", "deterministic_start:1"])
         cmd += [args.scenario]
         subprocess.run(cmd, check=True)  # capture_output=True, text=True)
