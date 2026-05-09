@@ -202,11 +202,11 @@ if __name__ == "__main__":
                 plt.plot(
                     (0, time / max_time), (-0.1, -0.1), color="#420dab", alpha=1, lw=3, transform=ax.transAxes, clip_on=False
                 )
-            plt.savefig(fn, dpi=args.dpi)
+            plt.savefig(fn, dpi=args.dpi, bbox_inches="tight")
             plt.close()
             fns.append(fn)
             i += 1
-        print("saving gif to", gif_path)
+        print(f"saving gif to {gif_path} with {len(fns)} images")
         create_gif(image_paths=fns, output_gif_path=gif_path, duration=args.duration)
         print("saved")
         # clean temp directory
