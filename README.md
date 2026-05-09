@@ -45,7 +45,7 @@ To create a visualization:
   ```shell
   python evaluation/graph_coloring_generator.py --output_dir output/gif_graph_instances/ --color_count 3 --graph_n 15 --num_problems 1 
   ```
-* Run `make_gif.py`:
+* Run `make_gif.py` on the generated graph coloring instance:
   ```shell
   python evaluation/make_gif.py output/gif_graph_instances/gc_n15_k3_random_1.yaml --algorithms evaluation/configs/algorithm_configs.json --display_time --dpi 300 --seed 13 --uniform_start
   ```
