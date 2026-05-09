@@ -26,7 +26,7 @@ def create_gif(image_paths, output_gif_path, duration=200):
 
     # get background color
     # im.getcolors() returns unsorted list of (count, color)
-    colors = images[0].getcolors(maxcolors=images[0].width*images[0].height)
+    colors = images[0].getcolors(maxcolors=images[0].width * images[0].height)
     assert colors is not None
     _, background_color = max(colors, key=lambda x: x[0])
 
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     os.makedirs(args.gif_dir, exist_ok=True)
     # "edgecolors": "tab:gray"
     options = {"edgecolors": "black", "node_size": args.node_size, "alpha": 1}
-    options_unassigned = {"node_color": 'gray', "node_size": max(args.node_size//2,1), "alpha": 1}
+    options_unassigned = {"node_color": "gray", "node_size": max(args.node_size // 2, 1), "alpha": 1}
     alg_to_info = dict()
 
     # make pydcop instance, edit colors so we can recover assignment from just costs
@@ -159,8 +159,8 @@ if __name__ == "__main__":
         var_to_color_record = []
         var_to_color = dict()
         for idx, row in df.iterrows():
-            var_to_color[row['variable']] = row['value']
-            var_to_color_record.append((row['time'], var_to_color.copy()))
+            var_to_color[row["variable"]] = row["value"]
+            var_to_color_record.append((row["time"], var_to_color.copy()))
         var_to_color_record = [var_to_color_record[0]] + var_to_color_record + [var_to_color_record[-1]]
         fns = []
         for i, (time, var_to_color) in enumerate(var_to_color_record):
@@ -182,21 +182,15 @@ if __name__ == "__main__":
             edge_style = []
             for u, v in G.edges():
                 if (u not in var_to_color) or (v not in var_to_color):
-                    edge_colors.append('gray')
-                    edge_style.append('--')
+                    edge_colors.append("gray")
+                    edge_style.append("--")
                 elif var_to_color[u] == var_to_color[v]:
                     edge_colors.append("red")
-                    edge_style.append('solid')
+                    edge_style.append("solid")
                 else:
                     edge_colors.append("black")
-                    edge_style.append('solid')
-            nx.draw_networkx_edges(
-                G,
-                pos,
-                width=2.0,
-                edge_color=edge_colors,
-                style=edge_style
-            )
+                    edge_style.append("solid")
+            nx.draw_networkx_edges(G, pos, width=2.0, edge_color=edge_colors, style=edge_style)
             fn = os.path.join(args.plot_temp_dir, str(i) + ".png")
             if args.display_time:
                 plt.xlabel(f"Time (s): {time}", loc="left", size=13)
@@ -204,9 +198,9 @@ if __name__ == "__main__":
             plt.close()
             fns.append(fn)
             i += 1
-        print('saving gif to',gif_path)
+        print("saving gif to", gif_path)
         create_gif(image_paths=fns, output_gif_path=gif_path, duration=args.duration)
-        print('saved')
+        print("saved")
         # clean temp directory
         for fn in fns:
             os.remove(fn)
