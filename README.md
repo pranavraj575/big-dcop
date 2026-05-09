@@ -1,6 +1,6 @@
 # Dcop python
 
-Tested with python 3.8 on Ubuntu 24
+Tested with python 3.8 on Ubuntu (20, 24)
 
 ## Installation
 
