@@ -49,7 +49,8 @@ To create a visualization:
   ```shell
   python evaluation/make_gif.py output/gif_graph_instances/gc_n15_k3_random_1.yaml --algorithms evaluation/configs/algorithm_configs.json --display_time --dpi 300 --seed 13 --uniform_start
   ```
-
+[//]: <> (python evaluation/graph_coloring_generator.py --output_dir output/gif_graph_instances/ --color_count 3 --graph_n 15 --num_problems 1)
+[//]: <> (python evaluation/make_gif.py output/gif_graph_instances/gc_n15_k3_random_1.yaml --algorithms evaluation/configs/algorithm_configs.json --gif_dir output/graph_color_gifs_readme --display_time --dpi 300 --seed 13 --uniform_start)
 ![](https://github.com/pranavraj575/big-dcop/blob/master/output/graph_color_gifs_readme/RM.gif)
 
 ## Formatting

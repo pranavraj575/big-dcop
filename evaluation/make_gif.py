@@ -161,9 +161,12 @@ if __name__ == "__main__":
         for idx, row in df.iterrows():
             var_to_color[row["variable"]] = row["value"]
             var_to_color_record.append((row["time"], var_to_color.copy()))
+        max_time = max(t for t, _ in var_to_color_record)
+
         var_to_color_record = [var_to_color_record[0]] + var_to_color_record + [var_to_color_record[-1]]
         fns = []
         for i, (time, var_to_color) in enumerate(var_to_color_record):
+            fig, ax = plt.subplots()
             if time is None:
                 continue
             color_to_var = {c: [] for c in colors}
@@ -194,6 +197,11 @@ if __name__ == "__main__":
             fn = os.path.join(args.plot_temp_dir, str(i) + ".png")
             if args.display_time:
                 plt.xlabel(f"Time (s): {time}", loc="left", size=13)
+
+                plt.plot((0, 1), (-0.1, -0.1), color="gray", alpha=0.420, lw=5, transform=ax.transAxes, clip_on=False)
+                plt.plot(
+                    (0, time / max_time), (-0.1, -0.1), color="#420dab", alpha=1, lw=3, transform=ax.transAxes, clip_on=False
+                )
             plt.savefig(fn, dpi=args.dpi)
             plt.close()
             fns.append(fn)
