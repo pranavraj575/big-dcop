@@ -97,12 +97,6 @@ if __name__ == "__main__":
         help="random seed for node positions",
     )
     p.add_argument(
-        "--start_decimals",
-        type=int,
-        default=1,
-        help="number of decimals to start the positional encoding of colors",
-    )
-    p.add_argument(
         "--dpi",
         type=int,
         default=100,
@@ -116,26 +110,14 @@ if __name__ == "__main__":
         algorithms = json.load(f)
     os.makedirs(args.plot_temp_dir, exist_ok=True)
     os.makedirs(args.gif_dir, exist_ok=True)
-    max_decimals = 0
+    options = {"edgecolors": "tab:gray", "node_size": args.node_size, "alpha": 1}
     alg_to_info = dict()
 
     # make pydcop instance, edit colors so we can recover assignment from just costs
     with open(args.scenario, "r") as f:
         pydcop_dict = yaml.safe_load(f)
     colors = pydcop_dict["domains"]["colors"]["values"]
-    var_to_dec = dict()
-    for i, variable in enumerate(pydcop_dict["variables"]):
-        var_to_dec[variable] = i + args.start_decimals
-        max_decimals = max(max_decimals, i + args.start_decimals)
-        prefix = "0." + "0" * (i + args.start_decimals - 1)
-        cost_fn = ""
-        for j, color in enumerate(colors[:-1]):
-            cost_fn += f"{prefix}{j} if {variable} == '{color}' else ("
-        cost_fn += f"{prefix}{len(colors) - 1}"
-        cost_fn += ")" * cost_fn.count("(")
-        pydcop_dict["variables"][variable]["cost_function"] = cost_fn
-    with open(temp_yaml, "w") as f:
-        yaml.safe_dump(pydcop_dict, f)
+
     # make graph, precompute positions
     G = nx.Graph()
     G.add_edges_from([constraint["variables"] for _, constraint in pydcop_dict["constraints"].items()])
@@ -162,45 +144,39 @@ if __name__ == "__main__":
                 cmd.extend(["--algo_param", param])
         if algorithm_config["name"].startswith("regret_matching"):
             cmd.extend(["--algo_param", "deterministic_start:1"])
-        cmd += [temp_yaml]
+        cmd += [args.scenario]
         subprocess.run(cmd, check=True)  # capture_output=True, text=True)
 
         df = pd.read_csv(collect_csv)
-        df = df[pd.notna(df["cost"])]
-        variables = list(var_to_dec.keys())
-        options = {"edgecolors": "tab:gray", "node_size": args.node_size, "alpha": 1}
-        i = 0
-        fns = []
-        costs = list(df["cost"])
-        times = list(df["time"])
-        # add to the start the initial deterministic start
-        if algorithm_config["name"].startswith("regret_matching"):
-            costs = [int(costs[0])] + costs
-            times = [0] + times
-        # linger on initial frame for longer
-        costs = [costs[0]] + costs
-        times = [times[0]] + times
 
-        # recover colorings from just the cost, generate gif from frames
-        for time, cost in zip(times, costs):
+        variables=list(pydcop_dict["variables"])
+        var_to_color_record=[]
+        var_to_color=dict()
+        for idx,row in df.iterrows():
+            var_to_color[row['variable']]=row['value']
+            var_to_color_record.append((row['time'], var_to_color.copy()))
+
+        fns=[]
+        for i,(time,var_to_color) in enumerate(var_to_color_record):
+            if time is None:
+                continue
             color_to_var = {c: [] for c in colors}
-            var_to_color = dict()
-            for var in var_to_dec:
-                t_cost = round(cost, max_decimals)
-                # prevent floating point errors by shifting one at a time
-                # idx=int(cost*(10**var_to_dec[var]))%10
-                for _ in range(var_to_dec[var]):
-                    t_cost = round((10 * t_cost) % 10, max_decimals)
-                c = colors[int(t_cost)]
+            unused_vars=set(variables)
+
+            for var,c in var_to_color.items():
                 color_to_var[c].append(var)
-                var_to_color[var] = c
+                unused_vars.remove(var)
+
             for c, var_list_c in color_to_var.items():
                 node_color = "tab:" + {"B": "blue", "R": "red", "G": "green", "O": "orange"}[c]
                 nx.draw_networkx_nodes(G, pos, nodelist=var_list_c, node_color=node_color, **options)
-
+            # unused nodes here
+            nx.draw_networkx_nodes(G, pos, nodelist=list(unused_vars), node_color='black', **options)
             edge_colors = []
             for u, v in G.edges():
-                if var_to_color[u] == var_to_color[v]:
+                if (u not in var_to_color )or (v not in var_to_color):
+                    edge_colors.append('gray')
+                elif var_to_color[u] == var_to_color[v]:
                     edge_colors.append("red")
                 else:
                     edge_colors.append("black")

@@ -371,6 +371,8 @@ columns = {
         "msg_count",
         "msg_size",
         "status",
+        "variable",
+        "value",
     ],
     "period": ["time", "cycle", "cost", "violation", "msg_count", "msg_size", "status"],
 }

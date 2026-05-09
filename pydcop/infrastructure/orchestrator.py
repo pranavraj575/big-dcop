@@ -34,7 +34,7 @@ from typing import Dict, Tuple, Callable
 from typing import List
 from typing import Optional, Any
 
-from collections import defaultdict
+from collections import defaultdict, deque
 
 import time
 import yaml
@@ -641,6 +641,9 @@ class AgentsMgt(MessagePassingComputation):
 
         self.repair_metrics = {}
 
+        self.store_value_changes=True
+        self.past_value_changes=deque(maxlen=2)
+
     @property
     def type(self):
         return 'mgt'
@@ -826,6 +829,17 @@ class AgentsMgt(MessagePassingComputation):
 
                 self._agt_cycle_metrics[self._current_cycle][msg.agent] =\
                     msg.metrics
+                if self.store_value_changes:
+                    self.past_value_changes.append({
+                        'agent': msg.agent,
+                        'computation': msg.computation,
+                        'value': msg.value,
+                        't': t
+                    })
+                msg.metrics['agent']=msg.agent
+                msg.metrics['computation']=msg.computation
+                msg.metrics['value']=msg.value
+                msg.metrics['t']=t
                 self._emit_metrics(t)
 
     def _on_cycle_change_msg(self, sender: str, msg: CycleChangeMessage,
@@ -1268,7 +1282,9 @@ class AgentsMgt(MessagePassingComputation):
             'msg_count': msg_count,
             'msg_size': msg_size,
             'cycle': max_cycle,
-            'agt_metrics': self._agt_cycle_metrics[self._current_cycle]
+            'agt_metrics': self._agt_cycle_metrics[self._current_cycle],
+            'variable':self.past_value_changes[-1]['computation'] if self.past_value_changes else None,
+            'value':self.past_value_changes[-1]['value'] if self.past_value_changes else None,
         }
 
         return global_metrics
