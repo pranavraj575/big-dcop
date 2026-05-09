@@ -26,7 +26,7 @@ def create_gif(image_paths, output_gif_path, duration=200):
 
     # get background color
     # im.getcolors() returns unsorted list of (count, color)
-    colors = images[0].getcolors(maxcolors=images[0].width * images[0].height)
+    colors = images[0].getcolors(maxcolors=images[0].width*images[0].height)
     assert colors is not None
     _, background_color = max(colors, key=lambda x: x[0])
 
@@ -105,12 +105,13 @@ if __name__ == "__main__":
     args = p.parse_args()
 
     collect_csv = os.path.join(args.plot_temp_dir, "temp_collect_metrics.csv")
-    temp_yaml = os.path.join(args.plot_temp_dir, "temp_yaml.yaml")
     with open(args.algorithms, "r") as f:
         algorithms = json.load(f)
     os.makedirs(args.plot_temp_dir, exist_ok=True)
     os.makedirs(args.gif_dir, exist_ok=True)
-    options = {"edgecolors": "tab:gray", "node_size": args.node_size, "alpha": 1}
+    # "edgecolors": "tab:gray"
+    options = {"edgecolors": "black", "node_size": args.node_size, "alpha": 1}
+    options_unassigned = {"node_color": 'gray', "node_size": max(args.node_size//2,1), "alpha": 1}
     alg_to_info = dict()
 
     # make pydcop instance, edit colors so we can recover assignment from just costs
@@ -149,21 +150,21 @@ if __name__ == "__main__":
 
         df = pd.read_csv(collect_csv)
 
-        variables=list(pydcop_dict["variables"])
-        var_to_color_record=[]
-        var_to_color=dict()
-        for idx,row in df.iterrows():
-            var_to_color[row['variable']]=row['value']
+        variables = list(pydcop_dict["variables"])
+        var_to_color_record = []
+        var_to_color = dict()
+        for idx, row in df.iterrows():
+            var_to_color[row['variable']] = row['value']
             var_to_color_record.append((row['time'], var_to_color.copy()))
-
-        fns=[]
-        for i,(time,var_to_color) in enumerate(var_to_color_record):
+        var_to_color_record = [var_to_color_record[0]] + var_to_color_record + [var_to_color_record[-1]]
+        fns = []
+        for i, (time, var_to_color) in enumerate(var_to_color_record):
             if time is None:
                 continue
             color_to_var = {c: [] for c in colors}
-            unused_vars=set(variables)
+            unused_vars = set(variables)
 
-            for var,c in var_to_color.items():
+            for var, c in var_to_color.items():
                 color_to_var[c].append(var)
                 unused_vars.remove(var)
 
@@ -171,20 +172,25 @@ if __name__ == "__main__":
                 node_color = "tab:" + {"B": "blue", "R": "red", "G": "green", "O": "orange"}[c]
                 nx.draw_networkx_nodes(G, pos, nodelist=var_list_c, node_color=node_color, **options)
             # unused nodes here
-            nx.draw_networkx_nodes(G, pos, nodelist=list(unused_vars), node_color='black', **options)
+            nx.draw_networkx_nodes(G, pos, nodelist=list(unused_vars), **options_unassigned)
             edge_colors = []
+            edge_style = []
             for u, v in G.edges():
-                if (u not in var_to_color )or (v not in var_to_color):
+                if (u not in var_to_color) or (v not in var_to_color):
                     edge_colors.append('gray')
+                    edge_style.append('--')
                 elif var_to_color[u] == var_to_color[v]:
                     edge_colors.append("red")
+                    edge_style.append('solid')
                 else:
                     edge_colors.append("black")
+                    edge_style.append('solid')
             nx.draw_networkx_edges(
                 G,
                 pos,
                 width=2.0,
                 edge_color=edge_colors,
+                style=edge_style
             )
             fn = os.path.join(args.plot_temp_dir, str(i) + ".png")
             if args.display_time:
@@ -193,7 +199,9 @@ if __name__ == "__main__":
             plt.close()
             fns.append(fn)
             i += 1
+        print('saving gif to',gif_path)
         create_gif(image_paths=fns, output_gif_path=gif_path, duration=args.duration)
+        print('saved')
         # clean temp directory
         for fn in fns:
             os.remove(fn)

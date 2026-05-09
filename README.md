@@ -44,11 +44,11 @@ python evaluation/plot_results.py
 To create a visualization:
 * Make a graph coloring instance 
   ```shell
-  python evaluation/graph_coloring_generator.py --output_dir output/gif_graph_instances/ --color_count 3 --graph_n 10 --num_problems 1 
+  python evaluation/graph_coloring_generator.py --output_dir output/gif_graph_instances/ --color_count 3 --graph_n 15 --num_problems 1 
   ```
 * Run `make_gif.py`:
   ```shell
-  python evaluation/make_gif.py output/gif_graph_instances/gc_n10_k3_random_1.yaml --algorithms evaluation/configs/algorithm_configs.json --display_time --dpi 300 --seed 13
+  python evaluation/make_gif.py output/gif_graph_instances/gc_n15_k3_random_1.yaml --algorithms evaluation/configs/algorithm_configs.json --display_time --dpi 300 --seed 13
   ```
 
 ![](https://github.com/pranavraj575/big-dcop/blob/master/output/graph_color_gifs_readme/RM.gif)
