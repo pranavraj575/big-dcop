@@ -163,7 +163,7 @@ if __name__ == "__main__":
             var_to_color_record.append((row["time"], var_to_color.copy()))
         max_time = max(t for t, _ in var_to_color_record)
 
-        var_to_color_record = [var_to_color_record[0]] + var_to_color_record + [var_to_color_record[-1]]
+        var_to_color_record = [(0, dict())] * 2 + var_to_color_record + [var_to_color_record[-1]]
         fns = []
         for i, (time, var_to_color) in enumerate(var_to_color_record):
             fig, ax = plt.subplots()
