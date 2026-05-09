@@ -82,4 +82,3 @@ pyDCOP runs on python >= 3.6.
 
 Documentation is hosted on 
 [ReadTheDoc](https://pydcop.readthedocs.io)
- 
