@@ -6,6 +6,7 @@ import time
 
 
 def build_cosp(pydcop_dict: dict, algorithm_config: dict):
+
     pass
 
 
@@ -29,8 +30,8 @@ def cosp_parse_json_to_dcop_and_overlaps(json_filepath):
 
     pydcop = {
         "name": "Satellite_Request_Allocation",
-        "objective": "max",
-        "domains": {"binary_domain": {"values": [0, 1]}},
+        # "objective": "max",
+        # "domains": {"binary_domain": {"values": [0, 1]}},
         "variables": {},
         "agents": {},
         "constraints": {},
@@ -114,7 +115,10 @@ def cosp_parse_json_to_dcop_and_overlaps(json_filepath):
             #  currently, nf(n)=1/n, which seems too strong
             "function": f"0 if {sum_expr} == 0 else 1 / ({sum_expr} ** 2)",
         }
-
+    pydcop.pop("distribution")
+    pydcop["variables"] = list(pydcop["variables"].keys())
+    pydcop["agents"] = list(pydcop["agents"].keys())
+    pydcop["constraints"] = {k: v["variables"] for k, v in pydcop["constraints"].items()}
     return (
         pydcop,
         agent_tasks,
@@ -127,6 +131,22 @@ def cosp_parse_json_to_dcop_and_overlaps(json_filepath):
 
 class COSPSolver(ABC):
     def __init__(self, algorithm_config: dict, pydcop_dict: dict):
+        """
+
+        Parameters
+        ----------
+        algorithm_config: specifies what algorithm to use for each agent
+        pydcop_dict: dict
+            {
+                'name' -> name of instance
+                'variables' -> list of variables, each variable is named v_{agent id}_{variable_id}
+                'agents' -> list of agent ids
+                'constraints -> dict of {
+                    request id -> list of variables corresponding to this request (at most one per agent)
+                }
+
+            }
+        """
         self.algorithm_config = algorithm_config
         self.pydcop_dict = pydcop_dict.copy()
         # TODO: create array of agents
@@ -150,7 +170,15 @@ if __name__ == "__main__":
     fp = "scenarios/scenario_0.json"
     with open(fp, "r") as f:
         data = json.load(f)
-    print(data)
-    pydcop_dict = cosp_parse_json_to_dcop_and_overlaps(fp)
-    print(pydcop_dict)
+    # print(data)
+    (
+        pydcop,
+        agent_tasks,
+        agent_downlinks,
+        agent_capacities,
+        var_to_details,
+        requests,
+    ) = cosp_parse_json_to_dcop_and_overlaps(fp)
+    print(pydcop)
+    print(pydcop.keys())
     # c = COSPSolver(pydcop_dict=pydcop_dict, algorithm_config=dict())
