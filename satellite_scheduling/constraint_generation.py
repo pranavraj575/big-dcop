@@ -43,7 +43,7 @@ def solve_constraint_generation(
 
         # Run DCOP
         print("Running global dispatch")
-        utils.run_global_dispatcher(
+        utils.run_global_dispatcher_cosp(
             pydcop_dict, algorithm_config, temp_json, pydcop_results_json, pydcop_mode=pydcop_mode, timeout=timeout
         )
         print("Done global dispatch")

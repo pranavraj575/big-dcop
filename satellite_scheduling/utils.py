@@ -164,3 +164,139 @@ def run_global_dispatcher(pydcop_dict, algorithm_config, json_filepath, output_j
     except subprocess.CalledProcessError:
         print("Error running PyDCOP. Check terminal output.")
         exit(1)
+
+
+def translate_pydcop_to_cosp_config(algorithm_config: dict) -> dict:
+    """
+    Translate pydcop algorithm config to COSPSolver config format.
+    
+    Pydcop format:
+    {
+        "name": "mgm",
+        "algo_params": ["param1:value1", "param2:value2"]
+    }
+    
+    COSPSolver format:
+    {
+        "algorithm": "mgm",
+        "param1": "value1",
+        "param2": "value2"
+    }
+    """
+    cosp_config = {
+        "algorithm": algorithm_config.get("name", "mgm").lower()
+    }
+    
+    if "algo_params" in algorithm_config:
+        for param in algorithm_config["algo_params"]:
+            if ":" in param:
+                key, value = param.split(":", 1)
+                try:
+                    cosp_config[key] = int(value)
+                except ValueError:
+                    try:
+                        cosp_config[key] = float(value)
+                    except ValueError:
+                        cosp_config[key] = value
+    
+    return cosp_config
+
+
+def normalize_constraints(pydcop_dict: dict) -> dict:
+    """
+    Normalize constraint format to ensure they all support the "function" field.
+    Preserves existing format but converts simple lists to dict format with variables field.
+    
+    Returns:
+        dict: New pydcop_dict with normalized constraints (doesn't modify original)
+    """
+    normalized = pydcop_dict.copy()
+    
+    if "constraints" not in normalized:
+        return normalized
+    
+    normalized_constraints = {}
+    for constraint_name, constraint_spec in pydcop_dict["constraints"].items():
+        if isinstance(constraint_spec, list):
+            normalized_constraints[constraint_name] = {
+                "variables": constraint_spec
+            }
+        else:
+            normalized_constraints[constraint_name] = constraint_spec.copy()
+    
+    normalized["constraints"] = normalized_constraints
+    return normalized
+
+
+def convert_cosp_to_assignments(cosp_result: dict) -> dict:
+    """
+    Convert COSPSolver result format to pydcop result format.
+    
+    COSPSolver format:
+    {
+        "algorithm": "MGM",
+        "solution": {"agent_id": [list_of_vars]},
+        "iterations": 5,
+        "converged": true
+    }
+    
+    Pydcop format:
+    {
+        "assignment": {"var_name": 0/1, ...}
+    }
+    """
+    assignment = {}
+    
+    if "solution" in cosp_result:
+        for agent_id, var_list in cosp_result["solution"].items():
+            for var_name in var_list:
+                assignment[var_name] = 1
+    
+    return {
+        "assignment": assignment,
+        "run_info": {
+            "algorithm": cosp_result.get("algorithm", "unknown"),
+            "iterations": cosp_result.get("iterations", 0),
+            "converged": cosp_result.get("converged", False)
+        }
+    }
+
+
+def run_global_dispatcher_cosp(pydcop_dict, algorithm_config, json_filepath, 
+                               output_json, pydcop_mode, timeout=-1):
+    """
+    COSPSolver wrapper that replaces or supplements pydcop run_global_dispatcher.
+    Uses in-process solver instead of external CLI subprocess.
+    
+    Args:
+        pydcop_dict: DCOP problem dictionary with constraints in pydcop format
+        algorithm_config: Algorithm config with "name" and "algo_params" fields
+        json_filepath: Path to write temp JSON (for compatibility with existing code)
+        output_json: Path where output JSON should be written
+        pydcop_mode: Ignored (for API compatibility with pydcop version)
+        timeout: Ignored (for API compatibility with pydcop version)
+    """
+    from cosp_solver import build_cosp
+    
+    normalized_pydcop = normalize_constraints(pydcop_dict)
+    cosp_config = translate_pydcop_to_cosp_config(algorithm_config)
+    
+    try:
+        ts = time.time()
+        
+        solver = build_cosp(normalized_pydcop, cosp_config)
+        cosp_result = solver.solve()
+        
+        te = time.time()
+        print(f"COSPSolver completed in {te - ts:.2f} seconds")
+        
+        pydcop_result = convert_cosp_to_assignments(cosp_result)
+        
+        with open(output_json, "w") as f:
+            json.dump(pydcop_result, f, indent=2)
+        
+        print("COSPSolver finished successfully.")
+    except Exception as e:
+        print(f"Error running COSPSolver: {e}")
+        raise
+

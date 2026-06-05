@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from agent import Agent
+from constraint_parser import ConstraintFunctionEvaluator
 from typing import List, Dict, Set, Tuple, Optional
 from collections import defaultdict
 import time
@@ -164,6 +165,7 @@ class COSPSolver(ABC):
         self.pydcop_dict = pydcop_dict.copy()
         self.agents: List[Agent] = []
         self.variable_assignments: List[Set] = []
+        self.utility_evaluator = ConstraintFunctionEvaluator()
 
     @abstractmethod
     def update(self, pydcop_dict: dict):
@@ -171,6 +173,11 @@ class COSPSolver(ABC):
             agent.update(variable_assignments=self.variable_assignments, pydcop_dict=pydcop_dict)
         for agent_id, agent in enumerate(self.agents):
             self.variable_assignments[agent_id] = agent.tasks()
+
+    def _setup_agents(self):
+        """Inject the utility evaluator into all agents."""
+        for agent in self.agents:
+            agent.set_utility_evaluator(self.utility_evaluator)
 
     @abstractmethod
     def solve(self):
@@ -199,30 +206,31 @@ class MGMAgent(Agent):
             self.assigned_variables = variable_assignments[agent_idx].copy()
         
         if pydcop_dict and "constraints" in pydcop_dict:
-            for constraint_name, var_list in pydcop_dict["constraints"].items():
+            for constraint_name, constraint_spec in pydcop_dict["constraints"].items():
+                var_list = self._get_variable_list(constraint_spec)
+                function_str = self._get_function_str(constraint_spec)
+                
                 agent_vars = [v for v in var_list if self.agent_id in v]
                 for var in agent_vars:
-                    gain_1 = self._calculate_gain(var, 1, pydcop_dict)
-                    gain_0 = self._calculate_gain(var, 0, pydcop_dict)
+                    gain_1 = self._calculate_gain(var, 1, var_list, function_str, pydcop_dict)
+                    gain_0 = self._calculate_gain(var, 0, var_list, function_str, pydcop_dict)
                     
                     if gain_1 > gain_0:
                         self.assigned_variables.add(var)
                     else:
                         self.assigned_variables.discard(var)
 
-    def _calculate_gain(self, variable: str, value: int, pydcop_dict: dict) -> float:
+    def _calculate_gain(self, variable: str, value: int, var_list: List[str], function_str: str, pydcop_dict: dict) -> float:
         """Calculate the gain for assigning a value to a variable."""
-        total_gain = 0
-        
-        if "constraints" in pydcop_dict:
-            for constraint_name, var_list in pydcop_dict["constraints"].items():
-                if variable in var_list:
-                    total_gain += self._constraint_utility(var_list, variable, value)
-        
-        return total_gain
+        return self._constraint_utility(var_list, variable, value, function_str)
 
-    def _constraint_utility(self, var_list: List[str], variable: str, value: int) -> float:
-        """Calculate utility from a constraint."""
+    def _constraint_utility(self, var_list: List[str], variable: str, value: int, function_str: str = None) -> float:
+        """Calculate utility from a constraint, using custom function if provided."""
+        if function_str and self.utility_evaluator:
+            var_values = {v: (1 if v in self.assigned_variables else 0) for v in var_list}
+            var_values[variable] = value
+            return self.evaluate_constraint_utility(function_str, var_values)
+        
         current_sum = sum(1 for v in var_list if v in self.assigned_variables)
         
         if value == 1:
@@ -234,6 +242,20 @@ class MGMAgent(Agent):
             return 0
         else:
             return 1 / (new_sum ** 2)
+
+    def _get_variable_list(self, constraint_spec) -> List[str]:
+        """Extract variable list from constraint spec (handles both formats)."""
+        if isinstance(constraint_spec, list):
+            return constraint_spec
+        elif isinstance(constraint_spec, dict) and "variables" in constraint_spec:
+            return constraint_spec["variables"]
+        return []
+
+    def _get_function_str(self, constraint_spec) -> str:
+        """Extract function string from constraint spec if present."""
+        if isinstance(constraint_spec, dict) and "function" in constraint_spec:
+            return constraint_spec["function"]
+        return None
 
     def tasks(self) -> Set:
         return self.assigned_variables.copy()
@@ -260,10 +282,13 @@ class DSAAgent(Agent):
             self.assigned_variables = variable_assignments[agent_idx].copy()
         
         if pydcop_dict and "constraints" in pydcop_dict:
-            for constraint_name, var_list in pydcop_dict["constraints"].items():
+            for constraint_name, constraint_spec in pydcop_dict["constraints"].items():
+                var_list = self._get_variable_list(constraint_spec)
+                function_str = self._get_function_str(constraint_spec)
+                
                 agent_vars = [v for v in var_list if self.agent_id in v]
                 for var in agent_vars:
-                    best_value = self._get_best_value(var, pydcop_dict)
+                    best_value = self._get_best_value(var, var_list, function_str, pydcop_dict)
                     
                     if random.random() < self.probability:
                         if best_value == 1:
@@ -271,30 +296,50 @@ class DSAAgent(Agent):
                         else:
                             self.assigned_variables.discard(var)
 
-    def _get_best_value(self, variable: str, pydcop_dict: dict) -> int:
+    def _get_best_value(self, variable: str, var_list: List[str], function_str: str, pydcop_dict: dict) -> int:
         """Get the best value for a variable based on constraints."""
         gain_1 = 0
         gain_0 = 0
         
-        if "constraints" in pydcop_dict:
-            for constraint_name, var_list in pydcop_dict["constraints"].items():
-                if variable in var_list:
-                    current_sum = sum(1 for v in var_list if v in self.assigned_variables)
-                    
-                    new_sum_1 = current_sum + 1
-                    new_sum_0 = max(0, current_sum - 1)
-                    
-                    if new_sum_1 == 0:
-                        gain_1 += 0
-                    else:
-                        gain_1 += 1 / (new_sum_1 ** 2)
-                    
-                    if new_sum_0 == 0:
-                        gain_0 += 0
-                    else:
-                        gain_0 += 1 / (new_sum_0 ** 2)
+        if function_str and self.utility_evaluator:
+            var_values_1 = {v: (1 if v in self.assigned_variables else 0) for v in var_list}
+            var_values_1[variable] = 1
+            var_values_0 = {v: (1 if v in self.assigned_variables else 0) for v in var_list}
+            var_values_0[variable] = 0
+            
+            gain_1 = self.evaluate_constraint_utility(function_str, var_values_1)
+            gain_0 = self.evaluate_constraint_utility(function_str, var_values_0)
+        else:
+            current_sum = sum(1 for v in var_list if v in self.assigned_variables)
+            
+            new_sum_1 = current_sum + 1
+            new_sum_0 = max(0, current_sum - 1)
+            
+            if new_sum_1 == 0:
+                gain_1 += 0
+            else:
+                gain_1 += 1 / (new_sum_1 ** 2)
+            
+            if new_sum_0 == 0:
+                gain_0 += 0
+            else:
+                gain_0 += 1 / (new_sum_0 ** 2)
         
         return 1 if gain_1 >= gain_0 else 0
+
+    def _get_variable_list(self, constraint_spec) -> List[str]:
+        """Extract variable list from constraint spec (handles both formats)."""
+        if isinstance(constraint_spec, list):
+            return constraint_spec
+        elif isinstance(constraint_spec, dict) and "variables" in constraint_spec:
+            return constraint_spec["variables"]
+        return []
+
+    def _get_function_str(self, constraint_spec) -> str:
+        """Extract function string from constraint spec if present."""
+        if isinstance(constraint_spec, dict) and "function" in constraint_spec:
+            return constraint_spec["function"]
+        return None
 
     def tasks(self) -> Set:
         return self.assigned_variables.copy()
@@ -326,11 +371,25 @@ class MaxSumAgent(Agent):
 
     def _update_beliefs(self, pydcop_dict: dict):
         """Update beliefs based on incoming messages from constraints."""
-        for constraint_name, var_list in pydcop_dict["constraints"].items():
+        for constraint_name, constraint_spec in pydcop_dict["constraints"].items():
+            var_list = self._get_variable_list(constraint_spec)
+            function_str = self._get_function_str(constraint_spec)
+            
             agent_vars = [v for v in var_list if self.agent_id in v]
             
             for var in agent_vars:
-                incoming_sum = sum(self.incoming_messages.get(v, 0) for v in var_list if v != var)
+                if function_str and self.utility_evaluator:
+                    var_values_1 = {v: (1 if v in self.assigned_variables else 0) for v in var_list}
+                    var_values_1[var] = 1
+                    utility_1 = self.evaluate_constraint_utility(function_str, var_values_1)
+                    
+                    var_values_0 = {v: (1 if v in self.assigned_variables else 0) for v in var_list}
+                    var_values_0[var] = 0
+                    utility_0 = self.evaluate_constraint_utility(function_str, var_values_0)
+                    
+                    incoming_sum = utility_1 - utility_0
+                else:
+                    incoming_sum = sum(self.incoming_messages.get(v, 0) for v in var_list if v != var)
                 
                 current_message = self.message_history.get(var, 0)
                 new_message = (1 - self.damping) * incoming_sum + self.damping * current_message
@@ -341,6 +400,20 @@ class MaxSumAgent(Agent):
                     self.assigned_variables.add(var)
                 else:
                     self.assigned_variables.discard(var)
+
+    def _get_variable_list(self, constraint_spec) -> List[str]:
+        """Extract variable list from constraint spec (handles both formats)."""
+        if isinstance(constraint_spec, list):
+            return constraint_spec
+        elif isinstance(constraint_spec, dict) and "variables" in constraint_spec:
+            return constraint_spec["variables"]
+        return []
+
+    def _get_function_str(self, constraint_spec) -> str:
+        """Extract function string from constraint spec if present."""
+        if isinstance(constraint_spec, dict) and "function" in constraint_spec:
+            return constraint_spec["function"]
+        return None
 
     def tasks(self) -> Set:
         return self.assigned_variables.copy()
@@ -370,6 +443,7 @@ class MGMSolver(COSPSolver):
 
     def solve(self) -> Dict:
         """Run MGM algorithm iterations until convergence."""
+        self._setup_agents()
         iteration = 0
         previous_assignments = [set() for _ in range(len(self.agents))]
         
@@ -436,6 +510,7 @@ class DSASolver(COSPSolver):
 
     def solve(self) -> Dict:
         """Run DSA algorithm iterations until convergence or max_iterations."""
+        self._setup_agents()
         iteration = 0
         
         while iteration < self.max_iterations:
@@ -489,6 +564,7 @@ class MaxSumSolver(COSPSolver):
 
     def solve(self) -> Dict:
         """Run MaxSum algorithm iterations until convergence."""
+        self._setup_agents()
         iteration = 0
         previous_messages = {}
         
