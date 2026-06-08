@@ -92,7 +92,7 @@ def solve_iterative_pricing(
         print(f"\nIteration {iteration}")
         pydcop_results_json = os.path.join(working_dir, f"it_{iteration}_temp_{uuid()}.json")
 
-         # This function subtracts the lambda penalty from the base utility
+        # This function subtracts the lambda penalty from the base utility
         current_pydcop_dict = update_dcop_utilities(pydcop_dict, lambda_penalties, var_to_details)
         # Run global DCOP
         print("Running global dispatch")

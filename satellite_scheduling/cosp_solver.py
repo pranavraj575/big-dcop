@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
-from agent import Agent
+from agent import Agent, MGMAgent, DSAAgent, MaxSumAgent
 from constraint_parser import ConstraintFunctionEvaluator
-from typing import List, Dict, Set, Tuple, Optional
+from typing import List, Dict, Set
 from collections import defaultdict
 import time
-import random
 import json
 import logging
 
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 def build_cosp(pydcop_dict: dict, algorithm_config: dict):
     """Factory function to instantiate the appropriate COSPSolver subclass."""
     algorithm_name = algorithm_config.get("algorithm", "mgm").lower()
-    
+
     if algorithm_name == "mgm":
         return MGMSolver(algorithm_config, pydcop_dict)
     elif algorithm_name == "dsa":
@@ -184,244 +183,9 @@ class COSPSolver(ABC):
         pass
 
 
-class MGMAgent(Agent):
-    """MGM (Maximum Gain Message) Agent implementation."""
-    
-    def __init__(self, agent_id: str, config: dict):
-        super().__init__(config)
-        self.agent_id = agent_id
-        self.current_value = 0
-        self.variable_gains: Dict[str, float] = {}
-        self.neighbor_values: Dict[str, int] = {}
-        self.assigned_variables: Set[str] = set()
-
-    def update(self, variable_assignments: List[Set], pydcop_dict: dict):
-        """
-        Update agent's variable assignments using MGM logic.
-        MGM tries to maximize individual gain at each step.
-        """
-        agent_idx = int(self.agent_id.split('_')[-1]) if '_' in str(self.agent_id) else 0
-        
-        if agent_idx < len(variable_assignments):
-            self.assigned_variables = variable_assignments[agent_idx].copy()
-        
-        if pydcop_dict and "constraints" in pydcop_dict:
-            for constraint_name, constraint_spec in pydcop_dict["constraints"].items():
-                var_list = self._get_variable_list(constraint_spec)
-                function_str = self._get_function_str(constraint_spec)
-                
-                agent_vars = [v for v in var_list if self.agent_id in v]
-                for var in agent_vars:
-                    gain_1 = self._calculate_gain(var, 1, var_list, function_str, pydcop_dict)
-                    gain_0 = self._calculate_gain(var, 0, var_list, function_str, pydcop_dict)
-                    
-                    if gain_1 > gain_0:
-                        self.assigned_variables.add(var)
-                    else:
-                        self.assigned_variables.discard(var)
-
-    def _calculate_gain(self, variable: str, value: int, var_list: List[str], function_str: str, pydcop_dict: dict) -> float:
-        """Calculate the gain for assigning a value to a variable."""
-        return self._constraint_utility(var_list, variable, value, function_str)
-
-    def _constraint_utility(self, var_list: List[str], variable: str, value: int, function_str: str = None) -> float:
-        """Calculate utility from a constraint, using custom function if provided."""
-        if function_str and self.utility_evaluator:
-            var_values = {v: (1 if v in self.assigned_variables else 0) for v in var_list}
-            var_values[variable] = value
-            return self.evaluate_constraint_utility(function_str, var_values)
-        
-        current_sum = sum(1 for v in var_list if v in self.assigned_variables)
-        
-        if value == 1:
-            new_sum = current_sum + 1
-        else:
-            new_sum = max(0, current_sum - 1)
-        
-        if new_sum == 0:
-            return 0
-        else:
-            return 1 / (new_sum ** 2)
-
-    def _get_variable_list(self, constraint_spec) -> List[str]:
-        """Extract variable list from constraint spec (handles both formats)."""
-        if isinstance(constraint_spec, list):
-            return constraint_spec
-        elif isinstance(constraint_spec, dict) and "variables" in constraint_spec:
-            return constraint_spec["variables"]
-        return []
-
-    def _get_function_str(self, constraint_spec) -> str:
-        """Extract function string from constraint spec if present."""
-        if isinstance(constraint_spec, dict) and "function" in constraint_spec:
-            return constraint_spec["function"]
-        return None
-
-    def tasks(self) -> Set:
-        return self.assigned_variables.copy()
-
-
-class DSAAgent(Agent):
-    """DSA (Distributed Stochastic Algorithm) Agent implementation."""
-    
-    def __init__(self, agent_id: str, config: dict):
-        super().__init__(config)
-        self.agent_id = agent_id
-        self.variant = config.get("variant", "B")
-        self.probability = config.get("probability", 0.7)
-        self.assigned_variables: Set[str] = set()
-
-    def update(self, variable_assignments: List[Set], pydcop_dict: dict):
-        """
-        Update agent's variable assignments using DSA logic.
-        DSA uses stochastic decisions based on local constraints.
-        """
-        agent_idx = int(self.agent_id.split('_')[-1]) if '_' in str(self.agent_id) else 0
-        
-        if agent_idx < len(variable_assignments):
-            self.assigned_variables = variable_assignments[agent_idx].copy()
-        
-        if pydcop_dict and "constraints" in pydcop_dict:
-            for constraint_name, constraint_spec in pydcop_dict["constraints"].items():
-                var_list = self._get_variable_list(constraint_spec)
-                function_str = self._get_function_str(constraint_spec)
-                
-                agent_vars = [v for v in var_list if self.agent_id in v]
-                for var in agent_vars:
-                    best_value = self._get_best_value(var, var_list, function_str, pydcop_dict)
-                    
-                    if random.random() < self.probability:
-                        if best_value == 1:
-                            self.assigned_variables.add(var)
-                        else:
-                            self.assigned_variables.discard(var)
-
-    def _get_best_value(self, variable: str, var_list: List[str], function_str: str, pydcop_dict: dict) -> int:
-        """Get the best value for a variable based on constraints."""
-        gain_1 = 0
-        gain_0 = 0
-        
-        if function_str and self.utility_evaluator:
-            var_values_1 = {v: (1 if v in self.assigned_variables else 0) for v in var_list}
-            var_values_1[variable] = 1
-            var_values_0 = {v: (1 if v in self.assigned_variables else 0) for v in var_list}
-            var_values_0[variable] = 0
-            
-            gain_1 = self.evaluate_constraint_utility(function_str, var_values_1)
-            gain_0 = self.evaluate_constraint_utility(function_str, var_values_0)
-        else:
-            current_sum = sum(1 for v in var_list if v in self.assigned_variables)
-            
-            new_sum_1 = current_sum + 1
-            new_sum_0 = max(0, current_sum - 1)
-            
-            if new_sum_1 == 0:
-                gain_1 += 0
-            else:
-                gain_1 += 1 / (new_sum_1 ** 2)
-            
-            if new_sum_0 == 0:
-                gain_0 += 0
-            else:
-                gain_0 += 1 / (new_sum_0 ** 2)
-        
-        return 1 if gain_1 >= gain_0 else 0
-
-    def _get_variable_list(self, constraint_spec) -> List[str]:
-        """Extract variable list from constraint spec (handles both formats)."""
-        if isinstance(constraint_spec, list):
-            return constraint_spec
-        elif isinstance(constraint_spec, dict) and "variables" in constraint_spec:
-            return constraint_spec["variables"]
-        return []
-
-    def _get_function_str(self, constraint_spec) -> str:
-        """Extract function string from constraint spec if present."""
-        if isinstance(constraint_spec, dict) and "function" in constraint_spec:
-            return constraint_spec["function"]
-        return None
-
-    def tasks(self) -> Set:
-        return self.assigned_variables.copy()
-
-
-class MaxSumAgent(Agent):
-    """MaxSum (Belief Propagation) Agent implementation."""
-    
-    def __init__(self, agent_id: str, config: dict):
-        super().__init__(config)
-        self.agent_id = agent_id
-        self.damping = config.get("damping", 0.0)
-        self.assigned_variables: Set[str] = set()
-        self.message_history: Dict[str, float] = {}
-        self.incoming_messages: Dict[str, float] = {}
-
-    def update(self, variable_assignments: List[Set], pydcop_dict: dict):
-        """
-        Update agent's variable assignments using MaxSum logic.
-        MaxSum uses belief propagation with damped messages.
-        """
-        agent_idx = int(self.agent_id.split('_')[-1]) if '_' in str(self.agent_id) else 0
-        
-        if agent_idx < len(variable_assignments):
-            self.assigned_variables = variable_assignments[agent_idx].copy()
-        
-        if pydcop_dict and "constraints" in pydcop_dict:
-            self._update_beliefs(pydcop_dict)
-
-    def _update_beliefs(self, pydcop_dict: dict):
-        """Update beliefs based on incoming messages from constraints."""
-        for constraint_name, constraint_spec in pydcop_dict["constraints"].items():
-            var_list = self._get_variable_list(constraint_spec)
-            function_str = self._get_function_str(constraint_spec)
-            
-            agent_vars = [v for v in var_list if self.agent_id in v]
-            
-            for var in agent_vars:
-                if function_str and self.utility_evaluator:
-                    var_values_1 = {v: (1 if v in self.assigned_variables else 0) for v in var_list}
-                    var_values_1[var] = 1
-                    utility_1 = self.evaluate_constraint_utility(function_str, var_values_1)
-                    
-                    var_values_0 = {v: (1 if v in self.assigned_variables else 0) for v in var_list}
-                    var_values_0[var] = 0
-                    utility_0 = self.evaluate_constraint_utility(function_str, var_values_0)
-                    
-                    incoming_sum = utility_1 - utility_0
-                else:
-                    incoming_sum = sum(self.incoming_messages.get(v, 0) for v in var_list if v != var)
-                
-                current_message = self.message_history.get(var, 0)
-                new_message = (1 - self.damping) * incoming_sum + self.damping * current_message
-                
-                self.message_history[var] = new_message
-                
-                if new_message > 0:
-                    self.assigned_variables.add(var)
-                else:
-                    self.assigned_variables.discard(var)
-
-    def _get_variable_list(self, constraint_spec) -> List[str]:
-        """Extract variable list from constraint spec (handles both formats)."""
-        if isinstance(constraint_spec, list):
-            return constraint_spec
-        elif isinstance(constraint_spec, dict) and "variables" in constraint_spec:
-            return constraint_spec["variables"]
-        return []
-
-    def _get_function_str(self, constraint_spec) -> str:
-        """Extract function string from constraint spec if present."""
-        if isinstance(constraint_spec, dict) and "function" in constraint_spec:
-            return constraint_spec["function"]
-        return None
-
-    def tasks(self) -> Set:
-        return self.assigned_variables.copy()
-
-
 class MGMSolver(COSPSolver):
     """MGM (Maximum Gain Message) DCOP Solver."""
-    
+
     def __init__(self, algorithm_config: dict, pydcop_dict: dict):
         super().__init__(algorithm_config, pydcop_dict)
         self.max_iterations = algorithm_config.get("max_iterations", 100)
@@ -446,25 +210,25 @@ class MGMSolver(COSPSolver):
         self._setup_agents()
         iteration = 0
         previous_assignments = [set() for _ in range(len(self.agents))]
-        
+
         while iteration < self.max_iterations:
             if self.stop_cycle > 0 and iteration >= self.stop_cycle:
                 break
-            
+
             self.update(self.pydcop_dict)
-            
+
             if self._has_converged(previous_assignments):
                 logger.info(f"MGM converged at iteration {iteration}")
                 break
-            
+
             previous_assignments = [a.copy() for a in self.variable_assignments]
             iteration += 1
-        
+
         return {
             "algorithm": "MGM",
             "iterations": iteration,
             "solution": self._extract_solution(),
-            "converged": iteration < self.max_iterations
+            "converged": iteration < self.max_iterations,
         }
 
     def _has_converged(self, previous_assignments: List[Set]) -> bool:
@@ -484,7 +248,7 @@ class MGMSolver(COSPSolver):
 
 class DSASolver(COSPSolver):
     """DSA (Distributed Stochastic Algorithm) DCOP Solver."""
-    
+
     def __init__(self, algorithm_config: dict, pydcop_dict: dict):
         super().__init__(algorithm_config, pydcop_dict)
         self.max_iterations = algorithm_config.get("max_iterations", 100)
@@ -495,10 +259,7 @@ class DSASolver(COSPSolver):
 
     def _initialize_agents(self):
         """Initialize DSA agents."""
-        config = {
-            "variant": self.variant,
-            "probability": self.probability
-        }
+        config = {"variant": self.variant, "probability": self.probability}
         for agent_id in self.pydcop_dict.get("agents", []):
             agent = DSAAgent(agent_id, config)
             self.agents.append(agent)
@@ -512,20 +273,20 @@ class DSASolver(COSPSolver):
         """Run DSA algorithm iterations until convergence or max_iterations."""
         self._setup_agents()
         iteration = 0
-        
+
         while iteration < self.max_iterations:
             if self.stop_cycle > 0 and iteration >= self.stop_cycle:
                 break
-            
+
             self.update(self.pydcop_dict)
             iteration += 1
-        
+
         return {
             "algorithm": "DSA",
             "variant": self.variant,
             "iterations": iteration,
             "solution": self._extract_solution(),
-            "converged": False
+            "converged": False,
         }
 
     def _extract_solution(self) -> Dict:
@@ -538,7 +299,7 @@ class DSASolver(COSPSolver):
 
 class MaxSumSolver(COSPSolver):
     """MaxSum (Belief Propagation) DCOP Solver."""
-    
+
     def __init__(self, algorithm_config: dict, pydcop_dict: dict):
         super().__init__(algorithm_config, pydcop_dict)
         self.max_iterations = algorithm_config.get("max_iterations", 100)
@@ -549,10 +310,7 @@ class MaxSumSolver(COSPSolver):
 
     def _initialize_agents(self):
         """Initialize MaxSum agents."""
-        config = {
-            "damping": self.damping,
-            "damping_nodes": self.damping_nodes
-        }
+        config = {"damping": self.damping, "damping_nodes": self.damping_nodes}
         for agent_id in self.pydcop_dict.get("agents", []):
             agent = MaxSumAgent(agent_id, config)
             self.agents.append(agent)
@@ -567,24 +325,24 @@ class MaxSumSolver(COSPSolver):
         self._setup_agents()
         iteration = 0
         previous_messages = {}
-        
+
         while iteration < self.max_iterations:
             self.update(self.pydcop_dict)
-            
+
             current_messages = self._collect_messages()
-            
+
             if self._has_converged(previous_messages, current_messages):
                 logger.info(f"MaxSum converged at iteration {iteration}")
                 break
-            
+
             previous_messages = current_messages
             iteration += 1
-        
+
         return {
             "algorithm": "MaxSum",
             "iterations": iteration,
             "solution": self._extract_solution(),
-            "converged": iteration < self.max_iterations
+            "converged": iteration < self.max_iterations,
         }
 
     def _collect_messages(self) -> Dict:
@@ -599,20 +357,20 @@ class MaxSumSolver(COSPSolver):
         """Check if MaxSum has converged based on message stability."""
         if not previous_messages:
             return False
-        
+
         for agent_id, current_msgs in current_messages.items():
             if agent_id not in previous_messages:
                 return False
-            
+
             previous_msgs = previous_messages[agent_id]
             for var, curr_msg in current_msgs.items():
                 if var not in previous_msgs:
                     return False
-                
+
                 prev_msg = previous_msgs[var]
                 if abs(curr_msg - prev_msg) > self.stability:
                     return False
-        
+
         return True
 
     def _extract_solution(self) -> Dict:

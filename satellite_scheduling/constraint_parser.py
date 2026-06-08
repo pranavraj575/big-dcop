@@ -7,35 +7,35 @@ from pydcop problem definitions, enabling dynamic constraint modification
 
 import logging
 import re
-from typing import Dict, Union, Any
+from typing import Dict, Union
 
 logger = logging.getLogger(__name__)
 
 
 class ConstraintFunctionEvaluator:
     """Safely evaluates constraint utility function expressions.
-    
+
     Supports pydcop constraint functions like:
     - "1 / (sum_var ** 2)"
     - "-penalty * variable_name"
     - "constraint_func(x, y)"
-    
+
     Uses restricted eval() with limited scope for safety.
     """
 
     # Allowed operators and functions in expressions
     ALLOWED_BUILTINS = {
-        'abs': abs,
-        'min': min,
-        'max': max,
-        'sum': sum,
-        'pow': pow,
-        'round': round,
-        'len': len,
+        "abs": abs,
+        "min": min,
+        "max": max,
+        "sum": sum,
+        "pow": pow,
+        "round": round,
+        "len": len,
     }
 
     # Regular expression to validate variable names
-    VARIABLE_PATTERN = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
+    VARIABLE_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
     def __init__(self):
         """Initialize the constraint function evaluator."""
@@ -44,14 +44,14 @@ class ConstraintFunctionEvaluator:
 
     def evaluate(self, function_str: str, variable_values: Dict[str, Union[int, float]]) -> float:
         """Evaluate a constraint utility function expression.
-        
+
         Args:
             function_str: Expression string, e.g., "-10.5 * penalty_var" or "1 / (sum ** 2)"
             variable_values: Dict mapping variable names to their values (typically 0 or 1)
-        
+
         Returns:
             Utility value as float. Returns 0.0 on error.
-        
+
         Examples:
             >>> evaluator = ConstraintFunctionEvaluator()
             >>> evaluator.evaluate("-10 * x", {"x": 1})
@@ -71,11 +71,7 @@ class ConstraintFunctionEvaluator:
             safe_namespace.update(variable_values)
 
             # Evaluate with restricted scope
-            result = eval(
-                function_str,
-                {"__builtins__": {}},
-                safe_namespace
-            )
+            result = eval(function_str, {"__builtins__": {}}, safe_namespace)
 
             # Ensure result is numeric
             return float(result) if result is not None else 0.0
@@ -96,28 +92,29 @@ class ConstraintFunctionEvaluator:
 
     def validate_expression(self, function_str: str) -> bool:
         """Check if expression is valid (doesn't crash on evaluation).
-        
+
         Args:
             function_str: Expression to validate
-        
+
         Returns:
             True if expression is safe to evaluate, False otherwise
         """
         try:
             # Test with dummy variables
             test_vars = {
-                'x': 1, 'y': 1, 'z': 1,
-                'penalty': 1, 'var': 1, 'sum': 2,
-                'v_a1_0': 1, 'v_a2_0': 1,  # Common variable names
+                "x": 1,
+                "y": 1,
+                "z": 1,
+                "penalty": 1,
+                "var": 1,
+                "sum": 2,
+                "v_a1_0": 1,
+                "v_a2_0": 1,  # Common variable names
             }
             safe_namespace = dict(self.ALLOWED_BUILTINS)
             safe_namespace.update(test_vars)
 
-            eval(
-                function_str,
-                {"__builtins__": {}},
-                safe_namespace
-            )
+            eval(function_str, {"__builtins__": {}}, safe_namespace)
             return True
 
         except Exception as e:
@@ -126,13 +123,13 @@ class ConstraintFunctionEvaluator:
 
     def extract_variables(self, function_str: str) -> set:
         """Extract variable names from a constraint function expression.
-        
+
         Args:
             function_str: Expression string
-        
+
         Returns:
             Set of variable names found in the expression
-        
+
         Examples:
             >>> evaluator = ConstraintFunctionEvaluator()
             >>> evaluator.extract_variables("-penalty * var_x")
@@ -146,14 +143,28 @@ class ConstraintFunctionEvaluator:
         try:
             # Find all potential variable names (identifiers)
             # This pattern matches Python identifiers
-            pattern = r'\b([a-zA-Z_][a-zA-Z0-9_]*)\b'
+            pattern = r"\b([a-zA-Z_][a-zA-Z0-9_]*)\b"
             candidates = re.findall(pattern, function_str)
 
             # Filter out keywords and built-in names
             keywords = {
-                'and', 'or', 'not', 'in', 'is', 'if', 'else',
-                'True', 'False', 'None',
-                'abs', 'min', 'max', 'sum', 'pow', 'round', 'len'
+                "and",
+                "or",
+                "not",
+                "in",
+                "is",
+                "if",
+                "else",
+                "True",
+                "False",
+                "None",
+                "abs",
+                "min",
+                "max",
+                "sum",
+                "pow",
+                "round",
+                "len",
             }
 
             for name in candidates:
@@ -176,7 +187,7 @@ class ConstraintFunctionEvaluator:
 
 def create_constraint_evaluator() -> ConstraintFunctionEvaluator:
     """Factory function to create a constraint evaluator instance.
-    
+
     Returns:
         ConstraintFunctionEvaluator instance
     """
@@ -189,7 +200,7 @@ _default_evaluator = None
 
 def get_default_evaluator() -> ConstraintFunctionEvaluator:
     """Get or create the default evaluator instance.
-    
+
     Returns:
         ConstraintFunctionEvaluator instance
     """

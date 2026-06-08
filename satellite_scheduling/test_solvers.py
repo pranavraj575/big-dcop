@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Test COSPSolver implementations."""
-import sys
-sys.path.insert(0, '.')
 
-from cosp_solver import COSPSolver, MGMSolver, DSASolver, MaxSumSolver
+import sys
+
+sys.path.insert(0, ".")
+
+from cosp_solver import MGMSolver, DSASolver, MaxSumSolver
 from cosp_solver import MGMAgent, DSAAgent, MaxSumAgent
 from cosp_solver import build_cosp
 
@@ -14,9 +16,7 @@ def test_solver_creation():
         "name": "test",
         "variables": ["v_a1_0", "v_a2_0"],
         "agents": ["a1", "a2"],
-        "constraints": {
-            "req_1": ["v_a1_0", "v_a2_0"]
-        }
+        "constraints": {"req_1": ["v_a1_0", "v_a2_0"]},
     }
 
     # Test MGM
@@ -47,9 +47,7 @@ def test_solve():
         "name": "test",
         "variables": ["v_a1_0", "v_a2_0"],
         "agents": ["a1", "a2"],
-        "constraints": {
-            "req_1": ["v_a1_0", "v_a2_0"]
-        }
+        "constraints": {"req_1": ["v_a1_0", "v_a2_0"]},
     }
 
     # Test MGM solve
@@ -96,7 +94,7 @@ def test_agent_types():
 
 if __name__ == "__main__":
     print("Testing COSPSolver implementations...\n")
-    
+
     try:
         test_solver_creation()
         print()
@@ -107,5 +105,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"✗ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
