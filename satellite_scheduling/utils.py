@@ -25,6 +25,7 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
         "agents": {},
         "constraints": {},
         "distribution": {},
+        "var_to_agent": {},
     }
 
     agent_tasks = defaultdict(list)
@@ -86,9 +87,9 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
 
             pydcop["variables"][var_name] = {"domain": "binary_domain"}
             pydcop["distribution"][agent_id].append(var_name)
+            pydcop["var_to_agent"][var_name] = agent_id
             req_to_vars[req_id].append(var_name)
 
-            # Save mapping so we know what this variable actually means later
             var_to_details[var_name] = {"req_id": req_id, "agent_id": agent_id}
 
     # DCOP Constraints
@@ -97,12 +98,10 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
         c_name = f"reward_req_{req_id}"
         sum_expr = " + ".join(var_list)
         pydcop["constraints"][c_name] = {
-            "type": "intention",
             "variables": var_list,
-            # "function": f"1 if ({sum_expr}) == 1 else ({HARD_PENALTY} if ({sum_expr}) > 1 else 0)",
-            # TODO: try different constraints here, want f(1)=1, nf(n)<1, and (n+1)f(n+1)<nf(n)
-            #  currently, nf(n)=1/n, which seems too strong
-            "function": f"0 if {sum_expr} == 0 else 1 / ({sum_expr} ** 2)",
+            "fn": lambda vi, a: (
+                0.0 if (n := sum(a[i] for i in vi)) == 0 else (1.0 if n == 1 else 1.0 / (n * n))
+            ),
         }
 
     return (
@@ -258,39 +257,37 @@ def convert_cosp_to_assignments(cosp_result: dict) -> dict:
     }
 
 
-def run_global_dispatcher_cosp(pydcop_dict, algorithm_config, json_filepath, output_json, pydcop_mode, timeout=-1):
+def _to_cosp_dict(pydcop_dict: dict) -> dict:
     """
-    COSPSolver wrapper that replaces or supplements pydcop run_global_dispatcher.
-    Uses in-process solver instead of external CLI subprocess.
+    Convert a legacy pydcop_dict (variables/agents as dicts) to the COSPSolver
+    format (variables/agents as lists).  var_to_agent is preserved as-is.
+    Constraints are left in whatever format they are — COSPSolver handles both.
+    """
+    variables = pydcop_dict.get("variables", {})
+    agents = pydcop_dict.get("agents", {})
+    return {
+        "name": pydcop_dict.get("name", ""),
+        "variables": list(variables.keys()) if isinstance(variables, dict) else list(variables),
+        "agents": list(agents.keys()) if isinstance(agents, dict) else list(agents),
+        "var_to_agent": pydcop_dict.get("var_to_agent", {}),
+        "constraints": pydcop_dict.get("constraints", {}),
+    }
 
-    Args:
-        pydcop_dict: DCOP problem dictionary with constraints in pydcop format
-        algorithm_config: Algorithm config with "name" and "algo_params" fields
-        json_filepath: Path to write temp JSON (for compatibility with existing code)
-        output_json: Path where output JSON should be written
-        pydcop_mode: Ignored (for API compatibility with pydcop version)
-        timeout: Ignored (for API compatibility with pydcop version)
+
+def run_global_dispatcher_cosp(pydcop_dict: dict, algorithm_config: dict) -> dict:
+    """
+    Run the COSPSolver in-process and return the result dict directly.
+
+    Returns
+    -------
+    dict with keys:
+        "assignment": {var_name: 0/1, ...}
+        "run_info":   {algorithm, iterations, converged}
     """
     from cosp_solver import build_cosp
 
-    normalized_pydcop = normalize_constraints(pydcop_dict)
     cosp_config = translate_pydcop_to_cosp_config(algorithm_config)
-
-    try:
-        ts = time.time()
-
-        solver = build_cosp(normalized_pydcop, cosp_config)
-        cosp_result = solver.solve()
-
-        te = time.time()
-        print(f"COSPSolver completed in {te - ts:.2f} seconds")
-
-        pydcop_result = convert_cosp_to_assignments(cosp_result)
-
-        with open(output_json, "w") as f:
-            json.dump(pydcop_result, f, indent=2)
-
-        print("COSPSolver finished successfully.")
-    except Exception as e:
-        print(f"Error running COSPSolver: {e}")
-        raise
+    cosp_pydcop = _to_cosp_dict(pydcop_dict)
+    solver = build_cosp(cosp_pydcop, cosp_config)
+    cosp_result = solver.solve()
+    return convert_cosp_to_assignments(cosp_result)
