@@ -344,10 +344,23 @@ class DSASolver(COSPSolver):
                     self.assignments[vi] = best_val
 
     def solve(self) -> Dict:
+        prev = list(self.assignments)
         for iteration in range(self.max_iterations):
             if self.stop_cycle > 0 and iteration >= self.stop_cycle:
                 break
             self._update()
+            if self.assignments == prev:
+                logger.info(f"DSA converged at iteration {iteration}")
+                return {
+                    "algorithm": "DSA",
+                    "variant": self.algorithm_config.get("variant", "B"),
+                    "iterations": iteration,
+                    "solution": self._extract_solution(),
+                    "converged": True,
+                    "messages_per_iter": self.messages_per_iter,
+                    "total_messages": self.total_messages,
+                }
+            prev = list(self.assignments)
 
         return {
             "algorithm": "DSA",
