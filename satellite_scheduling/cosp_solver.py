@@ -302,6 +302,12 @@ class DSASolver(COSPSolver):
         self.max_iterations = algorithm_config.get("max_iterations", 100)
         self.probability = algorithm_config.get("probability", 0.7)
         self.stop_cycle = algorithm_config.get("stop_cycle", 0)
+        # Stop early if the number of assignments that changed is below this
+        # fraction of variables for `patience` consecutive iterations.
+        # With p=0.7 DSA keeps jittering even at a good solution, so "no change"
+        # convergence rarely fires; patience gives a practical cutoff.
+        self.patience = algorithm_config.get("patience", 3)
+        self.stability_threshold = algorithm_config.get("stability_threshold", 0.01)
 
     def _update(self):
         self.total_messages += self.messages_per_iter
@@ -330,12 +336,31 @@ class DSASolver(COSPSolver):
 
     def solve(self) -> Dict:
         prev = list(self.assignments)
+        stable_iters = 0
         for iteration in range(self.max_iterations):
             if self.stop_cycle > 0 and iteration >= self.stop_cycle:
                 break
             self._update()
+            # Exact convergence: nothing changed at all.
             if self.assignments == prev:
                 logger.info(f"DSA converged at iteration {iteration}")
+                return {
+                    "algorithm": "DSA",
+                    "variant": self.algorithm_config.get("variant", "B"),
+                    "iterations": iteration,
+                    "solution": self._extract_solution(),
+                    "converged": True,
+                    "messages_per_iter": self.messages_per_iter,
+                    "total_messages": self.total_messages,
+                }
+            # Patience: stop if fewer than stability_threshold fraction of variables
+            # changed for `patience` consecutive iterations.  With p=0.7, DSA keeps
+            # jittering near a good solution and rarely hits exact convergence, so this
+            # provides a practical early-stop without waiting for max_iterations.
+            changed_frac = sum(a != b for a, b in zip(self.assignments, prev)) / max(self.n_vars, 1)
+            stable_iters = stable_iters + 1 if changed_frac < self.stability_threshold else 0
+            if stable_iters >= self.patience:
+                logger.info(f"DSA stabilised at iteration {iteration} (changed_frac={changed_frac:.4f})")
                 return {
                     "algorithm": "DSA",
                     "variant": self.algorithm_config.get("variant", "B"),
