@@ -18,7 +18,6 @@ def main(
     max_iterations,
     framework,
 ):
-    assert not os.path.exists(output_json), f"{output_json} already exists"
     run_info = {
         "scenario": scenario,
         "algorithms_json": algorithms_json,
@@ -44,7 +43,7 @@ def main(
         ) = parse_json_to_dcop_and_overlaps(scenario)
 
         if framework == "iterative_pricing":
-            best_total_scheduled, best_iter, _ = solve_iterative_pricing(
+            best_total_scheduled, best_iter, run_metrics = solve_iterative_pricing(
                 pydcop_dict,
                 agent_tasks,
                 agent_downlinks,
@@ -55,7 +54,7 @@ def main(
                 max_iterations=max_iterations,
             )
         elif framework == "constraint_generation":
-            best_total_scheduled, best_iter, _ = solve_constraint_generation(
+            best_total_scheduled, best_iter, run_metrics = solve_constraint_generation(
                 pydcop_dict,
                 agent_tasks,
                 agent_downlinks,
@@ -68,9 +67,19 @@ def main(
         else:
             raise NotImplementedError(f"Unknown framework: {framework}")
 
-        print(f"Result for {algo_name}: {best_total_scheduled:.1%} (best at iteration {best_iter})")
+        print(
+            f"Result for {algo_name}: {best_total_scheduled:.1%} "
+            f"(best at iteration {best_iter}, "
+            f"{run_metrics.get('total_messages', 0)} messages, "
+            f"{run_metrics.get('runtime_s', 0):.2f}s)"
+        )
         output_dic["output"][algo_name] = {
-            "aux_info": {"best_total_scheduled": best_total_scheduled, "best_iter": best_iter},
+            "aux_info": {
+                "best_total_scheduled": best_total_scheduled,
+                "best_iter": best_iter,
+                "total_messages": run_metrics.get("total_messages", 0),
+                "runtime_s": run_metrics.get("runtime_s", 0.0),
+            },
         }
 
     with open(output_json, "w") as f:

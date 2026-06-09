@@ -2,6 +2,7 @@ import math
 import json
 import os
 import copy
+import time
 from collections import defaultdict
 from scheduler import solve_local_schedule
 import utils
@@ -60,6 +61,8 @@ def solve_iterative_pricing(
     best_total_scheduled = 0
     best_iteration = 0
     run_data = []   # in-memory iteration results (no temp files)
+    total_messages = 0
+    t_start = time.time()
 
     for iteration in range(max_iterations):
         print(f"\nIteration {iteration}")
@@ -71,6 +74,7 @@ def solve_iterative_pricing(
         print("Done global dispatch")
 
         run_data.append({k: v for k, v in result.items() if k not in ignore_keys})
+        total_messages += result.get("run_info", {}).get("total_messages", 0)
 
         assignments = result["assignment"]
 
@@ -124,4 +128,8 @@ def solve_iterative_pricing(
         with open(output_json, "w") as f:
             json.dump(run_data, f, indent=2)
 
-    return best_total_scheduled / len(requests), best_iteration, []
+    runtime_s = time.time() - t_start
+    return best_total_scheduled / len(requests), best_iteration, {
+        "total_messages": total_messages,
+        "runtime_s": runtime_s,
+    }

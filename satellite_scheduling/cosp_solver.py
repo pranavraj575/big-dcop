@@ -428,6 +428,8 @@ class MaxSumSolver(COSPSolver):
                     "iterations": iteration,
                     "solution": self._extract_solution(),
                     "converged": True,
+                    "messages_per_iter": self.messages_per_iter,
+                    "total_messages": self.total_messages,
                 }
             prev_scores = list(self.message_scores)
 

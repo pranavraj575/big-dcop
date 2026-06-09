@@ -253,6 +253,8 @@ def convert_cosp_to_assignments(cosp_result: dict) -> dict:
             "algorithm": cosp_result.get("algorithm", "unknown"),
             "iterations": cosp_result.get("iterations", 0),
             "converged": cosp_result.get("converged", False),
+            "total_messages": cosp_result.get("total_messages", 0),
+            "messages_per_iter": cosp_result.get("messages_per_iter", 0),
         },
     }
 
