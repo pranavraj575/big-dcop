@@ -249,7 +249,12 @@ class MGMSolver(COSPSolver):
                 if best_val != orig:
                     move[vi] = best_val
 
-            gains[ai] = best_util - current_util
+            # Add tiny random perturbation to break gain ties.
+            # Without this, all n agents sharing a contested request have identical gain
+            # (1/(n-1)^2 - 1/n^2), so all pass the ">= neighbors" check simultaneously
+            # and drop in unison, sending the request from n takers to 0 — causing
+            # persistent oscillation that prevents convergence.
+            gains[ai] = best_util - current_util + random.uniform(0, 1e-9)
             best_moves[ai] = move
 
         return gains, best_moves
@@ -378,31 +383,35 @@ class MaxSumSolver(COSPSolver):
 
     def _update(self):
         self.total_messages += self.messages_per_iter
+        # snapshot is read-only during score computation so all agents evaluate
+        # from the same starting state (synchronous update).
         snapshot = list(self.assignments)
         new_scores: List[float] = list(self.message_scores)
+        new_assignments: List[int] = list(self.assignments)
 
         for ai in range(self.n_agents):
             for vi in self.agent_var_indices[ai]:
-                # Marginal utility of setting vi=1 vs vi=0, summed over its constraints
+                orig = snapshot[vi]  # save before temporarily overwriting
+
                 snapshot[vi] = 1
-                u1 = sum(
-                    self._constraint_value(c_idx, snapshot)
-                    for c_idx in self.var_to_constraints[vi]
-                )
+                u1 = sum(self._constraint_value(c_idx, snapshot)
+                         for c_idx in self.var_to_constraints[vi])
+
                 snapshot[vi] = 0
-                u0 = sum(
-                    self._constraint_value(c_idx, snapshot)
-                    for c_idx in self.var_to_constraints[vi]
-                )
-                snapshot[vi] = self.assignments[vi]  # restore
+                u0 = sum(self._constraint_value(c_idx, snapshot)
+                         for c_idx in self.var_to_constraints[vi])
+
+                snapshot[vi] = orig  # restore to original, not to the (not-yet-written) new value
 
                 incoming = u1 - u0
                 new_scores[vi] = (
                     (1.0 - self.damping) * incoming + self.damping * self.message_scores[vi]
                 )
-                self.assignments[vi] = 1 if new_scores[vi] > 0 else 0
+                new_assignments[vi] = 1 if new_scores[vi] > 0 else 0
 
+        # Apply all updates at once — keeps the synchronous semantics intact
         self.message_scores = new_scores
+        self.assignments = new_assignments
 
     def solve(self) -> Dict:
         prev_scores: List[float] = list(self.message_scores)
