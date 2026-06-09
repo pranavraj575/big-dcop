@@ -317,18 +317,19 @@ class DSASolver(COSPSolver):
             for vi in self.agent_var_indices[ai]:
                 orig = snapshot[vi]
 
-                # Find best value for this variable
-                best_val = orig
-                best_u = self._agent_utility(ai, snapshot)
+                # Only evaluate constraints containing vi — flipping vi cannot
+                # affect any other constraint, so agent_utility (which sums ALL
+                # of the agent's constraints) was doing ~51x redundant work.
+                current_u = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
+                best_val, best_u = orig, current_u
 
                 for val in (0, 1):
                     if val == orig:
                         continue
                     snapshot[vi] = val
-                    u = self._agent_utility(ai, snapshot)
+                    u = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
                     if u > best_u:
-                        best_u = u
-                        best_val = val
+                        best_u, best_val = u, val
                 snapshot[vi] = orig  # restore
 
                 if best_val != orig and random.random() < self.probability:
