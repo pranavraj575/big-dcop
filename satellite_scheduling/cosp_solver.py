@@ -383,35 +383,36 @@ class MaxSumSolver(COSPSolver):
 
     def _update(self):
         self.total_messages += self.messages_per_iter
-        # snapshot is read-only during score computation so all agents evaluate
-        # from the same starting state (synchronous update).
-        snapshot = list(self.assignments)
-        new_scores: List[float] = list(self.message_scores)
-        new_assignments: List[int] = list(self.assignments)
+        # Async (Gauss-Seidel) update: process variables one at a time in random
+        # order, each seeing the most recent live assignments.
+        #
+        # The synchronous (Jacobi) alternative causes oscillation: all variables
+        # covering the same request see everyone else at 0, score 1.0, all flip to 1.
+        # Next round they all see 1, score negative, all flip to 0.  Random shuffle
+        # breaks this symmetry: the first variable in the order claims the request;
+        # later variables see it taken and correctly back off.
+        order = list(range(self.n_vars))
+        random.shuffle(order)
 
-        for ai in range(self.n_agents):
-            for vi in self.agent_var_indices[ai]:
-                orig = snapshot[vi]  # save before temporarily overwriting
+        for vi in order:
+            orig = self.assignments[vi]
 
-                snapshot[vi] = 1
-                u1 = sum(self._constraint_value(c_idx, snapshot)
-                         for c_idx in self.var_to_constraints[vi])
+            self.assignments[vi] = 1
+            u1 = sum(self._constraint_value(c_idx, self.assignments)
+                     for c_idx in self.var_to_constraints[vi])
 
-                snapshot[vi] = 0
-                u0 = sum(self._constraint_value(c_idx, snapshot)
-                         for c_idx in self.var_to_constraints[vi])
+            self.assignments[vi] = 0
+            u0 = sum(self._constraint_value(c_idx, self.assignments)
+                     for c_idx in self.var_to_constraints[vi])
 
-                snapshot[vi] = orig  # restore to original, not to the (not-yet-written) new value
+            self.assignments[vi] = orig  # restore before committing new value
 
-                incoming = u1 - u0
-                new_scores[vi] = (
-                    (1.0 - self.damping) * incoming + self.damping * self.message_scores[vi]
-                )
-                new_assignments[vi] = 1 if new_scores[vi] > 0 else 0
-
-        # Apply all updates at once — keeps the synchronous semantics intact
-        self.message_scores = new_scores
-        self.assignments = new_assignments
+            # Small tie-breaking noise so equal-score variables don't systematically
+            # all land on 0 or all land on 1.
+            incoming = u1 - u0 + random.uniform(0, 1e-9)
+            new_score = (1.0 - self.damping) * incoming + self.damping * self.message_scores[vi]
+            self.message_scores[vi] = new_score
+            self.assignments[vi] = 1 if new_score > 0 else 0
 
     def solve(self) -> Dict:
         prev_scores: List[float] = list(self.message_scores)
