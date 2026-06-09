@@ -19,7 +19,7 @@ def solve_constraint_generation(
     ignore_keys=("agt_metrics",),
     timeout=-1,
     output_json=None,
-    clear_temp_files=True,
+    clear_temp_files=False,
     temp_json=None,
     working_dir="output/constraint_generation_runs",
     max_iterations=5,
@@ -128,9 +128,12 @@ def solve_constraint_generation(
         f.write("\n]")
         f.close()
     if clear_temp_files:
-        os.remove(temp_json)
-        for fn in run_files:
-            os.remove(fn)
+        try:
+            os.remove(temp_json)
+            for fn in run_files:
+                os.remove(fn)
+        except Exception as e:
+            pass
         run_files = []
     # return ratio satisifed
     return best_total_scheduled * 1.0 / len(requests), best_iteration, run_files

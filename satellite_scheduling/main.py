@@ -80,7 +80,7 @@ def main(
                 max_iterations=max_iterations,
                 output_json=temp_output_json,
                 working_dir=working_dir,
-                clear_temp_files=True,
+                clear_temp_files=False,
             )
         else:
             raise NotImplementedError
