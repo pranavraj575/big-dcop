@@ -64,7 +64,7 @@ def main(
                 max_iterations=max_iterations,
                 output_json=temp_output_json,
                 working_dir=working_dir,
-                clear_temp_files=True,
+                clear_temp_files=False,
             )
         elif framework == "constraint_generation":
             best_total_scheduled, best_iter, _ = solve_constraint_generation(

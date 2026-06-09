@@ -9,7 +9,7 @@ cd "$SCRIPT_DIR"
 echo "=================================="
 echo "COSPSolver Full Test"
 echo "Scenario: test_large.json (38.9K)"
-echo "Framework: constraint_generation"
+echo "Framework: iterative_pricing"
 echo "Max Iterations: 20"
 echo "=================================="
 echo
@@ -18,7 +18,7 @@ python3 main.py \
   --scenario test_large.json \
   --algorithms_json cosp_algorithm_configs.json \
   --output_json output/cosp_full_test.json \
-  --framework constraint_generation \
+  --framework iterative_pricing \
   --max_iterations 20 \
   --timeout -1
 
