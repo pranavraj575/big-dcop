@@ -1,0 +1,64 @@
+[
+  {
+    "name": "mgm",
+    "display_name": "MGM",
+    "algo_params": [
+      "max_iterations:100",
+      "convergence_threshold:0"
+    ]
+  },
+  {
+    "name": "mgm",
+    "display_name": "MGM-Conservative",
+    "algo_params": [
+      "max_iterations:50",
+      "break_mode:first",
+      "stop_cycle:10"
+    ]
+  },
+  {
+    "name": "dsa",
+    "display_name": "DSA-A",
+    "algo_params": [
+      "max_iterations:100",
+      "variant:A",
+      "probability:0.7"
+    ]
+  },
+  {
+    "name": "dsa",
+    "display_name": "DSA-B",
+    "algo_params": [
+      "max_iterations:100",
+      "variant:B",
+      "probability:0.7"
+    ]
+  },
+  {
+    "name": "dsa",
+    "display_name": "DSA-C",
+    "algo_params": [
+      "max_iterations:100",
+      "variant:C",
+      "probability:0.7"
+    ]
+  },
+  {
+    "name": "maxsum",
+    "display_name": "MaxSum",
+    "algo_params": [
+      "max_iterations:100",
+      "damping:0.0",
+      "stability:0.0001"
+    ]
+  },
+  {
+    "name": "maxsum",
+    "display_name": "MaxSum-Damped",
+    "algo_params": [
+      "max_iterations:100",
+      "damping:0.5",
+      "stability:0.0001"
+    ]
+  }
+]
