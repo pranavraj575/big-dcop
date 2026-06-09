@@ -218,59 +218,44 @@ class MGMSolver(COSPSolver):
         self.max_iterations = algorithm_config.get("max_iterations", 100)
         self.stop_cycle = algorithm_config.get("stop_cycle", 0)
 
-    def _compute_gains(self, snapshot: List[int]) -> Tuple[List[float], List[Dict[int, int]]]:
-        """
-        Returns (gains, best_moves) where gains[ai] is the utility improvement
-        for agent ai's best move, and best_moves[ai] is {var_idx: new_value}.
-        Uses snapshot so all agents evaluate from the same starting state.
-        """
-        gains: List[float] = [0.0] * self.n_agents
-        best_moves: List[Dict[int, int]] = [{} for _ in range(self.n_agents)]
-
-        for ai in range(self.n_agents):
-            current_util = self._agent_utility(ai, snapshot)
-            best_util = current_util
-            move: Dict[int, int] = {}
-
-            for vi in self.agent_var_indices[ai]:
-                orig = snapshot[vi]
-                best_val = orig
-
-                for val in (0, 1):
-                    if val == orig:
-                        continue
-                    snapshot[vi] = val
-                    u = self._agent_utility(ai, snapshot)
-                    if u > best_util:
-                        best_util = u
-                        best_val = val
-                snapshot[vi] = orig  # restore
-
-                if best_val != orig:
-                    move[vi] = best_val
-
-            # Add tiny random perturbation to break gain ties.
-            # Without this, all n agents sharing a contested request have identical gain
-            # (1/(n-1)^2 - 1/n^2), so all pass the ">= neighbors" check simultaneously
-            # and drop in unison, sending the request from n takers to 0 — causing
-            # persistent oscillation that prevents convergence.
-            gains[ai] = best_util - current_util + random.uniform(0, 1e-9)
-            best_moves[ai] = move
-
-        return gains, best_moves
-
     def _update(self):
         self.total_messages += self.messages_per_iter
         snapshot = list(self.assignments)
-        gains, best_moves = self._compute_gains(snapshot)
 
-        for ai in range(self.n_agents):
-            if gains[ai] <= 0:
+        # Per-variable gain: how much does flipping vi improve the local constraint sum?
+        var_gains: List[float] = [0.0] * self.n_vars
+        var_best_val: List[int] = list(snapshot)
+
+        for vi in range(self.n_vars):
+            orig = snapshot[vi]
+            current_u = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
+            best_val, best_u = orig, current_u
+            for val in (0, 1):
+                if val == orig:
+                    continue
+                snapshot[vi] = val
+                u = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
+                if u > best_u:
+                    best_u, best_val = u, val
+            snapshot[vi] = orig
+            # Tiny noise breaks ties so symmetric agents don't all act/all freeze.
+            var_gains[vi] = best_u - current_u + random.uniform(0, 1e-9)
+            var_best_val[vi] = best_val
+
+        # Per-variable coordination: vi is updated only if its gain beats the gain of
+        # every other variable that shares a constraint with it.  This allows one
+        # variable per constraint to move each iteration instead of serialising through
+        # a single per-agent all-neighbors check (which blocks ~58/60 agents in dense
+        # scenarios where every agent has ~43 global neighbors).
+        for vi in range(self.n_vars):
+            if var_gains[vi] <= 0 or var_best_val[vi] == snapshot[vi]:
                 continue
-            # Only apply if this agent has the max gain among its neighbors
-            if all(gains[ai] >= gains[nb] for nb in self.agent_neighbors[ai]):
-                for vi, val in best_moves[ai].items():
-                    self.assignments[vi] = val
+            competitors: Set[int] = set()
+            for c_idx in self.var_to_constraints[vi]:
+                competitors.update(self.constraints[c_idx][0])
+            competitors.discard(vi)
+            if all(var_gains[vi] >= var_gains[vj] for vj in competitors):
+                self.assignments[vi] = var_best_val[vi]
 
     def solve(self) -> Dict:
         prev = list(self.assignments)

@@ -1,3 +1,4 @@
+import logging
 import math
 import json
 import os
@@ -6,6 +7,8 @@ import time
 from collections import defaultdict
 from scheduler import solve_local_schedule
 import utils
+
+logger = logging.getLogger(__name__)
 
 
 def update_dcop_utilities(base_pydcop_dict, lambda_penalties, var_to_details):
@@ -65,13 +68,8 @@ def solve_iterative_pricing(
     t_start = time.time()
 
     for iteration in range(max_iterations):
-        print(f"\nIteration {iteration}")
-
         current_pydcop_dict = update_dcop_utilities(pydcop_dict, lambda_penalties, var_to_details)
-
-        print("Running global dispatch")
         result = utils.run_global_dispatcher_cosp(current_pydcop_dict, algorithm_config)
-        print("Done global dispatch")
 
         run_data.append({k: v for k, v in result.items() if k not in ignore_keys})
         total_messages += result.get("run_info", {}).get("total_messages", 0)
@@ -107,20 +105,14 @@ def solve_iterative_pricing(
             for req_id in dropped:
                 lambda_penalties[(agent_id, req_id)] += alpha
 
-            print(
-                f"Agent {agent_id}: Assigned {len(assigned_reqs)} -> "
-                f"Scheduled {len(scheduled_reqs)} (Dropped {len(dropped)})"
-            )
-
         true_total = len(global_scheduled_reqs)
-        print(f"Network Total: {true_total} of {len(requests)} physically scheduled.")
+        logger.info(f"Iteration {iteration}: {true_total}/{len(requests)} scheduled, {total_dropped} dropped")
 
         if true_total > best_total_scheduled:
             best_total_scheduled = true_total
             best_iteration = iteration
 
         if total_dropped == 0:
-            print("Nothing dropped — converged.")
             break
 
     if output_json is not None:
