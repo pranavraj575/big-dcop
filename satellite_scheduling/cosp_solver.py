@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Tuple, Callable, Set
+from typing import List, Dict, Tuple, Callable, Set, Optional
 from collections import defaultdict
 import random
 import time
 import json
 import logging
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,8 @@ def build_cosp(pydcop_dict: dict, algorithm_config: dict) -> "COSPSolver":
         return DSASolver(algorithm_config, pydcop_dict)
     if name == "maxsum":
         return MaxSumSolver(algorithm_config, pydcop_dict)
+    if name in ("regret_matching", "rm"):
+        return RegretMatchingSolver(algorithm_config, pydcop_dict)
     raise ValueError(f"Unknown algorithm: {name}")
 
 
@@ -462,6 +465,276 @@ class MaxSumSolver(COSPSolver):
             "iterations": self.max_iterations,
             "solution": self._extract_solution(),
             "converged": False,
+            "messages_per_iter": self.messages_per_iter,
+            "total_messages": self.total_messages,
+        }
+
+
+# ---------------------------------------------------------------------------
+# Regret Matching Solver
+# ---------------------------------------------------------------------------
+
+class RegretMatchingSolver(COSPSolver):
+    """
+    Regret Matching (RM) and variants.
+
+    Each agent maintains a mixed strategy (probability distribution over its
+    binary domain) and updates it based on cumulative regret.  Supported
+    variants (all via algorithm_config / algo_params):
+
+        rm_plus            (bool, default False)  — clip negative regrets to 0 (RM+)
+        predictive         (bool, default False)  — add instant regret to basis (Predictive RM)
+        ir_prm             (bool, default False)  — IR-PRM update rule
+        discounted_rm      (bool, default False)  — discount old regrets over time
+        alpha              (float, default 1.5)   — discount exponent for positive regrets
+        beta               (float, default 0.0)   — discount exponent for negative regrets
+        damping            (float, default 0.0)   — blend new strategy with previous
+        update_prob        (float, default 1.0)   — probability of actually updating value
+        deterministic_start(bool, default False)  — start at best deterministic value instead of random
+        stop_cycle         (int,   default 0)     — hard iteration cap (0 = use max_iterations)
+        max_iterations     (int,   default 100)   — maximum iterations
+        context_based      (bool, default False)  — maintain separate regret table per
+                                                    neighbor-value context (memory-intensive)
+    """
+
+    # Binary domain used by all variables.
+    _DOMAIN = (0, 1)
+
+    def __init__(self, algorithm_config: dict, pydcop_dict: dict):
+        super().__init__(algorithm_config, pydcop_dict)
+
+        self.max_iterations   = algorithm_config.get("max_iterations", 100)
+        self.stop_cycle       = algorithm_config.get("stop_cycle", 0)
+        self.use_rm_plus      = bool(algorithm_config.get("rm_plus", False))
+        self.use_predictive   = bool(algorithm_config.get("predictive", False))
+        self.use_ir_prm       = bool(algorithm_config.get("ir_prm", False))
+        self.context_based    = bool(algorithm_config.get("context_based", False))
+        self.det_start        = bool(algorithm_config.get("deterministic_start", False))
+        self.update_prob      = float(algorithm_config.get("update_prob", 1.0))
+        self.use_discounted   = bool(algorithm_config.get("discounted_rm", False))
+        self.alpha            = float(algorithm_config.get("alpha", 1.5))
+        self.beta             = float(algorithm_config.get("beta", 0.0))
+        self.damping          = float(algorithm_config.get("damping", 0.0))
+
+        # Per-variable mixed strategy: strategy[vi] = [p(0), p(1)]
+        self.strategy: List[np.ndarray] = [
+            np.array([0.5, 0.5]) for _ in range(self.n_vars)
+        ]
+
+        # Cumulative regrets.
+        # Non-context: regrets[vi] = np.array of shape (2,)
+        # Context-based: regrets[vi] = dict mapping context_tuple -> np.array(2,)
+        self.regrets: List = [
+            (dict() if self.context_based else np.zeros(2))
+            for _ in range(self.n_vars)
+        ]
+
+        # IR-PRM: prediction of utility vector from previous cycle
+        self.ir_prm_pred: Optional[List[np.ndarray]] = (
+            [np.zeros(2) for _ in range(self.n_vars)] if self.use_ir_prm else None
+        )
+
+        # Initialise assignments
+        if self.det_start:
+            self._deterministic_init()
+        else:
+            for vi in range(self.n_vars):
+                self.assignments[vi] = random.randint(0, 1)
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+
+    def _get_cum_regrets(self, vi: int) -> np.ndarray:
+        if self.context_based:
+            ctx = self._context(vi)
+            if ctx not in self.regrets[vi]:
+                self.regrets[vi][ctx] = np.zeros(2)
+            return self.regrets[vi][ctx]
+        return self.regrets[vi]
+
+    def _set_cum_regrets(self, vi: int, r: np.ndarray):
+        if self.context_based:
+            self.regrets[vi][self._context(vi)] = r
+        else:
+            self.regrets[vi] = r
+
+    def _context(self, vi: int):
+        """Tuple of current assignments of all agents sharing a constraint with vi."""
+        neighbors_vi: List[int] = []
+        for c_idx in self.var_to_constraints[vi]:
+            for vj in self.constraints[c_idx][0]:
+                if vj != vi:
+                    neighbors_vi.append(vj)
+        return tuple(self.assignments[vj] for vj in sorted(set(neighbors_vi)))
+
+    def _compute_utilities(self, vi: int) -> np.ndarray:
+        """
+        Return utility array [u(vi=0), u(vi=1)] using the current assignment
+        snapshot for all other variables.
+        """
+        orig = self.assignments[vi]
+        utils = np.zeros(2)
+        for val in (0, 1):
+            self.assignments[vi] = val
+            utils[val] = sum(
+                self._constraint_value(c, self.assignments)
+                for c in self.var_to_constraints[vi]
+            )
+        self.assignments[vi] = orig
+        return utils
+
+    def _strategy_to_assignment(self, vi: int, strategy: np.ndarray) -> int:
+        """Sample a value from the mixed strategy."""
+        if random.random() >= self.update_prob:
+            return self.assignments[vi]
+        return int(np.random.choice(2, p=strategy))
+
+    def _deterministic_init(self):
+        """Start at the locally best value for each variable (greedy)."""
+        for vi in range(self.n_vars):
+            utils = self._compute_utilities(vi)
+            self.assignments[vi] = int(np.argmax(utils))
+
+    def _get_discounts(self, t: int):
+        """Return (pos_discount, neg_discount) for iteration t (1-indexed)."""
+        if self.use_discounted:
+            pos = (t ** self.alpha) / (t ** self.alpha + 1)
+            neg = (t ** self.beta) / (t ** self.beta + 1) if self.beta > 0 else 0.0
+        else:
+            pos = neg = 1.0
+        return pos, neg
+
+    # ------------------------------------------------------------------
+    # Update rules (ported from pydcop RMComputation)
+    # ------------------------------------------------------------------
+
+    def _vanilla_rm_update(self, vi: int, utilities: np.ndarray, t: int) -> np.ndarray:
+        """Standard / discounted / predictive RM update. Returns new strategy."""
+        last_strat  = self.strategy[vi]
+        instant_reg = utilities - float(np.dot(utilities, last_strat))
+
+        pos_d, neg_d = self._get_discounts(t)
+        cum_reg = self._get_cum_regrets(vi)
+
+        if (pos_d, neg_d) != (1.0, 1.0):
+            cum_reg = np.where(cum_reg > 0, cum_reg * pos_d, cum_reg * neg_d)
+        cum_reg = cum_reg + instant_reg
+
+        if self.use_rm_plus:
+            cum_reg = np.clip(cum_reg, 0, None)
+        self._set_cum_regrets(vi, cum_reg)
+
+        basis = cum_reg + instant_reg if self.use_predictive else cum_reg
+        pos_part = np.clip(basis, 0, None)
+        pos_sum  = float(np.sum(pos_part))
+
+        new_strat = np.array([0.5, 0.5]) if pos_sum <= 0 else pos_part / pos_sum
+
+        if self.damping > 0:
+            new_strat = self.damping * last_strat + (1 - self.damping) * new_strat
+        return new_strat
+
+    @staticmethod
+    def _ir_prm_gamma(v: np.ndarray, t: float) -> float:
+        """Slow but exact gamma computation (from pydcop ir_prm_get_gamma_slow)."""
+        t2 = t ** 2
+        v_sorted = -np.sort(-v)   # descending
+        s = s2 = 0.0
+        for k, vk in enumerate(v_sorted):
+            s  += vk
+            s2 += vk ** 2
+            gamma = (s - np.sqrt(max(s ** 2 - (k + 1) * (s2 - t2), 0.0))) / (k + 1)
+            if (k + 1) >= len(v_sorted) or gamma >= v_sorted[k + 1]:
+                return gamma
+        return gamma  # unreachable but satisfies type checker
+
+    def _ir_prm_update(self, vi: int, utilities: np.ndarray) -> np.ndarray:
+        """IR-PRM update (Ioannis version from pydcop). Returns new strategy."""
+        pred       = self.ir_prm_pred[vi]
+        last_strat = self.strategy[vi]
+        u          = utilities - pred
+        cum_reg    = self._get_cum_regrets(vi) + u - float(np.dot(u, last_strat))
+
+        if self.use_rm_plus:
+            cum_reg = np.clip(cum_reg, 0, None)
+
+        if np.all(cum_reg <= 0):
+            self._set_cum_regrets(vi, cum_reg)
+            return last_strat
+
+        self.ir_prm_pred[vi] = utilities
+        old_norm = float(np.linalg.norm(np.clip(cum_reg, 0, None)))
+        cum_reg  = cum_reg + utilities
+        gamma    = self._ir_prm_gamma(cum_reg, old_norm)
+        cum_reg  = cum_reg - gamma
+        self._set_cum_regrets(vi, cum_reg)
+        pos_part = np.clip(cum_reg, 0, None)
+        return pos_part / float(np.sum(pos_part))
+
+    # ------------------------------------------------------------------
+    # Main iteration
+    # ------------------------------------------------------------------
+
+    def _update(self, t: int):
+        """One synchronous iteration over all variables."""
+        self.total_messages += self.messages_per_iter
+        # Take a snapshot so all agents evaluate from the same state.
+        snapshot = list(self.assignments)
+
+        new_assignments = list(self.assignments)
+
+        for vi in range(self.n_vars):
+            # Compute utilities from snapshot
+            orig = snapshot[vi]
+            utils = np.zeros(2)
+            for val in (0, 1):
+                snapshot[vi] = val
+                utils[val] = sum(
+                    self._constraint_value(c, snapshot)
+                    for c in self.var_to_constraints[vi]
+                )
+            snapshot[vi] = orig
+
+            # Choose update rule
+            if self.use_ir_prm:
+                new_strat = self._ir_prm_update(vi, utils)
+            else:
+                new_strat = self._vanilla_rm_update(vi, utils, t)
+
+            self.strategy[vi] = new_strat
+            new_assignments[vi] = self._strategy_to_assignment(vi, new_strat)
+
+        self.assignments = new_assignments
+
+    def solve(self) -> Dict:
+        prev = list(self.assignments)
+        stable_iters = 0
+        for iteration in range(self.max_iterations):
+            if self.stop_cycle > 0 and iteration >= self.stop_cycle:
+                break
+            self._update(t=iteration + 1)
+
+            if self.assignments == prev:
+                logger.info(f"RM converged at iteration {iteration}")
+                return self._result(iteration, converged=True)
+
+            changed_frac = sum(a != b for a, b in zip(self.assignments, prev)) / max(self.n_vars, 1)
+            stable_iters = stable_iters + 1 if changed_frac < 0.01 else 0
+            if stable_iters >= 3:
+                logger.info(f"RM stabilised at iteration {iteration}")
+                return self._result(iteration, converged=True)
+
+            prev = list(self.assignments)
+
+        return self._result(self.max_iterations, converged=False)
+
+    def _result(self, iterations: int, converged: bool) -> Dict:
+        return {
+            "algorithm": "RegretMatching",
+            "iterations": iterations,
+            "solution": self._extract_solution(),
+            "converged": converged,
             "messages_per_iter": self.messages_per_iter,
             "total_messages": self.total_messages,
         }

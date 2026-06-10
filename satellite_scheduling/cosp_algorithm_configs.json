@@ -3,8 +3,7 @@
     "name": "mgm",
     "display_name": "MGM",
     "algo_params": [
-      "max_iterations:100",
-      "convergence_threshold:0"
+      "max_iterations:100"
     ]
   },
   {
@@ -23,6 +22,71 @@
       "max_iterations:100",
       "damping:0.5",
       "stability:0.0001"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM",
+    "algo_params": [
+      "max_iterations:100"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM+",
+    "algo_params": [
+      "max_iterations:100",
+      "rm_plus:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Predictive RM",
+    "algo_params": [
+      "max_iterations:100",
+      "predictive:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "IR-PRM",
+    "algo_params": [
+      "max_iterations:100",
+      "ir_prm:1",
+      "rm_plus:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "DRM",
+    "algo_params": [
+      "max_iterations:100",
+      "discounted_rm:1",
+      "alpha:1.5",
+      "beta:0"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "DRM+",
+    "algo_params": [
+      "max_iterations:100",
+      "discounted_rm:1",
+      "alpha:1.5",
+      "beta:0",
+      "rm_plus:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Damped DRM+",
+    "algo_params": [
+      "max_iterations:100",
+      "discounted_rm:1",
+      "alpha:1.5",
+      "beta:0",
+      "rm_plus:1",
+      "damping:0.3"
     ]
   }
 ]
