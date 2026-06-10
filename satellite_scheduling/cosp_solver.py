@@ -736,6 +736,42 @@ class RegretMatchingSolver(COSPSolver):
 
         return self._result(self.max_iterations, converged=False)
 
+    def _extract_solution(self) -> Dict:
+        """
+        Per-constraint argmax extraction.
+
+        RM's mixed strategy causes many variables to be sampled as 1
+        simultaneously (heavy overcoverage), which makes OR-tools scheduling
+        slow.  Instead of using the last stochastic sample, we deterministically
+        assign 1 to the variable with the highest strategy_p1 within each
+        constraint (ties broken by index), giving at most one agent per request.
+        Variables not participating in any reward constraint keep their sampled
+        assignment.
+        """
+        # Start with all zeros.
+        final_assignments = [0] * self.n_vars
+
+        # For each constraint, award 1 to the variable with the highest p1.
+        for var_indices, _ in self.constraints:
+            if len(var_indices) == 1:
+                # Unary constraint (penalty): preserve the stochastic assignment.
+                vi = var_indices[0]
+                final_assignments[vi] = self.assignments[vi]
+            else:
+                # Reward constraint: highest-p1 variable wins.
+                winner = max(var_indices, key=lambda vi: self.strategy_p1[vi])
+                if self.strategy_p1[winner] > 0:
+                    final_assignments[winner] = 1
+
+        return {
+            agent_id: [
+                self.variables[vi]
+                for vi in self.agent_var_indices[ai]
+                if final_assignments[vi] == 1
+            ]
+            for ai, agent_id in enumerate(self.agents)
+        }
+
     def _result(self, iterations: int, converged: bool) -> Dict:
         return {
             "algorithm": "RegretMatching",
