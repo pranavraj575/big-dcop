@@ -35,11 +35,8 @@ def solve_constraint_generation(
     t_start = time.time()
 
     while iteration < max_iterations:
-        print(f"\nIteration {iteration}")
 
-        print("Running global dispatch")
         result = utils.run_global_dispatcher_cosp(pydcop_dict, algorithm_config)
-        print("Done global dispatch")
 
         run_data.append({k: v for k, v in result.items() if k not in ignore_keys})
         total_messages += result.get("run_info", {}).get("total_messages", 0)
@@ -60,7 +57,6 @@ def solve_constraint_generation(
             if not assigned_reqs:
                 continue
 
-            print(f"Agent {agent_id} received {len(assigned_reqs)} requests.")
 
             scheduled_reqs, final_schedule = solve_local_schedule(
                 agent_id,
@@ -70,7 +66,6 @@ def solve_constraint_generation(
                 agent_capacities[agent_id],
             )
             global_scheduled_reqs.update(scheduled_reqs)
-            print(f"  -> Scheduled: {len(scheduled_reqs)} (tasks: {final_schedule})")
 
             constraints.extend(get_constraints(
                 assigned_reqs=assigned_reqs,
@@ -84,7 +79,6 @@ def solve_constraint_generation(
             best_total_scheduled = true_total
             best_iteration = iteration
 
-        print(f"Total scheduled: {true_total} of {len(requests)}")
 
         pydcop_dict, new_num = add_constraints(
             constraints=constraints,

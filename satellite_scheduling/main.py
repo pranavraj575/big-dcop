@@ -88,7 +88,7 @@ def main(
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--scenario", default="satellite_scheduling/test.json", type=str, help="scenario json to evaluate")
+    p.add_argument("--scenario", default="satellite_scheduling/scenarios/scenario_1.json", type=str, help="scenario json to evaluate")
     p.add_argument("--output_json", default="output/test_main.json", type=str, help="output file to save results to")
     p.add_argument(
         "--algorithms_json",
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     )
     p.add_argument(
         "--framework",
-        default="iterative_pricing",
+        default="constraint_generation",
         type=str,
         help="use iterative pricing or constraint generation",
         choices=["iterative_pricing", "constraint_generation"],
