@@ -443,7 +443,7 @@ class DSASolver(COSPSolver):
         self.max_iterations = algorithm_config.get("max_iterations", 100)
         self.probability = algorithm_config.get("probability", 0.7)
         self.stop_cycle = algorithm_config.get("stop_cycle", 0)
-        self.patience = algorithm_config.get("patience", 3)
+        self.patience = algorithm_config.get("patience", 8)
         self.stability_threshold = algorithm_config.get("stability_threshold", 0.01)
 
     def _update(self):
@@ -563,7 +563,7 @@ class MaxSumSolver(COSPSolver):
     max_iterations : int (default 100)
     """
 
-    _SAME_COUNT_DEFAULT = 4
+    _SAME_COUNT_DEFAULT = 8
 
     def __init__(self, algorithm_config: dict, pydcop_dict: dict):
         super().__init__(algorithm_config, pydcop_dict)
@@ -894,6 +894,7 @@ class RegretMatchingSolver(COSPSolver):
         self.assignments = new_assignments
 
     def solve(self) -> Dict:
+<<<<<<< HEAD
         # RM does not have a clean convergence signal in contested environments:
         # - Assignment-based checks fail because stochastic sampling keeps
         #   jittering even after strategies stabilise.
@@ -907,6 +908,16 @@ class RegretMatchingSolver(COSPSolver):
         # results at a message cost comparable to DSA-C.
         n_iters = self.stop_cycle if self.stop_cycle > 0 else self.max_iterations
         for iteration in range(n_iters):
+=======
+        prev_p1 = list(self.strategy_p1)
+        stable_iters = 0
+        strategy_tol = float(self.algorithm_config.get("strategy_stability", 1e-3))
+        patience = int(self.algorithm_config.get("patience", 8))
+
+        for iteration in range(self.max_iterations):
+            if self.stop_cycle > 0 and iteration >= self.stop_cycle:
+                break
+>>>>>>> 7fcecbd (claude updates)
             self._update(t=iteration + 1)
 
         return self._result(n_iters, converged=False)

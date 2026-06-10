@@ -105,7 +105,7 @@ if __name__ == "__main__":
     )
     p.add_argument(
         "--max_iterations",
-        default=4,
+        default=8,
         type=int,
         help="number of outer iterations",
     )
