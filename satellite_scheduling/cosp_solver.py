@@ -686,7 +686,7 @@ class RegretMatchingSolver(COSPSolver):
         super().__init__(algorithm_config, pydcop_dict)
 
         self.max_iterations   = algorithm_config.get("max_iterations", 100)
-        self.stop_cycle       = algorithm_config.get("stop_cycle", 0)
+        self.stop_cycle       = algorithm_config.get("stop_cycle", 20)
         self.use_rm_plus      = bool(algorithm_config.get("rm_plus", False))
         self.use_predictive   = bool(algorithm_config.get("predictive", False))
         self.use_ir_prm       = bool(algorithm_config.get("ir_prm", False))
@@ -894,7 +894,6 @@ class RegretMatchingSolver(COSPSolver):
         self.assignments = new_assignments
 
     def solve(self) -> Dict:
-<<<<<<< HEAD
         # RM does not have a clean convergence signal in contested environments:
         # - Assignment-based checks fail because stochastic sampling keeps
         #   jittering even after strategies stabilise.
@@ -908,16 +907,6 @@ class RegretMatchingSolver(COSPSolver):
         # results at a message cost comparable to DSA-C.
         n_iters = self.stop_cycle if self.stop_cycle > 0 else self.max_iterations
         for iteration in range(n_iters):
-=======
-        prev_p1 = list(self.strategy_p1)
-        stable_iters = 0
-        strategy_tol = float(self.algorithm_config.get("strategy_stability", 1e-3))
-        patience = int(self.algorithm_config.get("patience", 8))
-
-        for iteration in range(self.max_iterations):
-            if self.stop_cycle > 0 and iteration >= self.stop_cycle:
-                break
->>>>>>> 7fcecbd (claude updates)
             self._update(t=iteration + 1)
 
         return self._result(n_iters, converged=False)
