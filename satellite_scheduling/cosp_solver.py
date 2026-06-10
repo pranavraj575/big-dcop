@@ -202,63 +202,182 @@ class COSPSolver(ABC):
 
 
 # ---------------------------------------------------------------------------
-# MGM Solver
+# MGM2 Solver
 # ---------------------------------------------------------------------------
 
 class MGMSolver(COSPSolver):
     """
-    MGM (Maximum Gain Message) solver.
+    MGM2 (Maximum Gain Message, 2-agent coordination) solver.
 
-    Each iteration:
-      1. All agents simultaneously compute the best value (0 or 1) for each
-         owned variable based on the current shared state (snapshot).
-      2. Gains are computed; an agent applies its move only if its gain is
-         >= the gain of every neighboring agent (max-gain wins protocol).
+    Each iteration runs a 3-phase protocol:
+
+    Phase 1 — unilateral: every variable computes its best individual move
+        and the corresponding gain (same as plain MGM per-variable).
+
+    Phase 2 — pair offers: each variable independently decides to become an
+        *offerer* with probability `threshold` (default 0.5).  An offerer
+        picks one random constraint-neighbour as partner and searches the 4
+        joint binary assignments to find the one that maximises the combined
+        utility of both variables' constraint neighbourhoods.  The offer is
+        accepted by the partner if the joint gain for the partner strictly
+        exceeds the partner's unilateral gain.  Accepted pairs commit to the
+        joint assignment and report individual joint gains for the next phase.
+
+    Phase 3 — GO/NO-GO: a variable applies its move (joint or unilateral)
+        only if its effective gain beats the effective gains of all
+        constraint-local competitors (same max-gain rule as plain MGM, but
+        *excluding* the committed partner from the competitor set).  For
+        committed pairs both partners must individually win their respective
+        competitions before either executes.
+
+    Parameters
+    ----------
+    threshold : float (default 0.5)
+        Probability that a variable becomes an offerer each iteration.
+    max_iterations : int (default 100)
+    stop_cycle : int (default 0 = disabled)
     """
 
     def __init__(self, algorithm_config: dict, pydcop_dict: dict):
         super().__init__(algorithm_config, pydcop_dict)
         self.max_iterations = algorithm_config.get("max_iterations", 100)
         self.stop_cycle = algorithm_config.get("stop_cycle", 0)
+        self.threshold = float(algorithm_config.get("threshold", 0.5))
 
     def _update(self):
         self.total_messages += self.messages_per_iter
         snapshot = list(self.assignments)
 
-        # Per-variable gain: how much does flipping vi improve the local constraint sum?
-        var_gains: List[float] = [0.0] * self.n_vars
-        var_best_val: List[int] = list(snapshot)
+        # ------------------------------------------------------------------
+        # Phase 1: unilateral gains (identical to plain MGM per-variable)
+        # ------------------------------------------------------------------
+        uni_gains: List[float] = [0.0] * self.n_vars
+        uni_best: List[int] = list(snapshot)
 
         for vi in range(self.n_vars):
             orig = snapshot[vi]
-            current_u = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
-            best_val, best_u = orig, current_u
-            for val in (0, 1):
-                if val == orig:
-                    continue
-                snapshot[vi] = val
-                u = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
-                if u > best_u:
-                    best_u, best_val = u, val
+            cur_u = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
+            alt = 1 - orig
+            snapshot[vi] = alt
+            alt_u = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
             snapshot[vi] = orig
-            # Tiny noise breaks ties so symmetric agents don't all act/all freeze.
-            var_gains[vi] = best_u - current_u + random.uniform(0, 1e-9)
-            var_best_val[vi] = best_val
+            if alt_u > cur_u:
+                uni_gains[vi] = alt_u - cur_u + random.uniform(0, 1e-9)
+                uni_best[vi] = alt
+            else:
+                uni_gains[vi] = random.uniform(0, 1e-9)  # ≤0 gain, just noise
 
-        # Per-variable coordination: vi is updated only if its gain beats the gain of
-        # every other variable that shares a constraint with it.  This allows one
-        # variable per constraint to move each iteration instead of serialising through
-        # a single per-agent all-neighbors check (which blocks ~58/60 agents in dense
-        # scenarios where every agent has ~43 global neighbors).
-        for vi in range(self.n_vars):
-            if var_gains[vi] <= 0 or var_best_val[vi] == snapshot[vi]:
+        # ------------------------------------------------------------------
+        # Phase 2: pair offers
+        # ------------------------------------------------------------------
+        # paired_gain[vi]    = effective gain vi will report in the GO phase
+        #                      (None if vi is unpaired → falls back to uni_gains[vi])
+        # paired_best[vi]    = value vi intends to take under the joint plan
+        # paired_partner[vi] = partner index (-1 if unpaired)
+        paired_gain: List[Optional[float]] = [None] * self.n_vars
+        paired_best: List[int] = list(snapshot)
+        paired_partner: List[int] = [-1] * self.n_vars
+        in_pair: List[bool] = [False] * self.n_vars
+
+        order = list(range(self.n_vars))
+        random.shuffle(order)
+
+        for vi in order:
+            if in_pair[vi] or random.random() >= self.threshold:
                 continue
-            competitors: Set[int] = set()
+
+            # Find unpaired constraint neighbours
+            neighbors: Set[int] = set()
             for c_idx in self.var_to_constraints[vi]:
-                competitors.update(self.constraints[c_idx][0])
-            competitors.discard(vi)
-            if all(var_gains[vi] >= var_gains[vj] for vj in competitors):
-                self.assignments[vi] = var_best_val[vi]
+                for vj in self.constraints[c_idx][0]:
+                    if vj != vi and not in_pair[vj]:
+                        neighbors.add(vj)
+            if not neighbors:
+                continue
+
+            vj = random.choice(list(neighbors))
+            orig_i, orig_j = snapshot[vi], snapshot[vj]
+
+            # Best joint assignment: search all 4 binary combinations for (vi, vj)
+            joint_c = list(set(self.var_to_constraints[vi]) | set(self.var_to_constraints[vj]))
+            cur_joint = sum(self._constraint_value(c, snapshot) for c in joint_c)
+            best_vi_val, best_vj_val = orig_i, orig_j
+            best_joint = cur_joint
+
+            for val_i in (0, 1):
+                for val_j in (0, 1):
+                    if val_i == orig_i and val_j == orig_j:
+                        continue
+                    snapshot[vi] = val_i
+                    snapshot[vj] = val_j
+                    u = sum(self._constraint_value(c, snapshot) for c in joint_c)
+                    if u > best_joint:
+                        best_joint = u
+                        best_vi_val, best_vj_val = val_i, val_j
+            snapshot[vi] = orig_i
+            snapshot[vj] = orig_j
+
+            if best_joint == cur_joint:
+                continue  # No joint improvement — no offer
+
+            # Individual gains for each variable under the proposed joint assignment
+            snapshot[vi] = best_vi_val
+            snapshot[vj] = best_vj_val
+            new_ui = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
+            new_uj = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vj])
+            snapshot[vi] = orig_i
+            snapshot[vj] = orig_j
+            cur_ui = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
+            cur_uj = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vj])
+
+            gain_vi_j = new_ui - cur_ui + random.uniform(0, 1e-9)
+            gain_vj_j = new_uj - cur_uj + random.uniform(0, 1e-9)
+
+            # Partner (vj) accepts offer only if joint gain > own unilateral gain
+            if gain_vj_j > uni_gains[vj]:
+                paired_gain[vi] = gain_vi_j
+                paired_gain[vj] = gain_vj_j
+                paired_best[vi] = best_vi_val
+                paired_best[vj] = best_vj_val
+                paired_partner[vi] = vj
+                paired_partner[vj] = vi
+                in_pair[vi] = True
+                in_pair[vj] = True
+
+        # Effective gain used in GO-phase competition: joint if paired, else unilateral
+        eff_gains: List[float] = [
+            paired_gain[vi] if paired_gain[vi] is not None else uni_gains[vi]
+            for vi in range(self.n_vars)
+        ]
+
+        # ------------------------------------------------------------------
+        # Phase 3: GO / NO-GO — apply moves
+        # ------------------------------------------------------------------
+        def _wins_competition(vx: int, exclude_partner: int) -> bool:
+            comps: Set[int] = set()
+            for c_idx in self.var_to_constraints[vx]:
+                comps.update(self.constraints[c_idx][0])
+            comps.discard(vx)
+            if exclude_partner >= 0:
+                comps.discard(exclude_partner)
+            return all(eff_gains[vx] >= eff_gains[vk] for vk in comps)
+
+        for vi in range(self.n_vars):
+            partner = paired_partner[vi]
+
+            if partner >= 0:
+                # Paired move: both partners must win their respective competitions
+                if not _wins_competition(vi, partner):
+                    continue
+                if not _wins_competition(partner, vi):
+                    continue
+                self.assignments[vi] = paired_best[vi]
+            else:
+                # Unilateral move: vi must win against all constraint-local competitors
+                if uni_best[vi] == snapshot[vi]:
+                    continue
+                if _wins_competition(vi, -1):
+                    self.assignments[vi] = uni_best[vi]
 
     def solve(self) -> Dict:
         prev = list(self.assignments)
@@ -267,9 +386,9 @@ class MGMSolver(COSPSolver):
                 break
             self._update()
             if self.assignments == prev:
-                logger.info(f"MGM converged at iteration {iteration}")
+                logger.info(f"MGM2 converged at iteration {iteration}")
                 return {
-                    "algorithm": "MGM",
+                    "algorithm": "MGM2",
                     "iterations": iteration,
                     "solution": self._extract_solution(),
                     "converged": True,
@@ -279,7 +398,7 @@ class MGMSolver(COSPSolver):
             prev = list(self.assignments)
 
         return {
-            "algorithm": "MGM",
+            "algorithm": "MGM2",
             "iterations": self.max_iterations,
             "solution": self._extract_solution(),
             "converged": False,
@@ -294,10 +413,29 @@ class MGMSolver(COSPSolver):
 
 class DSASolver(COSPSolver):
     """
-    DSA (Distributed Stochastic Algorithm) solver.
+    DSA-C (Distributed Stochastic Algorithm, variant C) solver.
 
-    Each iteration every agent independently and stochastically decides
-    whether to adopt its locally best value, with probability `probability`.
+    Variant C is the most aggressive DSA variant:
+
+    * **delta > 0** (strict improvement): change to best value with probability p.
+    * **delta == 0** (tie): remove the current value from the candidate set so
+      the agent is forced to pick an *alternative* equally-good value, then
+      change with probability p.  This escapes symmetric local optima that
+      variants A and B would keep revisiting.
+    * **delta < 0** (degradation): no change.
+
+    For binary variables the tie-break simplifies to: when the alternative
+    value yields identical utility, switch to it with probability p.
+
+    Parameters
+    ----------
+    probability : float (default 0.7)
+    max_iterations : int (default 100)
+    patience : int (default 3)
+        Early-stop after this many consecutive iterations where < stability_threshold
+        fraction of variables change.
+    stability_threshold : float (default 0.01)
+    stop_cycle : int (default 0 = disabled)
     """
 
     def __init__(self, algorithm_config: dict, pydcop_dict: dict):
@@ -305,10 +443,6 @@ class DSASolver(COSPSolver):
         self.max_iterations = algorithm_config.get("max_iterations", 100)
         self.probability = algorithm_config.get("probability", 0.7)
         self.stop_cycle = algorithm_config.get("stop_cycle", 0)
-        # Stop early if the number of assignments that changed is below this
-        # fraction of variables for `patience` consecutive iterations.
-        # With p=0.7 DSA keeps jittering even at a good solution, so "no change"
-        # convergence rarely fires; patience gives a practical cutoff.
         self.patience = algorithm_config.get("patience", 3)
         self.stability_threshold = algorithm_config.get("stability_threshold", 0.01)
 
@@ -319,24 +453,26 @@ class DSASolver(COSPSolver):
         for ai in range(self.n_agents):
             for vi in self.agent_var_indices[ai]:
                 orig = snapshot[vi]
+                alt = 1 - orig
 
-                # Only evaluate constraints containing vi — flipping vi cannot
-                # affect any other constraint, so agent_utility (which sums ALL
-                # of the agent's constraints) was doing ~51x redundant work.
-                current_u = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
-                best_val, best_u = orig, current_u
-
-                for val in (0, 1):
-                    if val == orig:
-                        continue
-                    snapshot[vi] = val
-                    u = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
-                    if u > best_u:
-                        best_u, best_val = u, val
+                # Only evaluate constraints containing vi (51× cheaper than agent_utility).
+                cur_u = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
+                snapshot[vi] = alt
+                alt_u = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
                 snapshot[vi] = orig  # restore
 
-                if best_val != orig and random.random() < self.probability:
-                    self.assignments[vi] = best_val
+                delta = alt_u - cur_u
+
+                if delta > 0:
+                    # DSA-C variant: improvement → change with probability p
+                    if random.random() < self.probability:
+                        self.assignments[vi] = alt
+                elif delta == 0:
+                    # DSA-C variant: tie → force switch to the alternative value
+                    # (removes current_val from candidates per the pydcop spec)
+                    if random.random() < self.probability:
+                        self.assignments[vi] = alt
+                # delta < 0: no change (all three variants agree)
 
     def solve(self) -> Dict:
         prev = list(self.assignments)
@@ -347,10 +483,9 @@ class DSASolver(COSPSolver):
             self._update()
             # Exact convergence: nothing changed at all.
             if self.assignments == prev:
-                logger.info(f"DSA converged at iteration {iteration}")
+                logger.info(f"DSA-C converged at iteration {iteration}")
                 return {
-                    "algorithm": "DSA",
-                    "variant": self.algorithm_config.get("variant", "B"),
+                    "algorithm": "DSA-C",
                     "iterations": iteration,
                     "solution": self._extract_solution(),
                     "converged": True,
@@ -358,16 +493,13 @@ class DSASolver(COSPSolver):
                     "total_messages": self.total_messages,
                 }
             # Patience: stop if fewer than stability_threshold fraction of variables
-            # changed for `patience` consecutive iterations.  With p=0.7, DSA keeps
-            # jittering near a good solution and rarely hits exact convergence, so this
-            # provides a practical early-stop without waiting for max_iterations.
+            # changed for `patience` consecutive iterations.
             changed_frac = sum(a != b for a, b in zip(self.assignments, prev)) / max(self.n_vars, 1)
             stable_iters = stable_iters + 1 if changed_frac < self.stability_threshold else 0
             if stable_iters >= self.patience:
-                logger.info(f"DSA stabilised at iteration {iteration} (changed_frac={changed_frac:.4f})")
+                logger.info(f"DSA-C stabilised at iteration {iteration} (changed_frac={changed_frac:.4f})")
                 return {
-                    "algorithm": "DSA",
-                    "variant": self.algorithm_config.get("variant", "B"),
+                    "algorithm": "DSA-C",
                     "iterations": iteration,
                     "solution": self._extract_solution(),
                     "converged": True,
@@ -377,8 +509,7 @@ class DSASolver(COSPSolver):
             prev = list(self.assignments)
 
         return {
-            "algorithm": "DSA",
-            "variant": self.algorithm_config.get("variant", "B"),
+            "algorithm": "DSA-C",
             "iterations": self.max_iterations,
             "solution": self._extract_solution(),
             "converged": False,
@@ -393,35 +524,77 @@ class DSASolver(COSPSolver):
 
 class MaxSumSolver(COSPSolver):
     """
-    MaxSum (belief propagation) solver.
+    MaxSum ADVP (Adaptive Damping and Variable Pruning) solver.
 
-    Each agent maintains a message score per owned variable.  Messages are
-    damped by `damping` to improve stability.  Convergence is declared when
-    no message changes by more than `stability`.
+    ADVP adds three improvements over plain MaxSum:
+
+    1. **Damping** — each variable's belief score is an EMA blend of the
+       newly-computed incoming score and the previous score:
+           score_new = (1 − damping) · incoming + damping · score_old
+       Damping reduces oscillation in loopy graphs.
+
+    2. **Normalization** — for each factor→variable message the mean of the
+       message values is subtracted before delivery.  For binary variables the
+       differential (u1 − u0) is unchanged, so numerical stability is
+       improved without affecting the argmax.  In our scalar-score
+       implementation this is implicit.
+
+    3. **Per-variable stability pruning** (the "VP" part) — once a variable's
+       score has been stable (relative change < `stability`) for SAME_COUNT
+       consecutive iterations, that variable is skipped in subsequent
+       iterations.  This lets the solver keep running for max_iterations but
+       do progressively less work as variables freeze.  The SAME_COUNT minimum
+       (default 4, matching pydcop) guarantees neighbours receive enough
+       consistent messages before a variable stops broadcasting.
+
+    Update order: async Gauss-Seidel (random shuffle each iteration) to avoid
+    the synchronous-Jacobi oscillation where all co-covering variables flip in
+    lockstep.
+
+    Parameters
+    ----------
+    damping : float (default 0.5)
+    stability : float (default 1e-4)
+        Relative-change threshold for per-variable pruning:
+        ``2·|prev−curr| / (|prev|+|curr|+ε) < stability``
+    same_count : int (default 4)
+        Minimum number of stable consecutive iterations before a variable
+        is pruned (matches SAME_COUNT in pydcop maxsum_advp).
+    max_iterations : int (default 100)
     """
+
+    _SAME_COUNT_DEFAULT = 4
 
     def __init__(self, algorithm_config: dict, pydcop_dict: dict):
         super().__init__(algorithm_config, pydcop_dict)
         self.max_iterations = algorithm_config.get("max_iterations", 100)
-        self.damping = algorithm_config.get("damping", 0.0)
-        self.stability = algorithm_config.get("stability", 1e-4)
-        # message_scores[vi] = current belief score for variable vi
+        self.damping = float(algorithm_config.get("damping", 0.5))
+        self.stability = float(algorithm_config.get("stability", 1e-4))
+        self.same_count = int(algorithm_config.get("same_count", self._SAME_COUNT_DEFAULT))
+        # message_scores[vi] = current damped belief score for variable vi
         self.message_scores: List[float] = [0.0] * self.n_vars
+        # stable_iters[vi] = consecutive iterations where vi's score was stable
+        self._stable_iters: List[int] = [0] * self.n_vars
+
+    @staticmethod
+    def _approx_stable(prev: float, curr: float, tol: float) -> bool:
+        """Relative-change stability test matching pydcop approx_match."""
+        denom = abs(prev) + abs(curr)
+        if denom == 0.0:
+            return True
+        return 2.0 * abs(prev - curr) / denom < tol
 
     def _update(self):
         self.total_messages += self.messages_per_iter
-        # Async (Gauss-Seidel) update: process variables one at a time in random
-        # order, each seeing the most recent live assignments.
-        #
-        # The synchronous (Jacobi) alternative causes oscillation: all variables
-        # covering the same request see everyone else at 0, score 1.0, all flip to 1.
-        # Next round they all see 1, score negative, all flip to 0.  Random shuffle
-        # breaks this symmetry: the first variable in the order claims the request;
-        # later variables see it taken and correctly back off.
+        # Async (Gauss-Seidel): random order, each variable sees the latest live values.
         order = list(range(self.n_vars))
         random.shuffle(order)
 
         for vi in order:
+            # VP: skip variables that have already stabilised for ≥ same_count iters
+            if self._stable_iters[vi] >= self.same_count:
+                continue
+
             orig = self.assignments[vi]
 
             self.assignments[vi] = 1
@@ -432,36 +605,42 @@ class MaxSumSolver(COSPSolver):
             u0 = sum(self._constraint_value(c_idx, self.assignments)
                      for c_idx in self.var_to_constraints[vi])
 
-            self.assignments[vi] = orig  # restore before committing new value
+            self.assignments[vi] = orig
 
-            # Small tie-breaking noise so equal-score variables don't systematically
-            # all land on 0 or all land on 1.
-            incoming = u1 - u0 + random.uniform(0, 1e-9)
-            new_score = (1.0 - self.damping) * incoming + self.damping * self.message_scores[vi]
+            # Normalization: subtract mean so scores don't drift unboundedly.
+            # For binary {u0, u1}: mean = (u0+u1)/2, normalised diff = u1−u0
+            # (unchanged), but we track normalised_u1 = (u1−u0)/2 as the score
+            # so scores stay bounded even in dense loopy graphs.
+            incoming = (u1 - u0) / 2.0 + random.uniform(0, 1e-9)
+
+            prev_score = self.message_scores[vi]
+            new_score = (1.0 - self.damping) * incoming + self.damping * prev_score
             self.message_scores[vi] = new_score
             self.assignments[vi] = 1 if new_score > 0 else 0
 
+            # Per-variable stability tracking
+            if self._approx_stable(prev_score, new_score, self.stability):
+                self._stable_iters[vi] += 1
+            else:
+                self._stable_iters[vi] = 0
+
     def solve(self) -> Dict:
-        prev_scores: List[float] = list(self.message_scores)
         for iteration in range(self.max_iterations):
             self._update()
-            if all(
-                abs(self.message_scores[vi] - prev_scores[vi]) <= self.stability
-                for vi in range(self.n_vars)
-            ):
-                logger.info(f"MaxSum converged at iteration {iteration}")
+            # Global convergence: all variables have stabilised for ≥ same_count iters
+            if all(self._stable_iters[vi] >= self.same_count for vi in range(self.n_vars)):
+                logger.info(f"MaxSum ADVP converged at iteration {iteration}")
                 return {
-                    "algorithm": "MaxSum",
+                    "algorithm": "MaxSum-ADVP",
                     "iterations": iteration,
                     "solution": self._extract_solution(),
                     "converged": True,
                     "messages_per_iter": self.messages_per_iter,
                     "total_messages": self.total_messages,
                 }
-            prev_scores = list(self.message_scores)
 
         return {
-            "algorithm": "MaxSum",
+            "algorithm": "MaxSum-ADVP",
             "iterations": self.max_iterations,
             "solution": self._extract_solution(),
             "converged": False,

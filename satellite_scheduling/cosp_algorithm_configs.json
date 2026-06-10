@@ -1,23 +1,23 @@
 [
   {
     "name": "mgm",
-    "display_name": "MGM",
+    "display_name": "MGM2",
     "algo_params": [
-      "max_iterations:100"
+      "max_iterations:100",
+      "threshold:0.5"
     ]
   },
   {
     "name": "dsa",
-    "display_name": "DSA-A",
+    "display_name": "DSA-C",
     "algo_params": [
       "max_iterations:100",
-      "variant:A",
       "probability:0.7"
     ]
   },
   {
     "name": "maxsum",
-    "display_name": "MaxSum",
+    "display_name": "MaxSum-ADVP",
     "algo_params": [
       "max_iterations:100",
       "damping:0.5",
