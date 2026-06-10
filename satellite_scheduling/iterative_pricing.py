@@ -55,7 +55,7 @@ def solve_iterative_pricing(
     temp_json=None,         # unused — kept for API compatibility
     working_dir=None,       # unused — kept for API compatibility
     max_iterations=5,
-    step_size_c=10.0,
+    step_size_c=5.0,
 ):
     if output_json is not None:
         assert not os.path.exists(output_json), f"output file {output_json} already exists"
