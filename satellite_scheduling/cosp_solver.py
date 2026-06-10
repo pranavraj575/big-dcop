@@ -894,32 +894,22 @@ class RegretMatchingSolver(COSPSolver):
         self.assignments = new_assignments
 
     def solve(self) -> Dict:
-        prev_p1 = list(self.strategy_p1)
-        stable_iters = 0
-        strategy_tol = float(self.algorithm_config.get("strategy_stability", 1e-3))
-        patience = int(self.algorithm_config.get("patience", 3))
-
-        for iteration in range(self.max_iterations):
-            if self.stop_cycle > 0 and iteration >= self.stop_cycle:
-                break
+        # RM does not have a clean convergence signal in contested environments:
+        # - Assignment-based checks fail because stochastic sampling keeps
+        #   jittering even after strategies stabilise.
+        # - Strategy-change checks (max/mean dp) fail because a small subset of
+        #   "contested" variables permanently swing as neighbours re-sample.
+        # - Pure-strategy checks fire after a single iteration (all vars greedily
+        #   jump to p1≈1 before contention resolves) giving terrible solutions.
+        #
+        # The correct budget control is stop_cycle (set in algo_params).  RM
+        # quality plateaus within ~20–30 iterations; stop_cycle:30 gives good
+        # results at a message cost comparable to DSA-C.
+        n_iters = self.stop_cycle if self.stop_cycle > 0 else self.max_iterations
+        for iteration in range(n_iters):
             self._update(t=iteration + 1)
 
-            # Convergence on strategies, not sampled assignments.
-            # Sampled assignments keep jittering even when strategy_p1 has
-            # stabilised (any variable with p1 ≈ 0.3–0.7 resamples a
-            # different binary value each iteration), so the old assignment-
-            # based check essentially never fired and RM always ran all
-            # max_iterations steps.  Checking the max change in strategy_p1
-            # catches true convergence orders of magnitude earlier.
-            max_dp = max(abs(self.strategy_p1[vi] - prev_p1[vi]) for vi in range(self.n_vars))
-            stable_iters = stable_iters + 1 if max_dp < strategy_tol else 0
-            if stable_iters >= patience:
-                logger.info(f"RM strategy stabilised at iteration {iteration} (max_dp={max_dp:.2e})")
-                return self._result(iteration, converged=True)
-
-            prev_p1 = list(self.strategy_p1)
-
-        return self._result(self.max_iterations, converged=False)
+        return self._result(n_iters, converged=False)
 
     def _extract_solution(self) -> Dict:
         """
