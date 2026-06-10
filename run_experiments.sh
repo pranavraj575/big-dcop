@@ -71,7 +71,7 @@ for framework in "${FRAMEWORKS[@]}"; do
     # Remove stale output so main.py can write fresh results
     rm -f "${output_json}"
 
-    if "${PYTHON}" "${SCRIPT}" \
+    if "python" "${SCRIPT}" \
         --scenario "${scenario_path}" \
         --output_json "${output_json}" \
         --algorithms_json "${ALGORITHMS_JSON}" \
