@@ -894,24 +894,30 @@ class RegretMatchingSolver(COSPSolver):
         self.assignments = new_assignments
 
     def solve(self) -> Dict:
-        prev = list(self.assignments)
+        prev_p1 = list(self.strategy_p1)
         stable_iters = 0
+        strategy_tol = float(self.algorithm_config.get("strategy_stability", 1e-3))
+        patience = int(self.algorithm_config.get("patience", 3))
+
         for iteration in range(self.max_iterations):
             if self.stop_cycle > 0 and iteration >= self.stop_cycle:
                 break
             self._update(t=iteration + 1)
 
-            if self.assignments == prev:
-                logger.info(f"RM converged at iteration {iteration}")
+            # Convergence on strategies, not sampled assignments.
+            # Sampled assignments keep jittering even when strategy_p1 has
+            # stabilised (any variable with p1 ≈ 0.3–0.7 resamples a
+            # different binary value each iteration), so the old assignment-
+            # based check essentially never fired and RM always ran all
+            # max_iterations steps.  Checking the max change in strategy_p1
+            # catches true convergence orders of magnitude earlier.
+            max_dp = max(abs(self.strategy_p1[vi] - prev_p1[vi]) for vi in range(self.n_vars))
+            stable_iters = stable_iters + 1 if max_dp < strategy_tol else 0
+            if stable_iters >= patience:
+                logger.info(f"RM strategy stabilised at iteration {iteration} (max_dp={max_dp:.2e})")
                 return self._result(iteration, converged=True)
 
-            changed_frac = sum(a != b for a, b in zip(self.assignments, prev)) / max(self.n_vars, 1)
-            stable_iters = stable_iters + 1 if changed_frac < 0.01 else 0
-            if stable_iters >= 3:
-                logger.info(f"RM stabilised at iteration {iteration}")
-                return self._result(iteration, converged=True)
-
-            prev = list(self.assignments)
+            prev_p1 = list(self.strategy_p1)
 
         return self._result(self.max_iterations, converged=False)
 
