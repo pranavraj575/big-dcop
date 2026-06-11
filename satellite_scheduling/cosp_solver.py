@@ -155,21 +155,26 @@ class COSPSolver(ABC):
         """
         Count would-be messages for one iteration.
 
-        For each agent, walk the unique set of constraints it participates in
-        and count variables in those constraints owned by *other* agents.
-        Each such variable is a value that would have been received as a message
-        in a real distributed implementation.
+        Each pair of agents that share at least one constraint must exchange
+        their current variable values each iteration: one message in each
+        direction, giving 2 messages per unique neighboring agent pair.
+
+        This matches standard DCOP accounting: an agent broadcasts its value
+        once to each of its constraint-neighbors.  The previous model counted
+        foreign *variable reads per constraint* — O(n²) in constraint size —
+        which overcounts by a factor of ~(avg_constraint_size − 1) because
+        it charged separately for each constraint two agents share rather than
+        once per unique (agent_i, agent_j) relationship.
         """
-        count = 0
-        for ai in range(self.n_agents):
-            seen: Set[int] = set()
-            for vi in self.agent_var_indices[ai]:
-                for c_idx in self.var_to_constraints[vi]:
-                    if c_idx not in seen:
-                        seen.add(c_idx)
-                        var_indices, _ = self.constraints[c_idx]
-                        count += sum(1 for vj in var_indices if self.agent_of_var[vj] != ai)
-        return count
+        agent_pairs: Set[tuple] = set()
+        for var_indices, _ in self.constraints:
+            agents_in_c = [self.agent_of_var[vi] for vi in var_indices
+                           if self.agent_of_var[vi] >= 0]
+            for i, ai in enumerate(agents_in_c):
+                for aj in agents_in_c[i + 1:]:
+                    if ai != aj:
+                        agent_pairs.add((min(ai, aj), max(ai, aj)))
+        return 2 * len(agent_pairs)
 
     def _constraint_value(self, c_idx: int, assignments: List[int]) -> float:
         var_indices, fn = self.constraints[c_idx]
