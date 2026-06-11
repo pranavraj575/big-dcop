@@ -63,7 +63,8 @@ def solve_iterative_pricing(
     lambda_penalties = defaultdict(float)
     best_total_scheduled = 0
     best_iteration = 0
-    run_data = []   # in-memory iteration results (no temp files)
+    run_data = []        # in-memory iteration results (no temp files)
+    utility_per_iter = []
     total_messages = 0
     t_start = time.time()
 
@@ -106,6 +107,7 @@ def solve_iterative_pricing(
                 lambda_penalties[(agent_id, req_id)] += alpha
 
         true_total = len(global_scheduled_reqs)
+        utility_per_iter.append(true_total / len(requests))
         logger.info(f"Iteration {iteration}: {true_total}/{len(requests)} scheduled, {total_dropped} dropped")
 
         if true_total > best_total_scheduled:
@@ -124,4 +126,5 @@ def solve_iterative_pricing(
     return best_total_scheduled / len(requests), best_iteration, {
         "total_messages": total_messages,
         "runtime_s": runtime_s,
+        "utility_per_iter": utility_per_iter,
     }
