@@ -9,7 +9,7 @@
 #   output/<framework>/<scenario_stem>.json
 #
 # Usage:
-#   bash run_experiments.sh [--max-iterations N] [--output-dir DIR]
+#   bash run_experiments.sh [--max-iterations N] [--output-dir DIR] [--trials NUM_TRIALS]
 #
 # Defaults:
 #   --max-iterations  4
@@ -21,8 +21,13 @@ set -euo pipefail
 # Defaults
 # ---------------------------------------------------------------------------
 MAX_ITER=4
-OUTPUT_DIR="output"
-SCRIPT="satellite_scheduling/main.py"
+TRIALS=2
+PROJECT_DIR=$(readlink -e $(dirname $0))
+OUTPUT_DIR="$PROJECT_DIR/output"
+SCRIPT="$PROJECT_DIR/satellite_scheduling/main.py"
+ALGORITHMS_JSON="$PROJECT_DIR/satellite_scheduling/cosp_algorithm_configs.json"
+SCENARIOS_DIR="$PROJECT_DIR/satellite_scheduling/scenarios_larger"
+
 
 # Auto-detect a Python interpreter that has ortools installed.
 # Override with --python /path/to/python if needed.
@@ -41,8 +46,6 @@ _find_python() {
   echo ""
 }
 PYTHON=""
-ALGORITHMS_JSON="satellite_scheduling/cosp_algorithm_configs.json"
-SCENARIOS_DIR="satellite_scheduling/scenarios_larger/"
 
 # ---------------------------------------------------------------------------
 # Parse arguments
@@ -53,6 +56,8 @@ while [[ $# -gt 0 ]]; do
       MAX_ITER="$2"; shift 2;;
     --output-dir)
       OUTPUT_DIR="$2"; shift 2;;
+    --trials)
+      TRIALS="$2"; shift 2;;
     --python)
       PYTHON="$2"; shift 2;;   # explicit override skips auto-detect
     *)
@@ -88,32 +93,36 @@ for framework in "${FRAMEWORKS[@]}"; do
 
   for scenario_path in "${SCENARIOS_DIR}"/scenario_*.json; do
     scenario_stem=$(basename "${scenario_path}" .json)
-    output_json="${out_dir}/${scenario_stem}.json"
+    current_trial=0
+    while [[ $current_trial -lt $TRIALS ]]; do
+      output_json="${out_dir}/${scenario_stem}_t${current_trial}.json"
 
-    total=$((total + 1))
-    echo "--------------------------------------------------------------"
-    echo "  framework : ${framework}"
-    echo "  scenario  : ${scenario_path}"
-    echo "  output    : ${output_json}"
-    echo "--------------------------------------------------------------"
+      total=$((total + 1))
+      echo "--------------------------------------------------------------"
+      echo "  framework : ${framework}"
+      echo "  scenario  : ${scenario_path}  (trial ${current_trial})"
+      echo "  output    : ${output_json}"
+      echo "--------------------------------------------------------------"
 
-    # Remove stale output so main.py can write fresh results
-    rm -f "${output_json}"
+      # Remove stale output so main.py can write fresh results
+      rm -f "${output_json}"
 
-    if "python" "${SCRIPT}" \
-        --scenario "${scenario_path}" \
-        --output_json "${output_json}" \
-        --algorithms_json "${ALGORITHMS_JSON}" \
-        --framework "${framework}" \
-        --max_iterations "${MAX_ITER}"; then
-      passed=$((passed + 1))
-    else
-      failed=$((failed + 1))
-      failed_list+=("${framework}/${scenario_stem}")
-      echo "  [FAILED] ${framework}/${scenario_stem}" >&2
-    fi
+      if "python" "${SCRIPT}" \
+          --scenario "${scenario_path}" \
+          --output_json "${output_json}" \
+          --algorithms_json "${ALGORITHMS_JSON}" \
+          --framework "${framework}" \
+          --max_iterations "${MAX_ITER}"; then
+        passed=$((passed + 1))
+      else
+        failed=$((failed + 1))
+        failed_list+=("${framework}/${scenario_stem}")
+        echo "  [FAILED] ${framework}/${scenario_stem}" >&2
+      fi
 
-    echo ""
+      echo ""
+      current_trial=$(($current_trial+1))
+    done
   done
 done
 
