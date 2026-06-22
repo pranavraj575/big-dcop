@@ -81,7 +81,7 @@ fi
 echo "Using Python: ${PYTHON}"
 echo ""
 
-FRAMEWORKS=("constraint_generation" "iterative_pricing")
+FRAMEWORKS=("iterative_pricing" "constraint_generation")
 
 # ---------------------------------------------------------------------------
 # Run

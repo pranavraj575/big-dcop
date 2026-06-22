@@ -1,0 +1,280 @@
+{
+  "run_info": {
+    "scenario": "/home/dcopper/big-dcop/satellite_scheduling/scenarios/scenario_6.json",
+    "algorithms_json": "/home/dcopper/big-dcop/satellite_scheduling/cosp_algorithm_configs.json"
+  },
+  "algorithm_configs": [
+    {
+      "name": "mgm",
+      "display_name": "MGM2",
+      "algo_params": [
+        "max_iterations:100",
+        "threshold:0.5"
+      ]
+    },
+    {
+      "name": "dsa",
+      "display_name": "DSA-C",
+      "algo_params": [
+        "max_iterations:100",
+        "probability:0.7"
+      ]
+    },
+    {
+      "name": "maxsum",
+      "display_name": "MaxSum-ADVP",
+      "algo_params": [
+        "max_iterations:100",
+        "damping:0.5",
+        "stability:0.0001"
+      ]
+    },
+    {
+      "name": "regret_matching",
+      "display_name": "RM",
+      "algo_params": [
+        "max_iterations:45"
+      ]
+    },
+    {
+      "name": "regret_matching",
+      "display_name": "RM+",
+      "algo_params": [
+        "max_iterations:45",
+        "rm_plus:1"
+      ]
+    },
+    {
+      "name": "regret_matching",
+      "display_name": "Predictive RM",
+      "algo_params": [
+        "max_iterations:45",
+        "predictive:1"
+      ]
+    },
+    {
+      "name": "regret_matching",
+      "display_name": "IR-PRM",
+      "algo_params": [
+        "max_iterations:45",
+        "ir_prm:1",
+        "rm_plus:1"
+      ]
+    },
+    {
+      "name": "regret_matching",
+      "display_name": "DRM",
+      "algo_params": [
+        "max_iterations:45",
+        "discounted_rm:1",
+        "alpha:1.5",
+        "beta:0"
+      ]
+    },
+    {
+      "name": "regret_matching",
+      "display_name": "DRM+",
+      "algo_params": [
+        "max_iterations:45",
+        "discounted_rm:1",
+        "alpha:1.5",
+        "beta:0",
+        "rm_plus:1"
+      ]
+    },
+    {
+      "name": "regret_matching",
+      "display_name": "Damped DRM+",
+      "algo_params": [
+        "max_iterations:45",
+        "discounted_rm:1",
+        "alpha:1.5",
+        "beta:0",
+        "rm_plus:1",
+        "damping:0.3"
+      ]
+    }
+  ],
+  "output": {
+    "MGM2": {
+      "aux_info": {
+        "best_total_scheduled": 0.945,
+        "best_iter": 6,
+        "total_messages": 148712,
+        "runtime_s": 1.3615965843200684,
+        "utility_per_iter": [
+          0.93,
+          0.905,
+          0.91,
+          0.91,
+          0.925,
+          0.93,
+          0.945,
+          0.91
+        ]
+      }
+    },
+    "DSA-C": {
+      "aux_info": {
+        "best_total_scheduled": 0.955,
+        "best_iter": 0,
+        "total_messages": 441008,
+        "runtime_s": 1.2833232879638672,
+        "utility_per_iter": [
+          0.955,
+          0.945,
+          0.91,
+          0.91,
+          0.93,
+          0.935,
+          0.94,
+          0.865
+        ]
+      }
+    },
+    "MaxSum-ADVP": {
+      "aux_info": {
+        "best_total_scheduled": 0.945,
+        "best_iter": 2,
+        "total_messages": 430752,
+        "runtime_s": 1.5057792663574219,
+        "utility_per_iter": [
+          0.92,
+          0.905,
+          0.945,
+          0.915,
+          0.925,
+          0.94,
+          0.925,
+          0.91
+        ]
+      }
+    },
+    "RM": {
+      "aux_info": {
+        "best_total_scheduled": 0.935,
+        "best_iter": 7,
+        "total_messages": 410240,
+        "runtime_s": 1.550926685333252,
+        "utility_per_iter": [
+          0.895,
+          0.92,
+          0.885,
+          0.89,
+          0.905,
+          0.92,
+          0.905,
+          0.935
+        ]
+      }
+    },
+    "RM+": {
+      "aux_info": {
+        "best_total_scheduled": 0.95,
+        "best_iter": 1,
+        "total_messages": 410240,
+        "runtime_s": 1.580216646194458,
+        "utility_per_iter": [
+          0.88,
+          0.95,
+          0.935,
+          0.905,
+          0.905,
+          0.93,
+          0.925,
+          0.92
+        ]
+      }
+    },
+    "Predictive RM": {
+      "aux_info": {
+        "best_total_scheduled": 0.95,
+        "best_iter": 4,
+        "total_messages": 410240,
+        "runtime_s": 1.5324358940124512,
+        "utility_per_iter": [
+          0.935,
+          0.93,
+          0.895,
+          0.905,
+          0.95,
+          0.92,
+          0.925,
+          0.935
+        ]
+      }
+    },
+    "IR-PRM": {
+      "aux_info": {
+        "best_total_scheduled": 0.945,
+        "best_iter": 6,
+        "total_messages": 410240,
+        "runtime_s": 1.7468855381011963,
+        "utility_per_iter": [
+          0.925,
+          0.91,
+          0.925,
+          0.895,
+          0.9,
+          0.935,
+          0.945,
+          0.935
+        ]
+      }
+    },
+    "DRM": {
+      "aux_info": {
+        "best_total_scheduled": 0.945,
+        "best_iter": 7,
+        "total_messages": 410240,
+        "runtime_s": 1.6072454452514648,
+        "utility_per_iter": [
+          0.91,
+          0.895,
+          0.93,
+          0.94,
+          0.915,
+          0.925,
+          0.94,
+          0.945
+        ]
+      }
+    },
+    "DRM+": {
+      "aux_info": {
+        "best_total_scheduled": 0.93,
+        "best_iter": 5,
+        "total_messages": 410240,
+        "runtime_s": 1.6346588134765625,
+        "utility_per_iter": [
+          0.885,
+          0.915,
+          0.91,
+          0.895,
+          0.875,
+          0.93,
+          0.905,
+          0.93
+        ]
+      }
+    },
+    "Damped DRM+": {
+      "aux_info": {
+        "best_total_scheduled": 0.945,
+        "best_iter": 7,
+        "total_messages": 410240,
+        "runtime_s": 1.6601393222808838,
+        "utility_per_iter": [
+          0.935,
+          0.925,
+          0.94,
+          0.915,
+          0.935,
+          0.92,
+          0.93,
+          0.945
+        ]
+      }
+    }
+  }
+}
