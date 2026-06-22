@@ -93,7 +93,7 @@ for framework in "${FRAMEWORKS[@]}"; do
     total=$((total + 1))
     echo "--------------------------------------------------------------"
     echo "  framework : ${framework}"
-    echo "  scenario  : ${scenario_stem}"
+    echo "  scenario  : ${scenario_path}"
     echo "  output    : ${output_json}"
     echo "--------------------------------------------------------------"
 
