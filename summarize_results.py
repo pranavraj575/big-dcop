@@ -25,6 +25,7 @@ from pathlib import Path
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _fmt(val, fmt=".1%"):
     return format(val, fmt) if val is not None else "—"
 
@@ -54,6 +55,7 @@ def _print_table(headers, rows, title=None):
 # Load
 # ---------------------------------------------------------------------------
 
+
 def load_results(output_dir: Path):
     """
     Returns a nested dict:
@@ -82,6 +84,7 @@ def load_results(output_dir: Path):
 # Summarise
 # ---------------------------------------------------------------------------
 
+
 def summarize(data, frameworks_filter=None, detail=False):
     frameworks = sorted(data.keys())
     if frameworks_filter:
@@ -102,8 +105,7 @@ def summarize(data, frameworks_filter=None, detail=False):
         if detail:
             headers = ["scenario"] + algos
             rows = []
-            for scenario in sorted(scenarios.keys(),
-                                   key=lambda s: int(s.replace("scenario_", ""))):
+            for scenario in sorted(scenarios.keys(), key=lambda s: int(s.replace("scenario_", ""))):
                 row = [scenario]
                 for algo in algos:
                     info = scenarios[scenario].get(algo, {})
@@ -129,13 +131,15 @@ def summarize(data, frameworks_filter=None, detail=False):
             avg_s = sum(sched_vals) / n if n else None
             avg_m = sum(msg_vals) / len(msg_vals) if msg_vals else None
             avg_r = sum(rt_vals) / len(rt_vals) if rt_vals else None
-            rows.append([
-                algo,
-                _fmt(avg_s) if avg_s is not None else "—",
-                f"{avg_m:,.0f}" if avg_m is not None else "—",
-                f"{avg_r:.2f}s" if avg_r is not None else "—",
-                str(n),
-            ])
+            rows.append(
+                [
+                    algo,
+                    _fmt(avg_s) if avg_s is not None else "—",
+                    f"{avg_m:,.0f}" if avg_m is not None else "—",
+                    f"{avg_r:.2f}s" if avg_r is not None else "—",
+                    str(n),
+                ]
+            )
 
         # Sort by average scheduled % descending
         rows.sort(key=lambda r: float(r[1].rstrip("%")) if r[1] != "—" else 0, reverse=True)
@@ -146,15 +150,12 @@ def summarize(data, frameworks_filter=None, detail=False):
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main():
-    p = argparse.ArgumentParser(description=__doc__,
-                                formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--output-dir", default="output", type=Path,
-                   help="Root of the output tree (default: output)")
-    p.add_argument("--detail", action="store_true",
-                   help="Also print per-scenario rows")
-    p.add_argument("--framework", default=None,
-                   help="Restrict to one framework")
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--output-dir", default="output", type=Path, help="Root of the output tree (default: output)")
+    p.add_argument("--detail", action="store_true", help="Also print per-scenario rows")
+    p.add_argument("--framework", default=None, help="Restrict to one framework")
     args = p.parse_args()
 
     if not args.output_dir.exists():

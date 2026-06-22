@@ -200,18 +200,18 @@ class HardcodedConstraintEvaluator:
 
     def _initialize_builtins(self):
         """Pre-registers default hardcoded functions mimicking the standard pydcop formulas."""
-        
-        # 1 / (sum ** 2) 
+
+        # 1 / (sum ** 2)
         # Safely checks if sum is 0 to avoid ZeroDivisionError
         def inverse_square_sum(vars_dict: dict) -> float:
-            # Looks for 'sum' explicitly. If 'sum' isn't explicitly calculated, 
+            # Looks for 'sum' explicitly. If 'sum' isn't explicitly calculated,
             # it sums up all active numeric values in the dictionary.
             s = vars_dict.get("sum")
             if s is None:
                 s = sum(v for v in vars_dict.values() if isinstance(v, (int, float)))
             if s == 0:
                 return 0.0
-            return 1.0 / (s ** 2)
+            return 1.0 / (s**2)
 
         # -10 * penalty_var (Generic multiplier template)
         def penalty_multiplier(vars_dict: dict) -> float:
@@ -252,7 +252,7 @@ class HardcodedConstraintEvaluator:
         """
         # Micro-optimization: Direct dictionary lookup bypasses all parsing
         func = self._registry.get(function_str)
-        
+
         if func is not None:
             try:
                 return func(variable_values)
@@ -262,7 +262,7 @@ class HardcodedConstraintEvaluator:
                 self.error_count += 1
                 logger.warning(f"Error executing function '{function_str}': {e}")
                 return 0.0
-        
+
         # Fallback closure generator for dynamic linear penalties if not registered explicitly
         # Matches formats like "-penalty * variable_name" or "-2.5 * var"
         if function_str and function_str.startswith("-"):
@@ -281,7 +281,7 @@ class HardcodedConstraintEvaluator:
             if "*" in clean:
                 coeff_part, var_name = clean.split("*", 1)
                 coefficient = float(coeff_part)
-                
+
                 # Returns an isolated, fast closure with local variable pinning
                 return lambda vars_dict: coefficient * vars_dict.get(var_name, 0.0)
         except Exception:
@@ -305,13 +305,13 @@ class HardcodedConstraintEvaluator:
             return {"a", "b"}
         elif function_str == "abs(-x)":
             return {"x"}
-        
+
         # Fallback parser for arbitrary penalty variable names
         clean = function_str.replace(" ", "").replace("-", "")
         if "*" in clean:
             parts = clean.split("*")
             return {p for p in parts if not p.replace(".", "", 1).isdigit()}
-            
+
         return set()
 
     def get_error_count(self) -> int:
@@ -334,6 +334,7 @@ def get_default_evaluator() -> HardcodedConstraintEvaluator:
     if _default_evaluator is None:
         _default_evaluator = HardcodedConstraintEvaluator()
     return _default_evaluator
+
 
 if __name__ == "__main__":
     # Test the evaluator

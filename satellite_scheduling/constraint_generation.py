@@ -14,13 +14,13 @@ def solve_constraint_generation(
     var_to_details,
     requests,
     algorithm_config,
-    pydcop_mode=None,       # unused — kept for API compatibility
+    pydcop_mode=None,  # unused — kept for API compatibility
     ignore_keys=("agt_metrics",),
-    timeout=-1,             # unused — kept for API compatibility
+    timeout=-1,  # unused — kept for API compatibility
     output_json=None,
     clear_temp_files=None,  # unused — kept for API compatibility
-    temp_json=None,         # unused — kept for API compatibility
-    working_dir=None,       # unused — kept for API compatibility
+    temp_json=None,  # unused — kept for API compatibility
+    working_dir=None,  # unused — kept for API compatibility
     max_iterations=5,
 ):
     if output_json is not None:
@@ -30,13 +30,12 @@ def solve_constraint_generation(
     best_total_scheduled = 0
     best_iteration = 0
     iteration = 0
-    run_data = []        # in-memory iteration results (no temp files)
+    run_data = []  # in-memory iteration results (no temp files)
     utility_per_iter = []
     total_messages = 0
     t_start = time.time()
 
     while iteration < max_iterations:
-
         result = utils.run_global_dispatcher_cosp(pydcop_dict, algorithm_config)
 
         run_data.append({k: v for k, v in result.items() if k not in ignore_keys})
@@ -58,7 +57,6 @@ def solve_constraint_generation(
             if not assigned_reqs:
                 continue
 
-
             scheduled_reqs, final_schedule = solve_local_schedule(
                 agent_id,
                 assigned_reqs,
@@ -68,12 +66,14 @@ def solve_constraint_generation(
             )
             global_scheduled_reqs.update(scheduled_reqs)
 
-            constraints.extend(get_constraints(
-                assigned_reqs=assigned_reqs,
-                scheduled_reqs=scheduled_reqs,
-                agent_id=agent_id,
-                pydcop_dict=pydcop_dict,
-            ))
+            constraints.extend(
+                get_constraints(
+                    assigned_reqs=assigned_reqs,
+                    scheduled_reqs=scheduled_reqs,
+                    agent_id=agent_id,
+                    pydcop_dict=pydcop_dict,
+                )
+            )
 
         true_total = len(global_scheduled_reqs)
         utility_per_iter.append(true_total / len(requests))
@@ -98,8 +98,12 @@ def solve_constraint_generation(
             json.dump(run_data, f, indent=2)
 
     runtime_s = time.time() - t_start
-    return best_total_scheduled / len(requests), best_iteration, {
-        "total_messages": total_messages,
-        "runtime_s": runtime_s,
-        "utility_per_iter": utility_per_iter,
-    }
+    return (
+        best_total_scheduled / len(requests),
+        best_iteration,
+        {
+            "total_messages": total_messages,
+            "runtime_s": runtime_s,
+            "utility_per_iter": utility_per_iter,
+        },
+    )

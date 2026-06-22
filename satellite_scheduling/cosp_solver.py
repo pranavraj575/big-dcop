@@ -14,12 +14,14 @@ logger = logging.getLogger(__name__)
 # Constraint functions
 # ---------------------------------------------------------------------------
 
+
 def _make_reward_fn() -> Callable:
     """Returns the hardcoded per-request reward function.
 
     Utility = 1 when exactly one agent takes the request,
     1/n^2 when n>1 agents take it (discourages overlap), 0 when no one takes it.
     """
+
     def fn(var_indices: List[int], assignments: List[int]) -> float:
         n = sum(assignments[i] for i in var_indices)
         if n == 0:
@@ -27,12 +29,14 @@ def _make_reward_fn() -> Callable:
         if n == 1:
             return 1.0
         return 1.0 / (n * n)
+
     return fn
 
 
 # ---------------------------------------------------------------------------
 # Factory / dispatcher
 # ---------------------------------------------------------------------------
+
 
 def build_cosp(pydcop_dict: dict, algorithm_config: dict) -> "COSPSolver":
     """Instantiate the correct COSPSolver subclass."""
@@ -59,6 +63,7 @@ def cosp_run_global_dispatcher(pydcop_dict: dict, algorithm_config: dict):
 # ---------------------------------------------------------------------------
 # Base solver
 # ---------------------------------------------------------------------------
+
 
 class COSPSolver(ABC):
     """
@@ -168,10 +173,9 @@ class COSPSolver(ABC):
         """
         agent_pairs: Set[tuple] = set()
         for var_indices, _ in self.constraints:
-            agents_in_c = [self.agent_of_var[vi] for vi in var_indices
-                           if self.agent_of_var[vi] >= 0]
+            agents_in_c = [self.agent_of_var[vi] for vi in var_indices if self.agent_of_var[vi] >= 0]
             for i, ai in enumerate(agents_in_c):
-                for aj in agents_in_c[i + 1:]:
+                for aj in agents_in_c[i + 1 :]:
                     if ai != aj:
                         agent_pairs.add((min(ai, aj), max(ai, aj)))
         return 2 * len(agent_pairs)
@@ -193,11 +197,7 @@ class COSPSolver(ABC):
 
     def _extract_solution(self) -> Dict:
         return {
-            agent_id: [
-                self.variables[vi]
-                for vi in self.agent_var_indices[ai]
-                if self.assignments[vi] == 1
-            ]
+            agent_id: [self.variables[vi] for vi in self.agent_var_indices[ai] if self.assignments[vi] == 1]
             for ai, agent_id in enumerate(self.agents)
         }
 
@@ -209,6 +209,7 @@ class COSPSolver(ABC):
 # ---------------------------------------------------------------------------
 # MGM2 Solver
 # ---------------------------------------------------------------------------
+
 
 class MGMSolver(COSPSolver):
     """
@@ -350,10 +351,7 @@ class MGMSolver(COSPSolver):
                 in_pair[vj] = True
 
         # Effective gain used in GO-phase competition: joint if paired, else unilateral
-        eff_gains: List[float] = [
-            paired_gain[vi] if paired_gain[vi] is not None else uni_gains[vi]
-            for vi in range(self.n_vars)
-        ]
+        eff_gains: List[float] = [paired_gain[vi] if paired_gain[vi] is not None else uni_gains[vi] for vi in range(self.n_vars)]
 
         # ------------------------------------------------------------------
         # Phase 3: GO / NO-GO — apply moves
@@ -415,6 +413,7 @@ class MGMSolver(COSPSolver):
 # ---------------------------------------------------------------------------
 # DSA Solver
 # ---------------------------------------------------------------------------
+
 
 class DSASolver(COSPSolver):
     """
@@ -527,6 +526,7 @@ class DSASolver(COSPSolver):
 # MaxSum Solver
 # ---------------------------------------------------------------------------
 
+
 class MaxSumSolver(COSPSolver):
     """
     MaxSum ADVP (Adaptive Damping and Variable Pruning) solver.
@@ -603,12 +603,10 @@ class MaxSumSolver(COSPSolver):
             orig = self.assignments[vi]
 
             self.assignments[vi] = 1
-            u1 = sum(self._constraint_value(c_idx, self.assignments)
-                     for c_idx in self.var_to_constraints[vi])
+            u1 = sum(self._constraint_value(c_idx, self.assignments) for c_idx in self.var_to_constraints[vi])
 
             self.assignments[vi] = 0
-            u0 = sum(self._constraint_value(c_idx, self.assignments)
-                     for c_idx in self.var_to_constraints[vi])
+            u0 = sum(self._constraint_value(c_idx, self.assignments) for c_idx in self.var_to_constraints[vi])
 
             self.assignments[vi] = orig
 
@@ -658,6 +656,7 @@ class MaxSumSolver(COSPSolver):
 # Regret Matching Solver
 # ---------------------------------------------------------------------------
 
+
 class RegretMatchingSolver(COSPSolver):
     """
     Regret Matching (RM) and variants.
@@ -690,18 +689,18 @@ class RegretMatchingSolver(COSPSolver):
     def __init__(self, algorithm_config: dict, pydcop_dict: dict):
         super().__init__(algorithm_config, pydcop_dict)
 
-        self.max_iterations   = algorithm_config.get("max_iterations", 100)
-        self.stop_cycle       = algorithm_config.get("stop_cycle", 20)
-        self.use_rm_plus      = bool(algorithm_config.get("rm_plus", False))
-        self.use_predictive   = bool(algorithm_config.get("predictive", False))
-        self.use_ir_prm       = bool(algorithm_config.get("ir_prm", False))
-        self.context_based    = bool(algorithm_config.get("context_based", False))
-        self.det_start        = bool(algorithm_config.get("deterministic_start", False))
-        self.update_prob      = float(algorithm_config.get("update_prob", 1.0))
-        self.use_discounted   = bool(algorithm_config.get("discounted_rm", False))
-        self.alpha            = float(algorithm_config.get("alpha", 1.5))
-        self.beta             = float(algorithm_config.get("beta", 0.0))
-        self.damping          = float(algorithm_config.get("damping", 0.0))
+        self.max_iterations = algorithm_config.get("max_iterations", 100)
+        self.stop_cycle = algorithm_config.get("stop_cycle", 20)
+        self.use_rm_plus = bool(algorithm_config.get("rm_plus", False))
+        self.use_predictive = bool(algorithm_config.get("predictive", False))
+        self.use_ir_prm = bool(algorithm_config.get("ir_prm", False))
+        self.context_based = bool(algorithm_config.get("context_based", False))
+        self.det_start = bool(algorithm_config.get("deterministic_start", False))
+        self.update_prob = float(algorithm_config.get("update_prob", 1.0))
+        self.use_discounted = bool(algorithm_config.get("discounted_rm", False))
+        self.alpha = float(algorithm_config.get("alpha", 1.5))
+        self.beta = float(algorithm_config.get("beta", 0.0))
+        self.damping = float(algorithm_config.get("damping", 0.0))
 
         # strategy_p1[vi] = P(vi=1);  P(vi=0) = 1 - p1.
         self.strategy_p1: List[float] = [0.5] * self.n_vars
@@ -716,12 +715,8 @@ class RegretMatchingSolver(COSPSolver):
             self.cum_r1 = [dict() for _ in range(self.n_vars)]
 
         # IR-PRM: predicted utilities (u0_pred, u1_pred) per variable
-        self.ir_prm_pred0: Optional[List[float]] = (
-            [0.0] * self.n_vars if self.use_ir_prm else None
-        )
-        self.ir_prm_pred1: Optional[List[float]] = (
-            [0.0] * self.n_vars if self.use_ir_prm else None
-        )
+        self.ir_prm_pred0: Optional[List[float]] = [0.0] * self.n_vars if self.use_ir_prm else None
+        self.ir_prm_pred1: Optional[List[float]] = [0.0] * self.n_vars if self.use_ir_prm else None
 
         if self.det_start:
             self._deterministic_init()
@@ -774,11 +769,11 @@ class RegretMatchingSolver(COSPSolver):
 
     def _get_discounts(self, t: int):
         if self.use_discounted:
-            ta  = t ** self.alpha
+            ta = t**self.alpha
             pos = ta / (ta + 1.0)
             neg = 0.0
             if self.beta > 0:
-                tb  = t ** self.beta
+                tb = t**self.beta
                 neg = tb / (tb + 1.0)
         else:
             pos = neg = 1.0
@@ -789,7 +784,7 @@ class RegretMatchingSolver(COSPSolver):
         """Convert (r0, r1) cumulative regrets to p1 probability."""
         p0 = max(r0, 0.0)
         p1 = max(r1, 0.0)
-        s  = p0 + p1
+        s = p0 + p1
         return (p1 / s) if s > 0 else 0.5
 
     def _sample_assignment(self, vi: int, p1: float) -> int:
@@ -803,10 +798,10 @@ class RegretMatchingSolver(COSPSolver):
 
     def _vanilla_rm_update(self, vi: int, u0: float, u1: float, t: int) -> float:
         """Standard / discounted / predictive RM. Returns new p1."""
-        p1   = self.strategy_p1[vi]
-        exp  = u0 * (1.0 - p1) + u1 * p1          # expected utility
-        ir0  = u0 - exp                             # instant regret for val=0
-        ir1  = u1 - exp                             # instant regret for val=1
+        p1 = self.strategy_p1[vi]
+        exp = u0 * (1.0 - p1) + u1 * p1  # expected utility
+        ir0 = u0 - exp  # instant regret for val=0
+        ir1 = u1 - exp  # instant regret for val=1
 
         pos_d, neg_d = self._get_discounts(t)
         r0, r1 = self._get_regrets(vi)
@@ -838,19 +833,19 @@ class RegretMatchingSolver(COSPSolver):
         """Closed-form gamma for 2-element vector, replacing pydcop's slow loop."""
         a, b = (v0, v1) if v0 >= v1 else (v1, v0)
         # k=0 candidate
-        g0 = a - (t_sq ** 0.5)
+        g0 = a - (t_sq**0.5)
         if g0 >= b:
             return g0
         # k=1 candidate (use both elements)
-        s    = a + b
-        s2   = a * a + b * b
+        s = a + b
+        s2 = a * a + b * b
         disc = s * s - 2.0 * (s2 - t_sq)
         return (s - (max(disc, 0.0) ** 0.5)) / 2.0
 
     def _ir_prm_update(self, vi: int, u0: float, u1: float) -> float:
         """IR-PRM update (Ioannis version). Returns new p1."""
         pred0, pred1 = self.ir_prm_pred0[vi], self.ir_prm_pred1[vi]
-        p1           = self.strategy_p1[vi]
+        p1 = self.strategy_p1[vi]
         g0 = u0 - pred0
         g1 = u1 - pred1
         exp_g = g0 * (1.0 - p1) + g1 * p1
@@ -944,11 +939,7 @@ class RegretMatchingSolver(COSPSolver):
                     final_assignments[winner] = 1
 
         return {
-            agent_id: [
-                self.variables[vi]
-                for vi in self.agent_var_indices[ai]
-                if final_assignments[vi] == 1
-            ]
+            agent_id: [self.variables[vi] for vi in self.agent_var_indices[ai] if final_assignments[vi] == 1]
             for ai, agent_id in enumerate(self.agents)
         }
 
@@ -966,6 +957,7 @@ class RegretMatchingSolver(COSPSolver):
 # ---------------------------------------------------------------------------
 # JSON parsing
 # ---------------------------------------------------------------------------
+
 
 def cosp_parse_json_to_dcop_and_overlaps(json_filepath: str):
     """
@@ -998,11 +990,13 @@ def cosp_parse_json_to_dcop_and_overlaps(json_filepath: str):
         pydcop["agents"].append(agent_id)
 
         for dl in agent_data.get("downlinks", []):
-            agent_downlinks[agent_id].append({
-                "start": float(dl["start"]),
-                "end": float(dl["end"]),
-                "data": float(dl["data_volume_MB"]),
-            })
+            agent_downlinks[agent_id].append(
+                {
+                    "start": float(dl["start"]),
+                    "end": float(dl["end"]),
+                    "data": float(dl["data_volume_MB"]),
+                }
+            )
 
         for f in agent_data.get("fulfillments", []):
             req_id = str(f["request_id"])
@@ -1010,13 +1004,15 @@ def cosp_parse_json_to_dcop_and_overlaps(json_filepath: str):
             agent_to_reqs[agent_id].add(req_id)
             if agent_id not in req_to_agents[req_id]:
                 req_to_agents[req_id].append(agent_id)
-            agent_tasks[agent_id].append({
-                "task_id": task_id,
-                "req_id": req_id,
-                "start": float(f["start_time"]),
-                "end": float(f["end_time"]),
-                "data": float(f["data_volume_MB"]),
-            })
+            agent_tasks[agent_id].append(
+                {
+                    "task_id": task_id,
+                    "req_id": req_id,
+                    "start": float(f["start_time"]),
+                    "end": float(f["end_time"]),
+                    "data": float(f["data_volume_MB"]),
+                }
+            )
 
     req_to_vars: Dict = defaultdict(list)
     var_to_details: Dict = {}

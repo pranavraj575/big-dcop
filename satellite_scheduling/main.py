@@ -74,10 +74,7 @@ def main(
             f"{run_metrics.get('runtime_s', 0):.2f}s)"
         )
         utility_per_iter = run_metrics.get("utility_per_iter", [])
-        print(
-            f"  utility/iter: "
-            + "  ".join(f"[{i}] {u:.1%}" for i, u in enumerate(utility_per_iter))
-        )
+        print(f"  utility/iter: " + "  ".join(f"[{i}] {u:.1%}" for i, u in enumerate(utility_per_iter)))
         output_dic["output"][algo_name] = {
             "aux_info": {
                 "best_total_scheduled": best_total_scheduled,
@@ -94,7 +91,9 @@ def main(
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--scenario", default="satellite_scheduling/scenarios/scenario_1.json", type=str, help="scenario json to evaluate")
+    p.add_argument(
+        "--scenario", default="satellite_scheduling/scenarios/scenario_1.json", type=str, help="scenario json to evaluate"
+    )
     p.add_argument("--output_json", default="output/test_main.json", type=str, help="output file to save results to")
     p.add_argument(
         "--algorithms_json",

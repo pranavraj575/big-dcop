@@ -19,9 +19,7 @@ def update_dcop_utilities(base_pydcop_dict, lambda_penalties, var_to_details):
     Returns a new pydcop_dict — base_pydcop_dict is not modified.
     """
     current = copy.deepcopy(base_pydcop_dict)
-    details_to_var = {
-        (d["agent_id"], d["req_id"]): v for v, d in var_to_details.items()
-    }
+    details_to_var = {(d["agent_id"], d["req_id"]): v for v, d in var_to_details.items()}
 
     for (agent_id, req_id), penalty in lambda_penalties.items():
         if penalty <= 0.0:
@@ -47,13 +45,13 @@ def solve_iterative_pricing(
     var_to_details,
     requests,
     algorithm_config,
-    pydcop_mode=None,       # unused — kept for API compatibility
-    timeout=-1,             # unused — kept for API compatibility
+    pydcop_mode=None,  # unused — kept for API compatibility
+    timeout=-1,  # unused — kept for API compatibility
     output_json=None,
     ignore_keys=("agt_metrics",),
     clear_temp_files=None,  # unused — kept for API compatibility
-    temp_json=None,         # unused — kept for API compatibility
-    working_dir=None,       # unused — kept for API compatibility
+    temp_json=None,  # unused — kept for API compatibility
+    working_dir=None,  # unused — kept for API compatibility
     max_iterations=5,
     step_size_c=15.0,
 ):
@@ -63,7 +61,7 @@ def solve_iterative_pricing(
     lambda_penalties = defaultdict(float)
     best_total_scheduled = 0
     best_iteration = 0
-    run_data = []        # in-memory iteration results (no temp files)
+    run_data = []  # in-memory iteration results (no temp files)
     utility_per_iter = []
     total_messages = 0
     t_start = time.time()
@@ -123,8 +121,12 @@ def solve_iterative_pricing(
             json.dump(run_data, f, indent=2)
 
     runtime_s = time.time() - t_start
-    return best_total_scheduled / len(requests), best_iteration, {
-        "total_messages": total_messages,
-        "runtime_s": runtime_s,
-        "utility_per_iter": utility_per_iter,
-    }
+    return (
+        best_total_scheduled / len(requests),
+        best_iteration,
+        {
+            "total_messages": total_messages,
+            "runtime_s": runtime_s,
+            "utility_per_iter": utility_per_iter,
+        },
+    )

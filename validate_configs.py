@@ -4,9 +4,9 @@
 import json
 import os
 
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("CONFIGURATION FILES VALIDATION")
-print("="*70 + "\n")
+print("=" * 70 + "\n")
 
 # Check all required files exist
 files_to_check = [
@@ -51,8 +51,8 @@ try:
         configs = json.load(f)
     print("✓ cosp_algorithm_configs.json: {} algorithms defined".format(len(configs)))
     for cfg in configs:
-        display_name = cfg.get('display_name', cfg.get('name'))
-        print("  - {}: {}".format(display_name, cfg['name']))
+        display_name = cfg.get("display_name", cfg.get("name"))
+        print("  - {}: {}".format(display_name, cfg["name"]))
 except Exception as e:
     print("✗ Error parsing cosp_algorithm_configs.json: {}".format(e))
 
@@ -76,9 +76,9 @@ if os.path.exists(guide_path):
 else:
     print("✗ COSPSOLVER_CONFIG_GUIDE.md: MISSING!")
 
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("READY TO RUN")
-print("="*70 + "\n")
+print("=" * 70 + "\n")
 
 print("Quick Start Commands:")
 print("-" * 70)

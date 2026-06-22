@@ -2,6 +2,7 @@
 """Test COSPSolver implementations."""
 
 import sys
+
 sys.path.insert(0, ".")
 
 from cosp_solver import MGMSolver, DSASolver, MaxSumSolver, build_cosp
@@ -72,7 +73,7 @@ def test_reward_fn():
     assert fn(var_indices, [0, 0, 0]) == 0.0, "0 agents -> 0"
     assert fn(var_indices, [1, 0, 0]) == 1.0, "1 agent -> 1"
     assert abs(fn(var_indices, [1, 1, 0]) - 0.25) < 1e-9, "2 agents -> 0.25"
-    assert abs(fn(var_indices, [1, 1, 1]) - 1/9) < 1e-9, "3 agents -> 1/9"
+    assert abs(fn(var_indices, [1, 1, 1]) - 1 / 9) < 1e-9, "3 agents -> 1/9"
     print("✓ Reward function correct")
 
 
@@ -103,5 +104,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"✗ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
