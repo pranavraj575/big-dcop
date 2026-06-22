@@ -1,4 +1,5 @@
-import os, json
+import os
+import json
 import matplotlib.pyplot as plt
 
 from matplotlib import rc

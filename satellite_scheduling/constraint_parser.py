@@ -7,7 +7,7 @@ from pydcop problem definitions, enabling dynamic constraint modification
 
 import logging
 import re
-from typing import Dict, Union, Set, Callable
+from typing import Dict, Union, Set
 
 logger = logging.getLogger(__name__)
 

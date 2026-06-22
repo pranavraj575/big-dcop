@@ -96,7 +96,8 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
     # Ensure exactly 1 agent takes the request. Penalty if overlap.
     for req_id, var_list in req_to_vars.items():
         c_name = f"reward_req_{req_id}"
-        sum_expr = " + ".join(var_list)
+        # sum_expr = " + ".join(var_list)
+        # sum_expr is unused
         pydcop["constraints"][c_name] = {
             "variables": var_list,
             "fn": lambda vi, a: 0.0 if (n := sum(a[i] for i in vi)) == 0 else (1.0 if n == 1 else 1.0 / (n * n)),
