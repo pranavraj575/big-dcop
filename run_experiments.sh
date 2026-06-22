@@ -9,11 +9,13 @@
 #   output/<framework>/<scenario_stem>.json
 #
 # Usage:
-#   bash run_experiments.sh [--max-iterations N] [--output-dir DIR] [--trials NUM_TRIALS]
+#   bash run_experiments.sh [--scenarios SCENARIOS_DIR] [--max-iterations N] [--output-dir DIR] [--trials NUM_TRIALS]
 #
 # Defaults:
 #   --max-iterations  4
 #   --output-dir      output
+#   --scenarios       satellite_scheduling/scenarios_larger
+#   --trials          1
 
 set -euo pipefail
 
@@ -58,6 +60,8 @@ while [[ $# -gt 0 ]]; do
       OUTPUT_DIR="$2"; shift 2;;
     --trials)
       TRIALS="$2"; shift 2;;
+    --scenarios)
+      SCENARIOS_DIR="$2"; shift 2;;
     --python)
       PYTHON="$2"; shift 2;;   # explicit override skips auto-detect
     *)
