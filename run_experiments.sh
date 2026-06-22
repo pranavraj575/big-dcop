@@ -22,10 +22,27 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 MAX_ITER=4
 OUTPUT_DIR="output"
-PYTHON="/Users/itai/big-dcop/venv/bin/python3"
 SCRIPT="satellite_scheduling/main.py"
+
+# Auto-detect a Python interpreter that has ortools installed.
+# Override with --python /path/to/python if needed.
+_find_python() {
+  for candidate in \
+      "$(dirname "$0")/venv/bin/python3" \
+      "${VIRTUAL_ENV:-__none__}/bin/python3" \
+      python3 python; do
+    [[ "$candidate" == __none__* ]] && continue
+    if command -v "$candidate" &>/dev/null && \
+       "$candidate" -c "import ortools" 2>/dev/null; then
+      echo "$candidate"
+      return
+    fi
+  done
+  echo ""
+}
+PYTHON=""
 ALGORITHMS_JSON="satellite_scheduling/cosp_algorithm_configs.json"
-SCENARIOS_DIR="satellite_scheduling/scenarios"
+SCENARIOS_DIR="satellite_scheduling/scenarios_larger/"
 
 # ---------------------------------------------------------------------------
 # Parse arguments
@@ -37,11 +54,23 @@ while [[ $# -gt 0 ]]; do
     --output-dir)
       OUTPUT_DIR="$2"; shift 2;;
     --python)
-      PYTHON="$2"; shift 2;;
+      PYTHON="$2"; shift 2;;   # explicit override skips auto-detect
     *)
       echo "Unknown argument: $1" >&2; exit 1;;
   esac
 done
+
+# Resolve Python interpreter (auto-detect if not set via --python)
+if [[ -z "${PYTHON}" ]]; then
+  PYTHON="$(_find_python)"
+fi
+if [[ -z "${PYTHON}" ]]; then
+  echo "ERROR: Could not find a Python interpreter with ortools installed." >&2
+  echo "       Install ortools in your active environment or pass --python /path/to/python3" >&2
+  exit 1
+fi
+echo "Using Python: ${PYTHON}"
+echo ""
 
 FRAMEWORKS=("constraint_generation" "iterative_pricing")
 
