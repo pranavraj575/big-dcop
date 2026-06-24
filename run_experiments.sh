@@ -9,13 +9,14 @@
 #   output/<framework>/<scenario_stem>.json
 #
 # Usage:
-#   bash run_experiments.sh [--scenarios SCENARIOS_DIR] [--max-iterations N] [--output-dir DIR] [--trials NUM_TRIALS]
+#   bash run_experiments.sh [--scenarios SCENARIOS_DIR] [--max-iterations N] [--output-dir DIR] [--trials NUM_TRIALS] [--start-trial START_TRIAL]
 #
 # Defaults:
 #   --max-iterations  4
 #   --output-dir      output
 #   --scenarios       satellite_scheduling/scenarios_larger
 #   --trials          2
+#   --start-trial     0
 
 set -euo pipefail
 
@@ -24,6 +25,7 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 MAX_ITER=4
 TRIALS=2
+START_TRIAL=0
 USE_SLURM_JOBS=1
 PROJECT_DIR=$(readlink -e $(dirname $0))
 OUTPUT_DIR="$PROJECT_DIR/output"
@@ -61,6 +63,8 @@ while [[ $# -gt 0 ]]; do
       OUTPUT_DIR="$2"; shift 2;;
     --trials)
       TRIALS="$2"; shift 2;;
+    --start-trial)
+      START_TRIAL="$2"; shift 2;;
     --scenarios)
       SCENARIOS_DIR="$2"; shift 2;;
     --python)
@@ -99,7 +103,7 @@ for framework in "${FRAMEWORKS[@]}"; do
 
   for scenario_path in "${SCENARIOS_DIR}"/scenario_*.json; do
     scenario_stem=$(basename "${scenario_path}" .json)
-    current_trial=0
+    current_trial=[[ START_TRIAL ]]
     while [[ $current_trial -lt $TRIALS ]]; do
       output_json="${out_dir}/${scenario_stem}_t${current_trial}.json"
 
@@ -151,7 +155,7 @@ echo "  Experiments complete"
 echo "  Total   : ${total}"
 echo "  Passed  : ${passed}"
 echo "  Failed  : ${failed}"
-echo "  Slurmed : ${sent_to_slurmsent_to_slurm}"
+echo "  Slurmed : ${sent_to_slurm}"
 if [[ ${failed} -gt 0 ]]; then
   echo "  Failed runs:"
   for f in "${failed_list[@]}"; do
