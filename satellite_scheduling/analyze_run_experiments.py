@@ -12,13 +12,14 @@ import shutil
 
 latex_exists = bool(shutil.which("latex"))
 
-rc(
-    "font",
-    **{
-        "family": "serif",
-        "serif": ["Times"],
-    },
-)
+if latex_exists:
+    rc(
+        "font",
+        **{
+            "family": "serif",
+            "serif": ["Times"],
+        },
+    )
 rc("text", usetex=latex_exists)
 
 p = argparse.ArgumentParser()
