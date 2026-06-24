@@ -118,7 +118,9 @@ for framework in "${FRAMEWORKS[@]}"; do
       echo "--------------------------------------------------------------"
 
       # Remove stale output so main.py can write fresh results
-      rm -f "${output_json}"
+      if [ -e "$output_json" ]; then
+          echo "WARNING: $output_json exists, python script will overwrite this"
+      fi
 
       if $USE_SLURM_JOBS
       then
