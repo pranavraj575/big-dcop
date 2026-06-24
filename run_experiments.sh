@@ -27,7 +27,7 @@ set -euo pipefail
 MAX_ITER=4
 TRIALS=2
 START_TRIAL=0
-USE_SLURM_JOBS=0
+USE_SLURM_JOBS=false
 PROJECT_DIR=$(readlink -e $(dirname $0))
 OUTPUT_DIR="$PROJECT_DIR/output"
 SCRIPT="$PROJECT_DIR/satellite_scheduling/main.py"
@@ -69,7 +69,7 @@ while [[ $# -gt 0 ]]; do
     --scenarios)
       SCENARIOS_DIR="$2"; shift 2;;
     --slurm)
-      USE_SLURM_JOBS=1; shift 1;;
+      USE_SLURM_JOBS=true; shift 1;;
     --python)
       PYTHON="$2"; shift 2;;   # explicit override skips auto-detect
     *)
@@ -120,7 +120,7 @@ for framework in "${FRAMEWORKS[@]}"; do
       # Remove stale output so main.py can write fresh results
       rm -f "${output_json}"
 
-      if [[ USE_SLURM_JOBS == 1 ]]
+      if USE_SLURM_JOBS
       then
         echo "sending job to slurm"
         sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
