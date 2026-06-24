@@ -59,9 +59,10 @@ for framework in frameworks:
 
 
 for title, get_stats in zip(
-    ("fulfillment", "time"),
+    ("fulfillment", "time", "log_time"),
     (
         lambda entry: entry["best_total_scheduled"],
+        lambda entry: entry["runtime_s"],
         lambda entry: entry["runtime_s"],
     ),
 ):
@@ -87,13 +88,15 @@ for title, get_stats in zip(
             capsize=5,
         )
         plt.title(f"performances with {framework} framework", size=17)
-        ylabels = {"time": "time (s)", "fulfillment": "proportion of requests fulfilled"}
+        ylabels = {"time": "time (s)", "log_time": "time (s)", "fulfillment": "proportion of requests fulfilled"}
         plt.ylabel(ylabels[title], size=17)
         plt.xlabel("algorithm", size=17)
 
         plt.grid(True, axis="y")
         plt.ylim(min_stat, max_stat)
-        # plt.yscale("log")
+        if title in ["log_time"]:
+            plt.yscale("log")
+        plt.grid(True, axis="y")
         save_file = os.path.join(plot_dir, f"{framework}_{title}.png")
         plt.savefig(save_file, bbox_inches="tight", dpi=300)
 
