@@ -1,5 +1,6 @@
 import os
 import json
+import itertools
 import matplotlib.pyplot as plt
 
 from matplotlib import rc
@@ -88,6 +89,29 @@ for framework in frameworks:
     plt.ylim(min_stat, max_stat)
     # plt.yscale("log")
     save_file = os.path.join(plot_dir, f"{framework}.png")
+    plt.savefig(save_file, bbox_inches="tight", dpi=300)
+
+    plt.close()
+
+
+def get_stats(entry):
+    return entry["utility_per_iter"]
+
+
+for framework, include_error in itertools.product(frameworks, (True, False)):
+    stats = np.array([list(map(get_stats, data[(framework, alg)])) for alg in algorithms])
+    for algo_name, sts in zip(algorithms, stats):
+        n = sts.shape[1]
+        (line,) = plt.plot(np.arange(n), sts.mean(axis=0), label=algo_name)
+        if include_error:
+            std_errors = sts.std(axis=0) / np.sqrt(stats.shape[0] - 1)
+            plt.fill_between(
+                np.arange(n), sts.mean(axis=0) - std_errors, sts.mean(axis=0) + std_errors, color=line.get_color(), alpha=0.25
+            )
+    plt.legend()
+    plt.ylabel("proportion of requests fulfilled", size=17)
+    plt.xlabel("iteration", size=17)
+    save_file = os.path.join(plot_dir, f"{framework}_iteration_plot{'_w_err' if include_error else ''}.png")
     plt.savefig(save_file, bbox_inches="tight", dpi=300)
 
     plt.close()
