@@ -115,7 +115,7 @@ for framework in "${FRAMEWORKS[@]}"; do
       if [[ USE_SLURM_JOBS ]]
       then
         echo "sending job to slurm"
-        bash slurm_template.sh "python" "${SCRIPT}" \
+        sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
                                            --scenario "${scenario_path}" \
                                            --output_json "${output_json}" \
                                            --algorithms_json "${ALGORITHMS_JSON}" \
