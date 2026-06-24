@@ -8,7 +8,18 @@ from evaluation.algo_configs import get_display_name
 import numpy as np
 from collections import defaultdict
 import argparse
+import shutil
 
+latex_exists = bool(shutil.which("latex"))
+
+rc(
+    "font",
+    **{
+        "family": "serif",
+        "serif": ["Times"],
+    },
+)
+rc("text", usetex=latex_exists)
 
 p = argparse.ArgumentParser()
 p.add_argument(
@@ -52,21 +63,11 @@ def get_stats(entry):
 
 min_stat = min(min(get_stats(entry) for entry in stuff) for _, stuff in data.items())
 max_stat = max(max(get_stats(entry) for entry in stuff) for _, stuff in data.items())
-print(min_stat)
-print(max_stat)
+print("bounds", min_stat, max_stat)
 for framework in frameworks:
     stats = np.array([list(map(get_stats, data[(framework, alg)])) for alg in algorithms])
 
-    rc(
-        "font",
-        **{
-            "family": "serif",
-            "serif": ["Times"],
-        },
-    )
-    rc("text", usetex=True)
     plt.tick_params(labelsize=15)
-
     plt.bar(algorithms, stats.mean(axis=1) - min_stat, bottom=min_stat)
     plt.xticks(rotation=45, ha="right")
     # stats.std is sqrt(1/n * biased variance)
@@ -99,6 +100,7 @@ def get_stats(entry):
 
 
 for framework, include_error in itertools.product(frameworks, (True, False)):
+    plt.tick_params(labelsize=15)
     stats = np.array([list(map(get_stats, data[(framework, alg)])) for alg in algorithms])
     for algo_name, sts in zip(algorithms, stats):
         n = sts.shape[1]
@@ -111,6 +113,8 @@ for framework, include_error in itertools.product(frameworks, (True, False)):
     plt.legend()
     plt.ylabel("proportion of requests fulfilled", size=17)
     plt.xlabel("iteration", size=17)
+    plt.grid(True, axis="both")
+
     save_file = os.path.join(plot_dir, f"{framework}_iteration_plot{'_w_err' if include_error else ''}.png")
     plt.savefig(save_file, bbox_inches="tight", dpi=300)
 
