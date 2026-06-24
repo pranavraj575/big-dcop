@@ -9,7 +9,8 @@
 #   output/<framework>/<scenario_stem>.json
 #
 # Usage:
-#   bash run_experiments.sh [--scenarios SCENARIOS_DIR] [--max-iterations N] [--output-dir DIR] [--trials NUM_TRIALS] [--start-trial START_TRIAL]
+#   bash run_experiments.sh [--scenarios SCENARIOS_DIR] [--max-iterations N]
+#     [--output-dir DIR] [--trials NUM_TRIALS] [--start-trial START_TRIAL] [--slurm]
 #
 # Defaults:
 #   --max-iterations  4
@@ -26,7 +27,7 @@ set -euo pipefail
 MAX_ITER=4
 TRIALS=2
 START_TRIAL=0
-USE_SLURM_JOBS=1
+USE_SLURM_JOBS=0
 PROJECT_DIR=$(readlink -e $(dirname $0))
 OUTPUT_DIR="$PROJECT_DIR/output"
 SCRIPT="$PROJECT_DIR/satellite_scheduling/main.py"
@@ -67,6 +68,8 @@ while [[ $# -gt 0 ]]; do
       START_TRIAL="$2"; shift 2;;
     --scenarios)
       SCENARIOS_DIR="$2"; shift 2;;
+    --slurm)
+      USE_SLURM_JOBS=1; shift 1;;
     --python)
       PYTHON="$2"; shift 2;;   # explicit override skips auto-detect
     *)
@@ -103,8 +106,8 @@ for framework in "${FRAMEWORKS[@]}"; do
 
   for scenario_path in "${SCENARIOS_DIR}"/scenario_*.json; do
     scenario_stem=$(basename "${scenario_path}" .json)
-    current_trial=[[ START_TRIAL ]]
-    while [[ $current_trial -lt $TRIALS ]]; do
+    current_trial="${START_TRIAL}"
+    while [[ $current_trial -lt $(($TRIALS + $START_TRIAL)) ]]; do
       output_json="${out_dir}/${scenario_stem}_t${current_trial}.json"
 
       total=$((total + 1))
@@ -117,7 +120,7 @@ for framework in "${FRAMEWORKS[@]}"; do
       # Remove stale output so main.py can write fresh results
       rm -f "${output_json}"
 
-      if [[ USE_SLURM_JOBS ]]
+      if [[ USE_SLURM_JOBS == 1 ]]
       then
         echo "sending job to slurm"
         sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
