@@ -120,7 +120,7 @@ for framework in "${FRAMEWORKS[@]}"; do
       # Remove stale output so main.py can write fresh results
       rm -f "${output_json}"
 
-      if USE_SLURM_JOBS
+      if $USE_SLURM_JOBS
       then
         echo "sending job to slurm"
         sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
