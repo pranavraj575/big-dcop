@@ -90,6 +90,7 @@ FRAMEWORKS=("iterative_pricing" "constraint_generation")
 total=0
 passed=0
 failed=0
+sent_to_slurm=0
 failed_list=()
 
 for framework in "${FRAMEWORKS[@]}"; do
@@ -121,6 +122,7 @@ for framework in "${FRAMEWORKS[@]}"; do
                                            --algorithms_json "${ALGORITHMS_JSON}" \
                                            --framework "${framework}" \
                                            --max_iterations "${MAX_ITER}"
+          sent_to_slurm=$((sent_to_slurm + 1))
       else
         if "python" "${SCRIPT}" \
             --scenario "${scenario_path}" \
@@ -146,9 +148,10 @@ done
 # ---------------------------------------------------------------------------
 echo "============================================================"
 echo "  Experiments complete"
-echo "  Total  : ${total}"
-echo "  Passed : ${passed}"
-echo "  Failed : ${failed}"
+echo "  Total   : ${total}"
+echo "  Passed  : ${passed}"
+echo "  Failed  : ${failed}"
+echo "  Slurmed : ${sent_to_slurmsent_to_slurm}"
 if [[ ${failed} -gt 0 ]]; then
   echo "  Failed runs:"
   for f in "${failed_list[@]}"; do
