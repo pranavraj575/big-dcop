@@ -15,7 +15,7 @@
 #   --max-iterations  4
 #   --output-dir      output
 #   --scenarios       satellite_scheduling/scenarios_larger
-#   --trials          1
+#   --trials          2
 
 set -euo pipefail
 
@@ -24,6 +24,7 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 MAX_ITER=4
 TRIALS=2
+USE_SLURM_JOBS=1
 PROJECT_DIR=$(readlink -e $(dirname $0))
 OUTPUT_DIR="$PROJECT_DIR/output"
 SCRIPT="$PROJECT_DIR/satellite_scheduling/main.py"
@@ -111,19 +112,29 @@ for framework in "${FRAMEWORKS[@]}"; do
       # Remove stale output so main.py can write fresh results
       rm -f "${output_json}"
 
-      if "python" "${SCRIPT}" \
-          --scenario "${scenario_path}" \
-          --output_json "${output_json}" \
-          --algorithms_json "${ALGORITHMS_JSON}" \
-          --framework "${framework}" \
-          --max_iterations "${MAX_ITER}"; then
-        passed=$((passed + 1))
+      if [[ USE_SLURM_JOBS ]]
+      then
+        echo "sending job to slurm"
+        bash slurm_template.sh "python" "${SCRIPT}" \
+                                           --scenario "${scenario_path}" \
+                                           --output_json "${output_json}" \
+                                           --algorithms_json "${ALGORITHMS_JSON}" \
+                                           --framework "${framework}" \
+                                           --max_iterations "${MAX_ITER}"
       else
-        failed=$((failed + 1))
-        failed_list+=("${framework}/${scenario_stem}")
-        echo "  [FAILED] ${framework}/${scenario_stem}" >&2
+        if "python" "${SCRIPT}" \
+            --scenario "${scenario_path}" \
+            --output_json "${output_json}" \
+            --algorithms_json "${ALGORITHMS_JSON}" \
+            --framework "${framework}" \
+            --max_iterations "${MAX_ITER}"; then
+          passed=$((passed + 1))
+        else
+          failed=$((failed + 1))
+          failed_list+=("${framework}/${scenario_stem}")
+          echo "  [FAILED] ${framework}/${scenario_stem}" >&2
+        fi
       fi
-
       echo ""
       current_trial=$(($current_trial+1))
     done
