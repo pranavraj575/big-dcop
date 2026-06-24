@@ -58,42 +58,46 @@ for framework in frameworks:
             data[(framework, algo_name)].append(run["aux_info"])
 
 
-def get_stats(entry):
-    return entry["best_total_scheduled"]
+for title, get_stats in zip(
+    ("fulfillment", "time"),
+    (
+        lambda entry: entry["best_total_scheduled"],
+        lambda entry: entry["runtime_s"],
+    ),
+):
+    min_stat = min(min(get_stats(entry) for entry in stuff) for _, stuff in data.items())
+    max_stat = max(max(get_stats(entry) for entry in stuff) for _, stuff in data.items())
+    print(title, "bounds", min_stat, max_stat)
+    for framework in frameworks:
+        stats = np.array([list(map(get_stats, data[(framework, alg)])) for alg in algorithms])
 
+        plt.tick_params(labelsize=15)
+        plt.bar(algorithms, stats.mean(axis=1) - min_stat, bottom=min_stat)
+        plt.xticks(rotation=45, ha="right")
+        # stats.std is sqrt(1/n * biased variance)
+        # sample std is sqrt(1/(n-1) * biased variance) = stats.std *sqrt(n/(n-1))
+        # std error is sample std/sqrt(n) = stats.std /sqrt(n-1)
+        std_errors = stats.std(axis=1) / np.sqrt(stats.shape[1] - 1)
+        plt.errorbar(
+            algorithms,
+            stats.mean(axis=1),
+            std_errors,
+            fmt="none",
+            color="black",
+            capsize=5,
+        )
+        plt.title(f"performances with {framework} framework", size=17)
+        ylabels = {"time": "time (s)", "fulfillment": "proportion of requests fulfilled"}
+        plt.ylabel(ylabels[title], size=17)
+        plt.xlabel("algorithm", size=17)
 
-min_stat = min(min(get_stats(entry) for entry in stuff) for _, stuff in data.items())
-max_stat = max(max(get_stats(entry) for entry in stuff) for _, stuff in data.items())
-print("bounds", min_stat, max_stat)
-for framework in frameworks:
-    stats = np.array([list(map(get_stats, data[(framework, alg)])) for alg in algorithms])
+        plt.grid(True, axis="y")
+        plt.ylim(min_stat, max_stat)
+        # plt.yscale("log")
+        save_file = os.path.join(plot_dir, f"{framework}_{title}.png")
+        plt.savefig(save_file, bbox_inches="tight", dpi=300)
 
-    plt.tick_params(labelsize=15)
-    plt.bar(algorithms, stats.mean(axis=1) - min_stat, bottom=min_stat)
-    plt.xticks(rotation=45, ha="right")
-    # stats.std is sqrt(1/n * biased variance)
-    # sample std is sqrt(1/(n-1) * biased variance) = stats.std *sqrt(n/(n-1))
-    # std error is sample std/sqrt(n) = stats.std /sqrt(n-1)
-    std_errors = stats.std(axis=1) / np.sqrt(stats.shape[1] - 1)
-    plt.errorbar(
-        algorithms,
-        stats.mean(axis=1),
-        std_errors,
-        fmt="none",
-        color="black",
-        capsize=5,
-    )
-    plt.title(f"performances with {framework} framework", size=17)
-    plt.ylabel("proportion of requests fulfilled", size=17)
-    plt.xlabel("algorithm", size=17)
-
-    plt.grid(True, axis="y")
-    plt.ylim(min_stat, max_stat)
-    # plt.yscale("log")
-    save_file = os.path.join(plot_dir, f"{framework}.png")
-    plt.savefig(save_file, bbox_inches="tight", dpi=300)
-
-    plt.close()
+        plt.close()
 
 
 def get_stats(entry):
