@@ -98,6 +98,7 @@ total=0
 passed=0
 failed=0
 sent_to_slurm=0
+slurm_string=""
 failed_list=()
 
 for framework in "${FRAMEWORKS[@]}"; do
@@ -123,13 +124,20 @@ for framework in "${FRAMEWORKS[@]}"; do
       if $USE_SLURM_JOBS
       then
         echo "sending job to slurm"
-        sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
-                                           --scenario "${scenario_path}" \
-                                           --output_json "${output_json}" \
-                                           --algorithms_json "${ALGORITHMS_JSON}" \
-                                           --framework "${framework}" \
-                                           --max_iterations "${MAX_ITER}"
-          sent_to_slurm=$((sent_to_slurm + 1))
+        slurm_string="$slurm_string python ${SCRIPT}
+         --scenario ${scenario_path}
+         --output_json ${output_json}
+         --algorithms_json ${ALGORITHMS_JSON}
+         --framework ${framework}
+         --max_iterations ${MAX_ITER}; "
+        echo $slurm_string
+        #sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
+        #                                   --scenario "${scenario_path}" \
+        #                                   --output_json "${output_json}" \
+        #                                   --algorithms_json "${ALGORITHMS_JSON}" \
+        #                                   --framework "${framework}" \
+        #                                   --max_iterations "${MAX_ITER}"
+        sent_to_slurm=$((sent_to_slurm + 1))
       else
         if "python" "${SCRIPT}" \
             --scenario "${scenario_path}" \
@@ -147,6 +155,12 @@ for framework in "${FRAMEWORKS[@]}"; do
       echo ""
       current_trial=$(($current_trial+1))
     done
+
+    if $USE_SLURM_JOBS
+    then
+      sbatch "$PROJECT_DIR/slurm_template.sh" $slurm_string
+      slurm_string=""
+    fi
   done
 done
 
