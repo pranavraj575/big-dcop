@@ -66,8 +66,8 @@ for title, get_stats in zip(
         lambda entry: entry["runtime_s"],
     ),
 ):
-    min_stat = min(min(get_stats(entry) for entry in stuff) for _, stuff in data.items())
-    max_stat = max(max(get_stats(entry) for entry in stuff) for _, stuff in data.items())
+    min_stat = min(min(get_stats(entry) for entry in stuff) for _, stuff in data.items() if stuff)
+    max_stat = max(max(get_stats(entry) for entry in stuff) for _, stuff in data.items() if stuff)
     print(title, "bounds", min_stat, max_stat)
     for framework in frameworks:
         stats = np.array([list(map(get_stats, data[(framework, alg)])) for alg in algorithms])
