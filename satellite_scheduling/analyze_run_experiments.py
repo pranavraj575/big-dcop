@@ -35,6 +35,12 @@ p.add_argument(
     type=str,
     help="dir to send plots into",
 )
+p.add_argument(
+    "--not-same-scale",
+    action="store_true",
+    required=False,
+    help="stops different frameworks from being forced to have same scale.",
+)
 args = p.parse_args()
 
 frameworks = ("iterative_pricing", "constraint_generation")
@@ -93,7 +99,8 @@ for title, get_stats in zip(
         plt.xlabel("algorithm", size=17)
 
         plt.grid(True, axis="y")
-        plt.ylim(min_stat, max_stat)
+        if not args.not_same_scale:
+            plt.ylim(min_stat, max_stat)
         if title in ["log_time"]:
             plt.yscale("log")
         plt.grid(True, axis="y")
@@ -107,6 +114,8 @@ def get_stats(entry):
     return entry["utility_per_iter"]
 
 
+min_stat = min(np.min([get_stats(entry) for entry in stuff]) for _, stuff in data.items() if stuff)
+max_stat = max(np.max([get_stats(entry) for entry in stuff]) for _, stuff in data.items() if stuff)
 for framework, include_error in itertools.product(frameworks, (True, False)):
     plt.tick_params(labelsize=15)
     stats = np.array([list(map(get_stats, data[(framework, alg)])) for alg in algorithms])
@@ -122,6 +131,8 @@ for framework, include_error in itertools.product(frameworks, (True, False)):
     plt.ylabel("proportion of requests fulfilled", size=17)
     plt.xlabel("iteration", size=17)
     plt.grid(True, axis="both")
+    if not args.not_same_scale:
+        plt.ylim(min_stat, max_stat)
 
     save_file = os.path.join(plot_dir, f"{framework}_iteration_plot{'_w_err' if include_error else ''}.png")
     plt.savefig(save_file, bbox_inches="tight", dpi=300)
