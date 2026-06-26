@@ -69,6 +69,8 @@ for framework in frameworks:
         for algo_name, run in t["output"].items():
             data[(framework, algo_name)].append(run["aux_info"])
 
+for framework, algo_name in itertools.product(frameworks, algorithms):
+    print(f"{len(data[(framework, algo_name)])} samples: {framework}, {algo_name}")
 
 for title, get_stats in zip(
     ("fulfillment", "time", "log_time"),
