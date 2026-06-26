@@ -71,16 +71,22 @@ for framework in frameworks:
 
 for framework, algo_name in itertools.product(frameworks, algorithms):
     print(f"{len(data[(framework, algo_name)])} samples: {framework}, {algo_name}")
+if args.max_iteration is None:
+    all_get_stats = (
+        lambda entry: entry["best_total_scheduled"],
+        lambda entry: entry["runtime_s"],
+        lambda entry: entry["runtime_s"],
+    )
+else:
+    all_get_stats = (
+        lambda entry: max(entry["utility_per_iter"][: args.max_iteration]),
+        lambda entry: sum(entry["runtime_per_iter"][: args.max_iteration]),
+        lambda entry: sum(entry["runtime_per_iter"][: args.max_iteration]),
+    )
 
 for title, get_stats in zip(
     ("fulfillment", "time", "log_time"),
-    (
-        lambda entry: (
-            entry["best_total_scheduled"] if args.max_iteration is None else max(entry["utility_per_iter"][: args.max_iteration])
-        ),
-        lambda entry: entry["runtime_s"],
-        lambda entry: entry["runtime_s"],
-    ),
+    all_get_stats,
 ):
     min_stat = min(min(get_stats(entry) for entry in stuff) for _, stuff in data.items() if stuff)
     max_stat = max(max(get_stats(entry) for entry in stuff) for _, stuff in data.items() if stuff)
@@ -119,36 +125,40 @@ for title, get_stats in zip(
 
         plt.close()
 
+if args.max_iteration is None:
+    all_get_stat_list = (
+        lambda entry: entry["utility_per_iter"],
+        lambda entry: entry["runtime_per_iter"],
+    )
+else:
+    all_get_stat_list = (
+        lambda entry: entry["utility_per_iter"][: args.max_iteration],
+        lambda entry: entry["runtime_per_iter"][: args.max_iteration],
+    )
+for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
+    min_stat = min(np.min([get_stats_list(entry) for entry in stuff]) for _, stuff in data.items() if stuff)
+    max_stat = max(np.max([get_stats_list(entry) for entry in stuff]) for _, stuff in data.items() if stuff)
+    for framework, include_error in itertools.product(frameworks, (True, False)):
+        plt.tick_params(labelsize=15)
+        stats = np.array([list(map(get_stats_list, data[(framework, alg)])) for alg in algorithms])
+        for algo_name, sts in zip(algorithms, stats):
+            n = sts.shape[1]
+            (line,) = plt.plot(np.arange(n), sts.mean(axis=0), label=algo_name)
+            if include_error:
+                std_errors = sts.std(axis=0) / np.sqrt(stats.shape[0] - 1)
+                plt.fill_between(
+                    np.arange(n), sts.mean(axis=0) - std_errors, sts.mean(axis=0) + std_errors, color=line.get_color(), alpha=0.25
+                )
+        plt.legend()
+        plt.title(f"{framework} performance", size=17)
+        ylabels = {"utility": "proportion of requests fulfilled", "runtime": "time (s)"}
+        plt.ylabel(ylabels[title], size=17)
+        plt.xlabel("iteration", size=17)
+        plt.grid(True, axis="both")
+        if not args.not_same_scale:
+            plt.ylim(min_stat, max_stat)
 
-def get_stats(entry):
-    if args.max_iteration is None:
-        return entry["utility_per_iter"]
-    else:
-        return entry["utility_per_iter"][: args.max_iteration]
+        save_file = os.path.join(plot_dir, f"{framework}_iter_plot_{title}{'_w_err' if include_error else ''}.png")
+        plt.savefig(save_file, bbox_inches="tight", dpi=300)
 
-
-min_stat = min(np.min([get_stats(entry) for entry in stuff]) for _, stuff in data.items() if stuff)
-max_stat = max(np.max([get_stats(entry) for entry in stuff]) for _, stuff in data.items() if stuff)
-for framework, include_error in itertools.product(frameworks, (True, False)):
-    plt.tick_params(labelsize=15)
-    stats = np.array([list(map(get_stats, data[(framework, alg)])) for alg in algorithms])
-    for algo_name, sts in zip(algorithms, stats):
-        n = sts.shape[1]
-        (line,) = plt.plot(np.arange(n), sts.mean(axis=0), label=algo_name)
-        if include_error:
-            std_errors = sts.std(axis=0) / np.sqrt(stats.shape[0] - 1)
-            plt.fill_between(
-                np.arange(n), sts.mean(axis=0) - std_errors, sts.mean(axis=0) + std_errors, color=line.get_color(), alpha=0.25
-            )
-    plt.legend()
-    plt.title(f"{framework} performance", size=17)
-    plt.ylabel("proportion of requests fulfilled", size=17)
-    plt.xlabel("iteration", size=17)
-    plt.grid(True, axis="both")
-    if not args.not_same_scale:
-        plt.ylim(min_stat, max_stat)
-
-    save_file = os.path.join(plot_dir, f"{framework}_iteration_plot{'_w_err' if include_error else ''}.png")
-    plt.savefig(save_file, bbox_inches="tight", dpi=300)
-
-    plt.close()
+        plt.close()
