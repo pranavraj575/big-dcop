@@ -10,7 +10,15 @@
 #
 # Usage:
 #   bash run_experiments.sh [--scenarios SCENARIOS_DIR] [--max-iterations N]
-#     [--output-dir DIR] [--trials NUM_TRIALS] [--start-trial START_TRIAL] [--slurm]
+#     [--output-dir DIR] [--trials NUM_TRIALS] [--start-trial START_TRIAL] [--slurm] [--overwrite]
+# Args:
+#   --scenarios       directory of scenario json files
+#   --max-iterations  maximum number of iterations to allow each framework
+#   --output-dir      directory to send output json files
+#   --trials          number of trials to run each (framework,scenario,algorithm)
+#   --start-trial     start numbering trials at this integer to avoid overwriting (if collecting additional experiments)
+#   --slurm           whether to use slurm job scheduling
+#   --overwrite       overwrite old experiments
 #
 # Defaults:
 #   --max-iterations  4
@@ -28,6 +36,7 @@ MAX_ITER=4
 TRIALS=2
 START_TRIAL=0
 USE_SLURM_JOBS=false
+OVERWRITE=false
 PROJECT_DIR=$(readlink -e $(dirname $0))
 OUTPUT_DIR="$PROJECT_DIR/output"
 SCRIPT="$PROJECT_DIR/satellite_scheduling/main.py"
@@ -70,6 +79,8 @@ while [[ $# -gt 0 ]]; do
       SCENARIOS_DIR="$2"; shift 2;;
     --slurm)
       USE_SLURM_JOBS=true; shift 1;;
+    --overwrite)
+      OVERWRITE=true; shift 1;;
     --python)
       PYTHON="$2"; shift 2;;   # explicit override skips auto-detect
     *)
@@ -97,6 +108,7 @@ FRAMEWORKS=("iterative_pricing" "constraint_generation")
 total=0
 passed=0
 failed=0
+skipped=0
 sent_to_slurm=0
 failed_list=()
 
@@ -117,33 +129,35 @@ for framework in "${FRAMEWORKS[@]}"; do
       echo "  output    : ${output_json}"
       echo "--------------------------------------------------------------"
 
-      # Remove stale output so main.py can write fresh results
-      if [ -e "$output_json" ]; then
-          echo "WARNING: $output_json exists, python script will overwrite this"
-      fi
-
-      if $USE_SLURM_JOBS
-      then
-        echo "sending job to slurm"
-        sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
-                                           --scenario "${scenario_path}" \
-                                           --output_json "${output_json}" \
-                                           --algorithms_json "${ALGORITHMS_JSON}" \
-                                           --framework "${framework}" \
-                                           --max_iterations "${MAX_ITER}"
-        sent_to_slurm=$((sent_to_slurm + 1))
+      if [[ -e "$output_json" ]] && [[ $OVERWRITE == false ]]; then
+        echo "WARNING: $output_json exists, skipping this trial (use --overwrite to overwrite this)"
+        skipped=$((skipped + 1))
       else
-        if "python" "${SCRIPT}" \
-            --scenario "${scenario_path}" \
-            --output_json "${output_json}" \
-            --algorithms_json "${ALGORITHMS_JSON}" \
-            --framework "${framework}" \
-            --max_iterations "${MAX_ITER}"; then
-          passed=$((passed + 1))
+        if [[ -e "$output_json" ]]; then
+          echo "WARNING: $output_json exists, python script will overwrite this"
+        fi
+        if [[ $USE_SLURM_JOBS == true ]]; then
+          echo "sending job to slurm"
+          sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
+                                             --scenario "${scenario_path}" \
+                                             --output_json "${output_json}" \
+                                             --algorithms_json "${ALGORITHMS_JSON}" \
+                                             --framework "${framework}" \
+                                             --max_iterations "${MAX_ITER}"
+          sent_to_slurm=$((sent_to_slurm + 1))
         else
-          failed=$((failed + 1))
-          failed_list+=("${framework}/${scenario_stem}")
-          echo "  [FAILED] ${framework}/${scenario_stem}" >&2
+          if "python" "${SCRIPT}" \
+              --scenario "${scenario_path}" \
+              --output_json "${output_json}" \
+              --algorithms_json "${ALGORITHMS_JSON}" \
+              --framework "${framework}" \
+              --max_iterations "${MAX_ITER}"; then
+            passed=$((passed + 1))
+          else
+            failed=$((failed + 1))
+            failed_list+=("${framework}/${scenario_stem}")
+            echo "  [FAILED] ${framework}/${scenario_stem}" >&2
+          fi
         fi
       fi
       echo ""
@@ -160,6 +174,7 @@ echo "  Experiments complete"
 echo "  Total   : ${total}"
 echo "  Passed  : ${passed}"
 echo "  Failed  : ${failed}"
+echo "  Skipped : ${skipped}"
 echo "  Slurmed : ${sent_to_slurm}"
 if [[ ${failed} -gt 0 ]]; then
   echo "  Failed runs:"
