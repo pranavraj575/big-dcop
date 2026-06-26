@@ -24,13 +24,13 @@ rc("text", usetex=latex_exists)
 
 p = argparse.ArgumentParser()
 p.add_argument(
-    "--output_dir",
+    "--output-dir",
     default=os.path.join(os.path.dirname(os.path.dirname(__file__)), "output"),
     type=str,
     help="output dir sent to run_experiments.sh",
 )
 p.add_argument(
-    "--plot_dir",
+    "--plot-dir",
     default=os.path.join(os.path.dirname(os.path.dirname(__file__)), "output", "cosp_solver_plots"),
     type=str,
     help="dir to send plots into",
@@ -40,6 +40,12 @@ p.add_argument(
     action="store_true",
     required=False,
     help="stops different frameworks from being forced to have same scale.",
+)
+p.add_argument(
+    "--max-iteration",
+    default=None,
+    type=int,
+    help="specify if performance results should only reflect the first n iterations",
 )
 args = p.parse_args()
 
@@ -67,7 +73,9 @@ for framework in frameworks:
 for title, get_stats in zip(
     ("fulfillment", "time", "log_time"),
     (
-        lambda entry: entry["best_total_scheduled"],
+        lambda entry: (
+            entry["best_total_scheduled"] if args.max_iteration is None else max(entry["utility_per_iter"][: args.max_iteration])
+        ),
         lambda entry: entry["runtime_s"],
         lambda entry: entry["runtime_s"],
     ),
@@ -111,7 +119,10 @@ for title, get_stats in zip(
 
 
 def get_stats(entry):
-    return entry["utility_per_iter"]
+    if args.max_iteration is None:
+        return entry["utility_per_iter"]
+    else:
+        return entry["utility_per_iter"][: args.max_iteration]
 
 
 min_stat = min(np.min([get_stats(entry) for entry in stuff]) for _, stuff in data.items() if stuff)
