@@ -128,6 +128,7 @@ for framework, include_error in itertools.product(frameworks, (True, False)):
                 np.arange(n), sts.mean(axis=0) - std_errors, sts.mean(axis=0) + std_errors, color=line.get_color(), alpha=0.25
             )
     plt.legend()
+    plt.title(f"{framework} performance", size=17)
     plt.ylabel("proportion of requests fulfilled", size=17)
     plt.xlabel("iteration", size=17)
     plt.grid(True, axis="both")
