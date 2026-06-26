@@ -93,7 +93,7 @@ for title, get_stats in zip(
             color="black",
             capsize=5,
         )
-        plt.title(f"performances with {framework} framework", size=17)
+        plt.title(f"{framework} performance", size=17)
         ylabels = {"time": "time (s)", "log_time": "time (s)", "fulfillment": "proportion of requests fulfilled"}
         plt.ylabel(ylabels[title], size=17)
         plt.xlabel("algorithm", size=17)
