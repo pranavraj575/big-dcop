@@ -32,10 +32,12 @@ def solve_constraint_generation(
     iteration = 0
     run_data = []  # in-memory iteration results (no temp files)
     utility_per_iter = []
+    runtime_per_iter = []
     total_messages = 0
     t_start = time.time()
 
     while iteration < max_iterations:
+        iter_t_start = time.time()
         result = utils.run_global_dispatcher_cosp(pydcop_dict, algorithm_config)
 
         run_data.append({k: v for k, v in result.items() if k not in ignore_keys})
@@ -86,7 +88,7 @@ def solve_constraint_generation(
             counter=num_constraints_added,
             pydcop_dict=pydcop_dict,
         )
-
+        runtime_per_iter.append(time.time() - iter_t_start)
         iteration += 1
         if num_constraints_added == new_num:
             break
@@ -105,5 +107,6 @@ def solve_constraint_generation(
             "total_messages": total_messages,
             "runtime_s": runtime_s,
             "utility_per_iter": utility_per_iter,
+            "runtime_per_iter": runtime_per_iter,
         },
     )

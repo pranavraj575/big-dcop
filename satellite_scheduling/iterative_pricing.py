@@ -63,10 +63,12 @@ def solve_iterative_pricing(
     best_iteration = 0
     run_data = []  # in-memory iteration results (no temp files)
     utility_per_iter = []
+    runtime_per_iter = []
     total_messages = 0
     t_start = time.time()
 
     for iteration in range(max_iterations):
+        iter_t_start = time.time()
         current_pydcop_dict = update_dcop_utilities(pydcop_dict, lambda_penalties, var_to_details)
         result = utils.run_global_dispatcher_cosp(current_pydcop_dict, algorithm_config)
 
@@ -111,6 +113,7 @@ def solve_iterative_pricing(
         if true_total > best_total_scheduled:
             best_total_scheduled = true_total
             best_iteration = iteration
+        runtime_per_iter.append(time.time() - iter_t_start)
 
         if total_dropped == 0:
             break
@@ -128,5 +131,6 @@ def solve_iterative_pricing(
             "total_messages": total_messages,
             "runtime_s": runtime_s,
             "utility_per_iter": utility_per_iter,
+            "runtime_per_iter": runtime_per_iter,
         },
     )

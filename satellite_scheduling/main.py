@@ -74,6 +74,7 @@ def main(
             f"{run_metrics.get('runtime_s', 0):.2f}s)"
         )
         utility_per_iter = run_metrics.get("utility_per_iter", [])
+        runtime_per_iter = run_metrics.get("runtime_per_iter", [])
         print("  utility/iter: " + "  ".join(f"[{i}] {u:.1%}" for i, u in enumerate(utility_per_iter)))
         output_dic["output"][algo_name] = {
             "aux_info": {
@@ -82,6 +83,7 @@ def main(
                 "total_messages": run_metrics.get("total_messages", 0),
                 "runtime_s": run_metrics.get("runtime_s", 0.0),
                 "utility_per_iter": utility_per_iter,
+                "runtime_per_iter": runtime_per_iter,
             },
         }
 
