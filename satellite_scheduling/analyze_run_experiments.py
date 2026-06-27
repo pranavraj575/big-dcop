@@ -136,18 +136,31 @@ else:
         lambda entry: entry["runtime_per_iter"][: args.max_iteration],
     )
 for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
-    min_stat = min(np.min([get_stats_list(entry) for entry in stuff]) for _, stuff in data.items() if stuff)
-    max_stat = max(np.max([get_stats_list(entry) for entry in stuff]) for _, stuff in data.items() if stuff)
+    min_stat = min(min([min(get_stats_list(entry)) for entry in stuff]) for _, stuff in data.items() if stuff)
+    max_stat = max(max([min(get_stats_list(entry)) for entry in stuff]) for _, stuff in data.items() if stuff)
+    max_iterations = max(max([len(get_stats_list(entry)) for entry in stuff]) for _, stuff in data.items() if stuff)
+
     for framework, include_error in itertools.product(frameworks, (True, False)):
         plt.tick_params(labelsize=15)
-        stats = np.array([list(map(get_stats_list, data[(framework, alg)])) for alg in algorithms])
+        temp_stats = [list(map(get_stats_list, data[(framework, alg)])) for alg in algorithms]
+        stats = np.nan * np.ones((len(algorithms), len(data[(framework, algorithms[0])]), max_iterations))
+        for i, alg_stats in enumerate(temp_stats):
+            for j, sample_stats in enumerate(alg_stats):
+                stats[i, j, : len(sample_stats)] = sample_stats
+
         for algo_name, sts in zip(algorithms, stats):
             n = sts.shape[1]
-            (line,) = plt.plot(np.arange(n), sts.mean(axis=0), label=algo_name)
+            (line,) = plt.plot(np.arange(n), np.nanmean(sts, axis=0), label=algo_name)
             if include_error:
-                std_errors = sts.std(axis=0) / np.sqrt(stats.shape[0] - 1)
+                # for each iteration, this is the number of samples
+                counts = np.sum(np.logical_not(np.isnan(sts)), axis=0)
+                std_errors = np.nanstd(sts, axis=0) / np.sqrt(counts - 1)
                 plt.fill_between(
-                    np.arange(n), sts.mean(axis=0) - std_errors, sts.mean(axis=0) + std_errors, color=line.get_color(), alpha=0.25
+                    np.arange(n),
+                    np.nanmean(sts, axis=0) - std_errors,
+                    np.nanmean(sts, axis=0) + std_errors,
+                    color=line.get_color(),
+                    alpha=0.25,
                 )
         plt.legend()
         plt.title(f"{framework} performance", size=17)
