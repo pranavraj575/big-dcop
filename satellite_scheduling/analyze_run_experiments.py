@@ -137,7 +137,7 @@ else:
     )
 for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
     min_stat = min(min([min(get_stats_list(entry)) for entry in stuff]) for _, stuff in data.items() if stuff)
-    max_stat = max(max([min(get_stats_list(entry)) for entry in stuff]) for _, stuff in data.items() if stuff)
+    max_stat = max(max([max(get_stats_list(entry)) for entry in stuff]) for _, stuff in data.items() if stuff)
     max_iterations = max(max([len(get_stats_list(entry)) for entry in stuff]) for _, stuff in data.items() if stuff)
 
     for framework, include_error in itertools.product(frameworks, (True, False)):
