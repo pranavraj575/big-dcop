@@ -69,9 +69,13 @@ for framework in frameworks:
 
         for algo_name, run in t["output"].items():
             data[(framework, algo_name)].append(run["aux_info"])
+for framework in frameworks:
+    if all(len(data[(framework, algo_name)]) == len(data[(framework, algorithms[0])]) for algo_name in algorithms):
+        print(f"{len(data[(framework, algorithms[0])])} samples: {framework}")
+    else:
+        for algo_name in algorithms:
+            print(f"{len(data[(framework, algo_name)])} samples: {framework}, {algo_name}")
 
-for framework, algo_name in itertools.product(frameworks, algorithms):
-    print(f"{len(data[(framework, algo_name)])} samples: {framework}, {algo_name}")
 if args.max_iteration is None:
     all_get_stats = (
         lambda entry: entry["best_total_scheduled"],
