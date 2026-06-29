@@ -9,11 +9,12 @@
 #   output/<framework>/<scenario_stem>.json
 #
 # Usage:
-#   bash run_experiments.sh [--scenarios SCENARIOS_DIR] [--max-iterations N]
+#   bash run_experiments.sh [--scenarios SCENARIOS_DIR] [--max-iterations N] [--step-size-c C]
 #     [--output-dir DIR] [--trials NUM_TRIALS] [--start-trial START_TRIAL] [--slurm] [--overwrite]
 # Args:
 #   --scenarios       directory of scenario json files
 #   --max-iterations  maximum number of iterations to allow each framework
+#   --step-size-c     step size to use for iterative pricing
 #   --output-dir      directory to send output json files
 #   --trials          number of trials to run each (framework,scenario,algorithm)
 #   --start-trial     start numbering trials at this integer to avoid overwriting (if collecting additional experiments)
@@ -22,6 +23,7 @@
 #
 # Defaults:
 #   --max-iterations  4
+#   --step-size-c     15.0
 #   --output-dir      output
 #   --scenarios       satellite_scheduling/scenarios_larger
 #   --trials          2
@@ -33,6 +35,7 @@ set -euo pipefail
 # Defaults
 # ---------------------------------------------------------------------------
 MAX_ITER=4
+STEP_SIZE_C=15.0
 TRIALS=2
 START_TRIAL=0
 USE_SLURM_JOBS=false
@@ -69,6 +72,8 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --max-iterations)
       MAX_ITER="$2"; shift 2;;
+    --step-size-c)
+      STEP_SIZE_C="$2"; shift 2;;
     --output-dir)
       OUTPUT_DIR="$2"; shift 2;;
     --trials)
@@ -140,18 +145,20 @@ for framework in "${FRAMEWORKS[@]}"; do
           echo "sending job to slurm"
           sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
                                              --scenario "${scenario_path}" \
-                                             --output_json "${output_json}" \
-                                             --algorithms_json "${ALGORITHMS_JSON}" \
+                                             --output-json "${output_json}" \
+                                             --algorithms-json "${ALGORITHMS_JSON}" \
                                              --framework "${framework}" \
-                                             --max_iterations "${MAX_ITER}"
+                                             --max-iterations "${MAX_ITER}" \
+                                             --step-size-c "${STEP_SIZE_C}"
           sent_to_slurm=$((sent_to_slurm + 1))
         else
           if "python" "${SCRIPT}" \
               --scenario "${scenario_path}" \
-              --output_json "${output_json}" \
-              --algorithms_json "${ALGORITHMS_JSON}" \
+              --output-json "${output_json}" \
+              --algorithms-json "${ALGORITHMS_JSON}" \
               --framework "${framework}" \
-              --max_iterations "${MAX_ITER}"; then
+              --max-iterations "${MAX_ITER}" \
+              --step-size-c "${STEP_SIZE_C}"; then
             passed=$((passed + 1))
           else
             failed=$((failed + 1))

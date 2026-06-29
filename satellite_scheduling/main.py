@@ -17,6 +17,7 @@ def main(
     algorithms_json,
     max_iterations,
     framework,
+    step_size_c=15.0,
 ):
     run_info = {
         "scenario": scenario,
@@ -52,6 +53,7 @@ def main(
                 requests,
                 algorithm_config,
                 max_iterations=max_iterations,
+                step_size_c=step_size_c,
             )
         elif framework == "constraint_generation":
             best_total_scheduled, best_iter, run_metrics = solve_constraint_generation(
@@ -96,25 +98,31 @@ if __name__ == "__main__":
     p.add_argument(
         "--scenario", default="satellite_scheduling/scenarios/scenario_1.json", type=str, help="scenario json to evaluate"
     )
-    p.add_argument("--output_json", default="output/test_main.json", type=str, help="output file to save results to")
+    p.add_argument("--output-json", default="output/test_main.json", type=str, help="output file to save results to")
     p.add_argument(
-        "--algorithms_json",
+        "--algorithms-json",
         default="satellite_scheduling/cosp_algorithm_configs.json",
         type=str,
         help="json with list of algorithm configs to test",
     )
     p.add_argument(
         "--framework",
-        default="constraint_generation",
+        default="constraint-generation",
         type=str,
         help="use iterative pricing or constraint generation",
         choices=["iterative_pricing", "constraint_generation"],
     )
     p.add_argument(
-        "--max_iterations",
+        "--max-iterations",
         default=8,
         type=int,
         help="number of outer iterations",
+    )
+    p.add_argument(
+        "--step-size-c",
+        default=15.0,
+        type=float,
+        help="step size for iterative pricing",
     )
     args = p.parse_args()
     main(
@@ -123,4 +131,5 @@ if __name__ == "__main__":
         algorithms_json=args.algorithms_json,
         max_iterations=args.max_iterations,
         framework=args.framework,
+        step_size_c=args.step_size_c,
     )
