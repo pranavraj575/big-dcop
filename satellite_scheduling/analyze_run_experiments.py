@@ -49,9 +49,10 @@ p.add_argument(
 )
 args = p.parse_args()
 
-frameworks = ("iterative_pricing", "constraint_generation")
 output_dir = args.output_dir
 plot_dir = args.plot_dir
+frameworks = ("iterative_pricing", "constraint_generation")
+frameworks = tuple(filter(lambda framework: os.path.exists(os.path.join(output_dir, framework)), frameworks))
 
 os.makedirs(plot_dir, exist_ok=True)
 data = defaultdict(lambda: list())
