@@ -22,7 +22,13 @@ def main(
     run_info = {
         "scenario": scenario,
         "algorithms_json": algorithms_json,
+        "framework": framework,
     }
+    if framework == "iterative_pricing":
+        run_info["step_size_c"] = step_size_c
+    else:
+        run_info["step_size_c"] = None
+
     os.makedirs(os.path.dirname(output_json), exist_ok=True)
 
     with open(algorithms_json, "r") as f:

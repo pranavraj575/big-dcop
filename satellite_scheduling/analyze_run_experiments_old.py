@@ -10,6 +10,7 @@ from collections import defaultdict
 import argparse
 import shutil
 
+
 latex_exists = bool(shutil.which("latex"))
 
 if latex_exists:
@@ -25,9 +26,10 @@ rc("text", usetex=latex_exists)
 p = argparse.ArgumentParser()
 p.add_argument(
     "--output-dir",
-    default=os.path.join(os.path.dirname(os.path.dirname(__file__)), "output"),
+    default=[os.path.join(os.path.dirname(os.path.dirname(__file__)), "output")],
     type=str,
-    help="output dir sent to run_experiments.sh",
+    nargs="+",
+    help="output dir (or list of these) sent to run_experiments.sh",
 )
 p.add_argument(
     "--plot-dir",
@@ -49,16 +51,16 @@ p.add_argument(
 )
 args = p.parse_args()
 
-output_dir = args.output_dir
 plot_dir = args.plot_dir
 frameworks = ("iterative_pricing", "constraint_generation")
-frameworks = tuple(filter(lambda framework: os.path.exists(os.path.join(output_dir, framework)), frameworks))
 
 os.makedirs(plot_dir, exist_ok=True)
-data = defaultdict(lambda: list())
+data=list()
 algorithms = None
-for framework in frameworks:
+for output_dir,framework in itertools.product(args.output_dir, frameworks):
     pth = os.path.join(output_dir, framework)
+    if not os.path.exists(pth):
+        continue
     for fn in os.listdir(pth):
         with open(os.path.join(pth, fn)) as f:
             t = json.load(f)
@@ -68,36 +70,42 @@ for framework in frameworks:
         algorithms = temp
 
         for algo_name, run in t["output"].items():
-            data[(framework, algo_name)].append(run["aux_info"])
+            trial_info=t['run_info'].copy()
+            trial_info['algo_name']=algo_name
+            trial_data=run["aux_info"]
+            data.append({'info':trial_info,'data':trial_data})
 for framework in frameworks:
-    if all(len(data[(framework, algo_name)]) == len(data[(framework, algorithms[0])]) for algo_name in algorithms):
-        print(f"{len(data[(framework, algorithms[0])])} samples: {framework}")
+    frm_data=list(filter(lambda d:d['info']['framework']==framework,data))
+    alg_data=[list(filter(lambda d:d['info']['algo_name']==algo_name,frm_data)) for algo_name in algorithms]
+    if all(len(t) == len(alg_data[0]) for t in alg_data):
+        print(f"{len(alg_data[0])} samples: {framework}")
     else:
-        for algo_name in algorithms:
-            print(f"{len(data[(framework, algo_name)])} samples: {framework}, {algo_name}")
+        for algo_name,t in zip(algorithms,alg_data):
+            print(f"{len(t)} samples: {framework}, {algo_name}")
 
 if args.max_iteration is None:
     all_get_stats = (
-        lambda entry: entry["best_total_scheduled"],
-        lambda entry: entry["runtime_s"],
-        lambda entry: entry["runtime_s"],
+        lambda dic: dic['data']["best_total_scheduled"],
+        lambda dic: dic['data']["runtime_s"],
+        lambda dic: dic['data']["runtime_s"],
     )
 else:
     all_get_stats = (
-        lambda entry: max(entry["utility_per_iter"][: args.max_iteration]),
-        lambda entry: sum(entry["runtime_per_iter"][: args.max_iteration]),
-        lambda entry: sum(entry["runtime_per_iter"][: args.max_iteration]),
+        lambda dic: max(dic['data']["utility_per_iter"][: args.max_iteration]),
+        lambda dic: sum(dic['data']["runtime_per_iter"][: args.max_iteration]),
+        lambda dic: sum(dic['data']["runtime_per_iter"][: args.max_iteration]),
     )
 
 for title, get_stats in zip(
     ("fulfillment", "time", "log_time"),
     all_get_stats,
 ):
-    min_stat = min(min(get_stats(entry) for entry in stuff) for _, stuff in data.items() if stuff)
-    max_stat = max(max(get_stats(entry) for entry in stuff) for _, stuff in data.items() if stuff)
-    print(title, "bounds", min_stat, max_stat)
+    min_stat = min(map(get_stats,data))
+    max_stat = max(map(get_stats,data))
     for framework in frameworks:
-        stats = np.array([list(map(get_stats, data[(framework, alg)])) for alg in algorithms])
+        frm_data=list(filter(lambda d:d['info']['framework']==framework,data))
+        alg_data=[list(filter(lambda d:d['info']['algo_name']==algo_name,frm_data)) for algo_name in algorithms]
+        stats = np.array([list(map(get_stats, ag)) for ag in alg_data])
 
         plt.tick_params(labelsize=15)
         plt.bar(algorithms, stats.mean(axis=1) - min_stat, bottom=min_stat)
@@ -132,23 +140,25 @@ for title, get_stats in zip(
 
 if args.max_iteration is None:
     all_get_stat_list = (
-        lambda entry: entry["utility_per_iter"],
-        lambda entry: entry["runtime_per_iter"],
+        lambda dic: dic['data']["utility_per_iter"],
+        lambda dic: dic['data']["runtime_per_iter"],
     )
 else:
     all_get_stat_list = (
-        lambda entry: entry["utility_per_iter"][: args.max_iteration],
-        lambda entry: entry["runtime_per_iter"][: args.max_iteration],
+        lambda dic: dic['data']["utility_per_iter"][: args.max_iteration],
+        lambda dic: dic['data']["runtime_per_iter"][: args.max_iteration],
     )
 for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
-    min_stat = min(min([min(get_stats_list(entry)) for entry in stuff]) for _, stuff in data.items() if stuff)
-    max_stat = max(max([max(get_stats_list(entry)) for entry in stuff]) for _, stuff in data.items() if stuff)
-    max_iterations = max(max([len(get_stats_list(entry)) for entry in stuff]) for _, stuff in data.items() if stuff)
+    min_stat = min(map(min,map(get_stats_list,data)))
+    max_stat = max(map(max,map(get_stats_list,data)))
+    max_iterations=max(map(len,map(get_stats_list,data)))
 
     for framework, include_error in itertools.product(frameworks, (True, False)):
         plt.tick_params(labelsize=15)
-        temp_stats = [list(map(get_stats_list, data[(framework, alg)])) for alg in algorithms]
-        stats = np.nan * np.ones((len(algorithms), len(data[(framework, algorithms[0])]), max_iterations))
+        frm_data=list(filter(lambda d:d['info']['framework']==framework,data))
+        alg_data=[list(filter(lambda d:d['info']['algo_name']==algo_name,frm_data)) for algo_name in algorithms]
+        temp_stats=[list(map(get_stats_list,ag)) for ag in alg_data]
+        stats = np.nan * np.ones((len(algorithms), len(temp_stats[0]), max_iterations))
         for i, alg_stats in enumerate(temp_stats):
             for j, sample_stats in enumerate(alg_stats):
                 stats[i, j, : len(sample_stats)] = sample_stats
