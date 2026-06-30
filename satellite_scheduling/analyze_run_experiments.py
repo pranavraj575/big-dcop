@@ -51,12 +51,12 @@ p.add_argument(
 args = p.parse_args()
 
 plot_dir = args.plot_dir
-frameworks = ("iterative_pricing", "constraint_generation")
+possible_frameworks = ("iterative_pricing", "constraint_generation")
 
 os.makedirs(plot_dir, exist_ok=True)
 data = list()
 algorithms = None
-for output_dir, framework in itertools.product(args.output_dir, frameworks):
+for output_dir, framework in itertools.product(args.output_dir, possible_frameworks):
     pth = os.path.join(output_dir, framework)
     if not os.path.exists(pth):
         continue
@@ -73,6 +73,7 @@ for output_dir, framework in itertools.product(args.output_dir, frameworks):
             trial_info["algo_name"] = algo_name
             trial_data = run["aux_info"]
             data.append({"info": trial_info, "data": trial_data})
+frameworks = set(dic["info"]["framework"] for dic in data)
 for framework in frameworks:
     frm_data = list(filter(lambda d: d["info"]["framework"] == framework, data))
     alg_data = [list(filter(lambda d: d["info"]["algo_name"] == algo_name, frm_data)) for algo_name in algorithms]
@@ -199,20 +200,26 @@ if args.max_iteration is None:
 else:
     all_get_stats = (lambda dic: max(dic["data"]["utility_per_iter"][: args.max_iteration]),)
 c_values = sorted(set(dic["info"]["step_size_c"] for dic in iterative_pricing_data))
-if len(c_values) > 0:
-    for get_stats, include_error in itertools.product(all_get_stats, (True, False)):
+if len(c_values) > 1:
+    for get_stats, include_error, log_x in itertools.product(all_get_stats, (True, False), (True, False)):
         alg_data = [
             list(filter(lambda d: d["info"]["algo_name"] == algo_name, iterative_pricing_data)) for algo_name in algorithms
         ]
         data_by_c = [[list(filter(lambda d: d["info"]["step_size_c"] == c_val, ad)) for c_val in c_values] for ad in alg_data]
-        stats = np.array([[list(map(get_stats, tt)) for tt in t] for t in data_by_c])
+        temp_stats = [[list(map(get_stats, tt)) for tt in t] for t in data_by_c]
+        stats = np.nan * np.ones(
+            (len(algorithms), len(c_values), max(max(len(list(map(get_stats, tt))) for tt in t) for t in data_by_c))
+        )
+        for alg_i, t in enumerate(temp_stats):
+            for cval_j, tt in enumerate(t):
+                stats[alg_i, cval_j, : len(tt)] = tt
         # shaped (num algs, num c values, num trials)
-        count = stats.shape[-1]
         for algo_name, sts in zip(algorithms, stats):
-            (line,) = plt.plot(c_values, np.nanmean(sts, axis=1), label=algo_name)
+            (line,) = plt.plot(c_values, np.nanmean(sts, axis=1), label=algo_name, marker=".")
             if include_error:
                 # for each iteration, this is the number of samples
-                std_errors = np.nanstd(sts, axis=1) / np.sqrt(count - 1)
+                counts = np.sum(np.logical_not(np.isnan(sts)), axis=1)
+                std_errors = np.nanstd(sts, axis=1) / np.sqrt(counts - 1)
                 plt.fill_between(
                     c_values,
                     np.nanmean(sts, axis=1) - std_errors,
@@ -225,8 +232,12 @@ if len(c_values) > 0:
         plt.ylabel("proportion of requests fulfilled", size=17)
         plt.xlabel("c (step size)", size=17)
         plt.grid(True, axis="both")
+        if log_x:
+            plt.xscale("log")
 
-        save_file = os.path.join(plot_dir, f"iterative_pricing_c_graph{'_w_err' if include_error else ''}.png")
+        save_file = os.path.join(
+            plot_dir, f"iterative_pricing_c_{'log_' if log_x else ''}graph{'_w_err' if include_error else ''}.png"
+        )
         plt.savefig(save_file, bbox_inches="tight", dpi=300)
 
         plt.close()
