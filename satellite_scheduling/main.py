@@ -17,7 +17,7 @@ def main(
     algorithms_json,
     max_iterations,
     framework,
-    step_size_c=15.0,
+    step_size_c=1.5,
 ):
     run_info = {
         "scenario": scenario,
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     )
     p.add_argument(
         "--step-size-c",
-        default=15.0,
+        default=1.5,
         type=float,
         help="step size for iterative pricing",
     )

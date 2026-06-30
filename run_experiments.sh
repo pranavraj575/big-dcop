@@ -23,7 +23,7 @@
 #
 # Defaults:
 #   --max-iterations  4
-#   --step-size-c     15.0
+#   --step-size-c     1.5
 #   --output-dir      output
 #   --scenarios       satellite_scheduling/scenarios_larger
 #   --trials          2
@@ -35,7 +35,7 @@ set -euo pipefail
 # Defaults
 # ---------------------------------------------------------------------------
 MAX_ITER=4
-STEP_SIZE_C=15.0
+STEP_SIZE_C=1.5
 TRIALS=2
 START_TRIAL=0
 USE_SLURM_JOBS=false
