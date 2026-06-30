@@ -82,6 +82,7 @@ for framework in frameworks:
         for algo_name, t in zip(algorithms, alg_data):
             print(f"{len(t)} samples: {framework}, {algo_name}")
 
+# plot single statistics as a bar graph: best utility and runtime
 if args.max_iteration is None:
     all_get_stats = (
         lambda dic: dic["data"]["best_total_scheduled"],
@@ -137,6 +138,7 @@ for title, get_stats in zip(
 
         plt.close()
 
+# plot list statistics as a line: utility/runtime per iteration
 if args.max_iteration is None:
     all_get_stat_list = (
         lambda dic: dic["data"]["utility_per_iter"],
@@ -186,6 +188,45 @@ for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
             plt.ylim(min_stat, max_stat)
 
         save_file = os.path.join(plot_dir, f"{framework}_iter_plot_{title}{'_w_err' if include_error else ''}.png")
+        plt.savefig(save_file, bbox_inches="tight", dpi=300)
+
+        plt.close()
+
+# plot best utility over hyperparameter c for iterative pricing
+iterative_pricing_data = list(filter(lambda d: d["info"]["framework"] == "iterative_pricing", data))
+if args.max_iteration is None:
+    all_get_stats = (lambda dic: dic["data"]["best_total_scheduled"],)
+else:
+    all_get_stats = (lambda dic: max(dic["data"]["utility_per_iter"][: args.max_iteration]),)
+c_values = sorted(set(dic["info"]["step_size_c"] for dic in iterative_pricing_data))
+if len(c_values) > 0:
+    for get_stats, include_error in itertools.product(all_get_stats, (True, False)):
+        alg_data = [
+            list(filter(lambda d: d["info"]["algo_name"] == algo_name, iterative_pricing_data)) for algo_name in algorithms
+        ]
+        data_by_c = [[list(filter(lambda d: d["info"]["step_size_c"] == c_val, ad)) for c_val in c_values] for ad in alg_data]
+        stats = np.array([[list(map(get_stats, tt)) for tt in t] for t in data_by_c])
+        # shaped (num algs, num c values, num trials)
+        count = stats.shape[-1]
+        for algo_name, sts in zip(algorithms, stats):
+            (line,) = plt.plot(c_values, np.nanmean(sts, axis=1), label=algo_name)
+            if include_error:
+                # for each iteration, this is the number of samples
+                std_errors = np.nanstd(sts, axis=1) / np.sqrt(count - 1)
+                plt.fill_between(
+                    c_values,
+                    np.nanmean(sts, axis=1) - std_errors,
+                    np.nanmean(sts, axis=1) + std_errors,
+                    color=line.get_color(),
+                    alpha=0.25,
+                )
+        plt.legend()
+        plt.title("iterative pricing performance across c values", size=17)
+        plt.ylabel("proportion of requests fulfilled", size=17)
+        plt.xlabel("c (step size)", size=17)
+        plt.grid(True, axis="both")
+
+        save_file = os.path.join(plot_dir, f"iterative_pricing_c_graph{'_w_err' if include_error else ''}.png")
         plt.savefig(save_file, bbox_inches="tight", dpi=300)
 
         plt.close()
