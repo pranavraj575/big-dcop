@@ -200,6 +200,7 @@ if args.max_iteration is None:
 else:
     all_get_stats = (lambda dic: max(dic["data"]["utility_per_iter"][: args.max_iteration]),)
 c_values = sorted(set(dic["info"]["step_size_c"] for dic in iterative_pricing_data))
+print("c values:", c_values)
 if len(c_values) > 1:
     for get_stats, include_error, log_x in itertools.product(all_get_stats, (True, False), (True, False)):
         alg_data = [
@@ -228,9 +229,9 @@ if len(c_values) > 1:
                     alpha=0.25,
                 )
         plt.legend()
-        plt.title("iterative pricing performance across c values", size=17)
+        plt.title("iterative pricing performance across step sizes", size=17)
         plt.ylabel("proportion of requests fulfilled", size=17)
-        plt.xlabel("c (step size)", size=17)
+        plt.xlabel("$\\alpha$ (step size)", size=17)
         plt.grid(True, axis="both")
         if log_x:
             plt.xscale("log")
