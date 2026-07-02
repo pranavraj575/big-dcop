@@ -44,10 +44,22 @@ p.add_argument(
     help="stops different frameworks from being forced to have same scale.",
 )
 p.add_argument(
+    "--title",
+    action="store_true",
+    required=False,
+    help="outputs plots with titles.",
+)
+p.add_argument(
     "--max-iteration",
     default=None,
     type=int,
     help="specify if performance results should only reflect the first n iterations",
+)
+p.add_argument(
+    "--dpi",
+    default=300,
+    type=int,
+    help="dpi of plot",
 )
 args = p.parse_args()
 
@@ -124,7 +136,9 @@ for title, get_stats in zip(
             color="black",
             capsize=5,
         )
-        plt.title(f"{framework} performance", size=17)
+
+        if args.title:
+            plt.title(f"{framework} performance", size=17)
         ylabels = {"time": "time (s)", "log_time": "time (s)", "fulfillment": "proportion of requests fulfilled"}
         plt.ylabel(ylabels[title], size=17)
         plt.xlabel("algorithm", size=17)
@@ -136,7 +150,7 @@ for title, get_stats in zip(
             plt.yscale("log")
         plt.grid(True, axis="y")
         save_file = os.path.join(plot_dir, f"{framework}_{title}.png")
-        plt.savefig(save_file, bbox_inches="tight", dpi=300)
+        plt.savefig(save_file, bbox_inches="tight", dpi=args.dpi)
 
         plt.close()
 
@@ -183,8 +197,10 @@ for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
                     color=line.get_color(),
                     alpha=0.25,
                 )
-        plt.legend()
-        plt.title(f"{framework} performance", size=17)
+        plt.legend(fontsize=14)
+        if args.title:
+            plt.title(f"{framework} performance", size=17)
+        plt.tick_params(labelsize=15)
         ylabels = {"utility": "proportion of requests fulfilled", "runtime": "time (s)"}
         plt.ylabel(ylabels[title], size=17)
         plt.xlabel("iteration", size=17)
@@ -193,7 +209,7 @@ for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
             plt.ylim(min_stat, max_stat)
 
         save_file = os.path.join(plot_dir, f"{framework}_iter_plot_{title}{'_w_err' if include_error else ''}.png")
-        plt.savefig(save_file, bbox_inches="tight", dpi=300)
+        plt.savefig(save_file, bbox_inches="tight", dpi=args.dpi)
 
         plt.close()
 
@@ -232,8 +248,10 @@ if len(c_values) > 1:
                     color=line.get_color(),
                     alpha=0.25,
                 )
-        plt.legend()
-        plt.title("iterative pricing performance across step sizes", size=17)
+        plt.legend(fontsize=14)
+        plt.tick_params(labelsize=15)
+        if args.title:
+            plt.title("iterative pricing performance across step sizes", size=17)
         plt.ylabel("proportion of requests fulfilled", size=17)
         plt.xlabel("$\\alpha$ (step size)", size=17)
         plt.grid(True, axis="both")
@@ -243,6 +261,6 @@ if len(c_values) > 1:
         save_file = os.path.join(
             plot_dir, f"iterative_pricing_c_{'log_' if log_x else ''}graph{'_w_err' if include_error else ''}.png"
         )
-        plt.savefig(save_file, bbox_inches="tight", dpi=300)
+        plt.savefig(save_file, bbox_inches="tight", dpi=args.dpi)
 
         plt.close()
