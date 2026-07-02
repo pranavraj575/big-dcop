@@ -4,6 +4,7 @@ import itertools
 import matplotlib.pyplot as plt
 
 from matplotlib import rc
+
 from evaluation.algo_configs import get_display_name
 import numpy as np
 import argparse
@@ -153,14 +154,17 @@ else:
 for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
     min_stat = min(map(min, map(get_stats_list, data)))
     max_stat = max(map(max, map(get_stats_list, data)))
-    max_iterations = max(map(len, map(get_stats_list, data)))
-
+    overall_max_iterations = max(map(len, map(get_stats_list, data)))
     for framework, include_error in itertools.product(frameworks, (True, False)):
         plt.tick_params(labelsize=15)
         frm_data = list(filter(lambda d: d["info"]["framework"] == framework, data))
         alg_data = [list(filter(lambda d: d["info"]["algo_name"] == algo_name, frm_data)) for algo_name in algorithms]
         temp_stats = [list(map(get_stats_list, ag)) for ag in alg_data]
+        max_iterations = max(map(len, map(get_stats_list, frm_data)))
         stats = np.nan * np.ones((len(algorithms), len(temp_stats[0]), max_iterations))
+        if (include_error and title == "utility") and max_iterations < overall_max_iterations:
+            print(f"framework {framework} only has samples up to {max_iterations} iterations")
+
         for i, alg_stats in enumerate(temp_stats):
             for j, sample_stats in enumerate(alg_stats):
                 stats[i, j, : len(sample_stats)] = sample_stats
