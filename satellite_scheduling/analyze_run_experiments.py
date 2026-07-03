@@ -86,7 +86,7 @@ for output_dir, framework in itertools.product(args.output_dir, possible_framewo
             trial_info["algo_name"] = algo_name
             trial_data = run["aux_info"]
             data.append({"info": trial_info, "data": trial_data})
-frameworks = set(dic["info"]["framework"] for dic in data)
+frameworks = sorted(set(dic["info"]["framework"] for dic in data))
 for framework in frameworks:
     frm_data = list(filter(lambda d: d["info"]["framework"] == framework, data))
     alg_data = [list(filter(lambda d: d["info"]["algo_name"] == algo_name, frm_data)) for algo_name in algorithms]
@@ -116,43 +116,50 @@ for title, get_stats in zip(
 ):
     min_stat = min(map(get_stats, data))
     max_stat = max(map(get_stats, data))
+    w, x = 0.4, np.arange(len(algorithms))
+    x_vals = x - w / 2
     for framework in frameworks:
         frm_data = list(filter(lambda d: d["info"]["framework"] == framework, data))
         alg_data = [list(filter(lambda d: d["info"]["algo_name"] == algo_name, frm_data)) for algo_name in algorithms]
         stats = np.array([list(map(get_stats, ag)) for ag in alg_data])
 
         plt.tick_params(labelsize=15)
-        plt.bar(algorithms, stats.mean(axis=1) - min_stat, bottom=min_stat)
-        plt.xticks(rotation=45, ha="right")
+
+        plt.bar(x_vals, stats.mean(axis=1) - min_stat, bottom=min_stat, width=w, label=framework)
         # stats.std is sqrt(1/n * biased variance)
         # sample std is sqrt(1/(n-1) * biased variance) = stats.std *sqrt(n/(n-1))
         # std error is sample std/sqrt(n) = stats.std /sqrt(n-1)
         std_errors = stats.std(axis=1) / np.sqrt(stats.shape[1] - 1)
         plt.errorbar(
-            algorithms,
+            x_vals,
             stats.mean(axis=1),
             std_errors,
             fmt="none",
             color="black",
             capsize=5,
         )
+        x_vals = x_vals + w
 
-        if args.title:
-            plt.title(f"{framework} performance", size=17)
-        ylabels = {"time": "time (s)", "log_time": "time (s)", "fulfillment": "proportion of requests fulfilled"}
-        plt.ylabel(ylabels[title], size=17)
-        plt.xlabel("algorithm", size=17)
+    plt.xticks(rotation=45, ha="right")
+    if args.title:
+        plt.title(f"{title}", size=17)
+    ylabels = {"time": "time (s)", "log_time": "time (s)", "fulfillment": "proportion of requests fulfilled"}
+    plt.ylabel(ylabels[title], size=17)
+    plt.xlabel("algorithm", size=17)
+    plt.xticks(x, labels=algorithms)
 
-        plt.grid(True, axis="y")
-        if not args.not_same_scale:
-            plt.ylim(min_stat, max_stat)
-        if title in ["log_time"]:
-            plt.yscale("log")
-        plt.grid(True, axis="y")
-        save_file = os.path.join(plot_dir, f"{framework}_{title}.png")
-        plt.savefig(save_file, bbox_inches="tight", dpi=args.dpi)
+    plt.legend(fontsize=15, loc="lower center", bbox_to_anchor=(0.5, 1))
+    # plt.legend(fontsize=14)
+    plt.grid(True, axis="y")
+    if not args.not_same_scale:
+        plt.ylim(min_stat, max_stat)
+    if title in ["log_time"]:
+        plt.yscale("log")
+    plt.grid(True, axis="y")
+    save_file = os.path.join(plot_dir, f"{title}_ber.png")
+    plt.savefig(save_file, bbox_inches="tight", dpi=args.dpi)
 
-        plt.close()
+    plt.close()
 
 # plot list statistics as a line: utility/runtime per iteration
 if args.max_iteration is None:
@@ -169,7 +176,7 @@ for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
     min_stat = min(map(min, map(get_stats_list, data)))
     max_stat = max(map(max, map(get_stats_list, data)))
     overall_max_iterations = max(map(len, map(get_stats_list, data)))
-    for framework, include_error in itertools.product(frameworks, (True, False)):
+    for framework, include_error, include_legend in itertools.product(frameworks, (True,), (True, False)):
         plt.tick_params(labelsize=15)
         frm_data = list(filter(lambda d: d["info"]["framework"] == framework, data))
         alg_data = [list(filter(lambda d: d["info"]["algo_name"] == algo_name, frm_data)) for algo_name in algorithms]
@@ -197,7 +204,8 @@ for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
                     color=line.get_color(),
                     alpha=0.25,
                 )
-        plt.legend(fontsize=14)
+        if include_legend:
+            plt.legend(fontsize=14)
         if args.title:
             plt.title(f"{framework} performance", size=17)
         plt.tick_params(labelsize=15)
@@ -208,7 +216,9 @@ for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
         if not args.not_same_scale:
             plt.ylim(min_stat, max_stat)
 
-        save_file = os.path.join(plot_dir, f"{framework}_iter_plot_{title}{'_w_err' if include_error else ''}.png")
+        save_file = os.path.join(
+            plot_dir, f"{framework}_iter_plot_{title}{'_w_err' if include_error else ''}{'_lg' if include_legend else ''}.png"
+        )
         plt.savefig(save_file, bbox_inches="tight", dpi=args.dpi)
 
         plt.close()
@@ -222,7 +232,7 @@ else:
 c_values = sorted(set(dic["info"]["step_size_c"] for dic in iterative_pricing_data))
 print("c values:", c_values)
 if len(c_values) > 1:
-    for get_stats, include_error, log_x in itertools.product(all_get_stats, (True, False), (True, False)):
+    for get_stats, include_error, include_legend, log_x in itertools.product(all_get_stats, (True,), (True, False), (False,)):
         alg_data = [
             list(filter(lambda d: d["info"]["algo_name"] == algo_name, iterative_pricing_data)) for algo_name in algorithms
         ]
@@ -248,7 +258,8 @@ if len(c_values) > 1:
                     color=line.get_color(),
                     alpha=0.25,
                 )
-        plt.legend(fontsize=14)
+        if include_legend:
+            plt.legend(fontsize=14)
         plt.tick_params(labelsize=15)
         if args.title:
             plt.title("iterative pricing performance across step sizes", size=17)
@@ -259,7 +270,8 @@ if len(c_values) > 1:
             plt.xscale("log")
 
         save_file = os.path.join(
-            plot_dir, f"iterative_pricing_c_{'log_' if log_x else ''}graph{'_w_err' if include_error else ''}.png"
+            plot_dir,
+            f"iterative_pricing_c_{'log_' if log_x else ''}graph{'_w_err' if include_error else ''}{'_lg' if include_legend else ''}.png",
         )
         plt.savefig(save_file, bbox_inches="tight", dpi=args.dpi)
 
