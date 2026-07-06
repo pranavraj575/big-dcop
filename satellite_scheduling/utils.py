@@ -25,6 +25,7 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
         "agents": {},
         "constraints": {},
         "distribution": {},
+        "var_to_agent": {},
     }
 
     agent_tasks = defaultdict(list)
@@ -86,23 +87,20 @@ def parse_json_to_dcop_and_overlaps(json_filepath):
 
             pydcop["variables"][var_name] = {"domain": "binary_domain"}
             pydcop["distribution"][agent_id].append(var_name)
+            pydcop["var_to_agent"][var_name] = agent_id
             req_to_vars[req_id].append(var_name)
 
-            # Save mapping so we know what this variable actually means later
             var_to_details[var_name] = {"req_id": req_id, "agent_id": agent_id}
 
     # DCOP Constraints
     # Ensure exactly 1 agent takes the request. Penalty if overlap.
     for req_id, var_list in req_to_vars.items():
         c_name = f"reward_req_{req_id}"
-        sum_expr = " + ".join(var_list)
+        # sum_expr = " + ".join(var_list)
+        # sum_expr is unused
         pydcop["constraints"][c_name] = {
-            "type": "intention",
             "variables": var_list,
-            # "function": f"1 if ({sum_expr}) == 1 else ({HARD_PENALTY} if ({sum_expr}) > 1 else 0)",
-            # TODO: try different constraints here, want f(1)=1, nf(n)<1, and (n+1)f(n+1)<nf(n)
-            #  currently, nf(n)=1/n, which seems too strong
-            "function": f"0 if {sum_expr} == 0 else 1 / ({sum_expr} ** 2)",
+            "fn": lambda vi, a: 0.0 if (n := sum(a[i] for i in vi)) == 0 else (1.0 if n == 1 else 1.0 / (n * n)),
         }
 
     return (
@@ -164,3 +162,133 @@ def run_global_dispatcher(pydcop_dict, algorithm_config, json_filepath, output_j
     except subprocess.CalledProcessError:
         print("Error running PyDCOP. Check terminal output.")
         exit(1)
+
+
+def translate_pydcop_to_cosp_config(algorithm_config: dict) -> dict:
+    """
+    Translate pydcop algorithm config to COSPSolver config format.
+
+    Pydcop format:
+    {
+        "name": "mgm",
+        "algo_params": ["param1:value1", "param2:value2"]
+    }
+
+    COSPSolver format:
+    {
+        "algorithm": "mgm",
+        "param1": "value1",
+        "param2": "value2"
+    }
+    """
+    cosp_config = {"algorithm": algorithm_config.get("name", "mgm").lower()}
+
+    if "algo_params" in algorithm_config:
+        for param in algorithm_config["algo_params"]:
+            if ":" in param:
+                key, value = param.split(":", 1)
+                try:
+                    cosp_config[key] = int(value)
+                except ValueError:
+                    try:
+                        cosp_config[key] = float(value)
+                    except ValueError:
+                        cosp_config[key] = value
+
+    return cosp_config
+
+
+def normalize_constraints(pydcop_dict: dict) -> dict:
+    """
+    Normalize constraint format to ensure they all support the "function" field.
+    Preserves existing format but converts simple lists to dict format with variables field.
+
+    Returns:
+        dict: New pydcop_dict with normalized constraints (doesn't modify original)
+    """
+    normalized = pydcop_dict.copy()
+
+    if "constraints" not in normalized:
+        return normalized
+
+    normalized_constraints = {}
+    for constraint_name, constraint_spec in pydcop_dict["constraints"].items():
+        if isinstance(constraint_spec, list):
+            normalized_constraints[constraint_name] = {"variables": constraint_spec}
+        else:
+            normalized_constraints[constraint_name] = constraint_spec.copy()
+
+    normalized["constraints"] = normalized_constraints
+    return normalized
+
+
+def convert_cosp_to_assignments(cosp_result: dict) -> dict:
+    """
+    Convert COSPSolver result format to pydcop result format.
+
+    COSPSolver format:
+    {
+        "algorithm": "MGM",
+        "solution": {"agent_id": [list_of_vars]},
+        "iterations": 5,
+        "converged": true
+    }
+
+    Pydcop format:
+    {
+        "assignment": {"var_name": 0/1, ...}
+    }
+    """
+    assignment = {}
+
+    if "solution" in cosp_result:
+        for agent_id, var_list in cosp_result["solution"].items():
+            for var_name in var_list:
+                assignment[var_name] = 1
+
+    return {
+        "assignment": assignment,
+        "run_info": {
+            "algorithm": cosp_result.get("algorithm", "unknown"),
+            "iterations": cosp_result.get("iterations", 0),
+            "converged": cosp_result.get("converged", False),
+            "total_messages": cosp_result.get("total_messages", 0),
+            "messages_per_iter": cosp_result.get("messages_per_iter", 0),
+        },
+    }
+
+
+def _to_cosp_dict(pydcop_dict: dict) -> dict:
+    """
+    Convert a legacy pydcop_dict (variables/agents as dicts) to the COSPSolver
+    format (variables/agents as lists).  var_to_agent is preserved as-is.
+    Constraints are left in whatever format they are — COSPSolver handles both.
+    """
+    variables = pydcop_dict.get("variables", {})
+    agents = pydcop_dict.get("agents", {})
+    return {
+        "name": pydcop_dict.get("name", ""),
+        "variables": list(variables.keys()) if isinstance(variables, dict) else list(variables),
+        "agents": list(agents.keys()) if isinstance(agents, dict) else list(agents),
+        "var_to_agent": pydcop_dict.get("var_to_agent", {}),
+        "constraints": pydcop_dict.get("constraints", {}),
+    }
+
+
+def run_global_dispatcher_cosp(pydcop_dict: dict, algorithm_config: dict) -> dict:
+    """
+    Run the COSPSolver in-process and return the result dict directly.
+
+    Returns
+    -------
+    dict with keys:
+        "assignment": {var_name: 0/1, ...}
+        "run_info":   {algorithm, iterations, converged}
+    """
+    from cosp_solver import build_cosp
+
+    cosp_config = translate_pydcop_to_cosp_config(algorithm_config)
+    cosp_pydcop = _to_cosp_dict(pydcop_dict)
+    solver = build_cosp(cosp_pydcop, cosp_config)
+    cosp_result = solver.solve()
+    return convert_cosp_to_assignments(cosp_result)

@@ -85,3 +85,4 @@ target/
 
 venv
 /output/
+satellite_scheduling/output

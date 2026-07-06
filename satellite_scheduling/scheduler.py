@@ -122,11 +122,11 @@ def add_constraints(constraints, counter, pydcop_dict):
         (i.e. additional_constraint_j will be unused where j is the returnec counter)
     """
     for var_list in constraints:
-        sum_expr = " + ".join(var_list)
+        n = len(var_list)
+        # Fires HARD_PENALTY only when all n variables are assigned (infeasible combo).
         pydcop_dict["constraints"][f"additional_constraint_{counter}"] = {
-            "type": "intention",
             "variables": var_list,
-            "function": f"{HARD_PENALTY} if ({sum_expr}) == {len(var_list)} else 0",
+            "fn": lambda vi, a, _n=n: HARD_PENALTY if sum(a[i] for i in vi) == _n else 0,
         }
         counter += 1
     return pydcop_dict, counter
