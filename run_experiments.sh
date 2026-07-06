@@ -9,10 +9,11 @@
 #   output/<framework>/<scenario_stem>.json
 #
 # Usage:
-#   bash run_experiments.sh [--scenarios SCENARIOS_DIR] [--max-iterations N] [--step-size-c C]
-#     [--output-dir DIR] [--trials NUM_TRIALS] [--start-trial START_TRIAL] [--slurm] [--overwrite]
+#   bash run_experiments.sh [--scenarios SCENARIOS_DIR] [--algorithms ALGORITHMS_JSON] [--max-iterations N]
+#     [--step-size-c C] [--output-dir DIR] [--trials NUM_TRIALS] [--start-trial START_TRIAL] [--slurm] [--overwrite]
 # Args:
 #   --scenarios       directory of scenario json files
+#   --algorithms      config json file of algorithms to test
 #   --max-iterations  maximum number of iterations to allow each framework
 #   --step-size-c     step size to use for iterative pricing
 #   --output-dir      directory to send output json files
@@ -26,6 +27,7 @@
 #   --step-size-c     1.8
 #   --output-dir      output
 #   --scenarios       satellite_scheduling/scenarios_larger
+#   --algorithms      satellite_scheduling/cosp_algorithm_configs.json
 #   --trials          2
 #   --start-trial     0
 
@@ -76,6 +78,8 @@ while [[ $# -gt 0 ]]; do
       STEP_SIZE_C="$2"; shift 2;;
     --output-dir)
       OUTPUT_DIR="$2"; shift 2;;
+    --algorithms)
+      ALGORITHMS_JSON="$2"; shift 2;;
     --trials)
       TRIALS="$2"; shift 2;;
     --start-trial)
