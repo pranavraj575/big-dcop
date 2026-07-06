@@ -53,7 +53,7 @@ SCENARIOS_DIR="$PROJECT_DIR/satellite_scheduling/scenarios_larger"
 # Override with --python /path/to/python if needed.
 _find_python() {
   for candidate in \
-      "$(dirname "$0")/venv/bin/python3" \
+      "${PROJECT_DIR}/venv/bin/python3" \
       "${VIRTUAL_ENV:-__none__}/bin/python3" \
       python3 python; do
     [[ "$candidate" == __none__* ]] && continue

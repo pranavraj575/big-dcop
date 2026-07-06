@@ -5,7 +5,7 @@ from shortuuid import uuid
 from constraint_generation import solve_constraint_generation
 from utils import parse_json_to_dcop_and_overlaps
 from iterative_pricing import solve_iterative_pricing
-from evaluation.algo_configs import get_display_name
+from graph_coloring.algo_configs import get_display_name
 import argparse
 
 

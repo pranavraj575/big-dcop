@@ -30,7 +30,7 @@ def run_pydcop(problem_file, algo_config, args):
     # append the specific args from the dict
     cmd.extend(extra_alg_params)
 
-    if args.collect_on is not None:
+    if args.collect_on != "NONE":
         cmd.extend(["--collect_on", args.collect_on])
         if args.period is not None:
             cmd.extend(["--period", str(args.period)])
@@ -74,46 +74,52 @@ def main():
     parser.add_argument(
         "--algorithms",
         type=str,
-        default=os.path.join(DIR, "evaluation", "configs", "rm_configs.json"),
+        default=os.path.join(DIR, "graph_coloring", "configs", "algorithm_configs.json"),
         help="json file with algorithm configs to use",
     )
     parser.add_argument(
         "--input_dir",
         type=str,
-        default=os.path.join(DIR, "output", "graph_coloring_scalefree"),
+        default=os.path.join(DIR, "output", "graph_coloring_instances_hard"),
         help="Directory containing .yaml problem files",
     )
     parser.add_argument(
         "--output_csv",
         type=str,
-        default=os.path.join(DIR, "output", "results_rm_scalefree.csv"),
+        default=os.path.join(DIR, "output", "results.csv"),
         help="Path to save the results DataFrame",
     )
     parser.add_argument(
         "--temp_csv",
         type=str,
-        default=os.path.join(DIR, "output", "temp_rm_scalefree.csv"),
+        default=os.path.join(DIR, "output", "temp.csv"),
         help="Path to save mid-run results into (cleared after running each experiemnt)",
     )
     parser.add_argument(
         "--trials",
         type=int,
-        default=10,
+        default=1,
         help="Number of trials per algorithm per problem",
     )
     parser.add_argument("--timeout", type=float, default=30.0, help="Timeout in seconds per run")
     parser.add_argument(
         "-c",
         "--collect_on",
-        choices=["value_change", "cycle_change", "period"],
+        choices=["value_change", "cycle_change", "period", "NONE"],
         default="value_change",
-        help="collect mid-run data upon this event",
+        help="collect mid-run data upon this event (use NONE for collecting no mid-run data)",
     )
     parser.add_argument(
         "--period",
         type=float,
         default=None,
         help="Period for collecting metrics. only available when using --collect_on period. Defaults to 1 second if not specified",
+    )
+
+    parser.add_argument(
+        "--append_results",
+        action="store_true",
+        help="append results to end of csv file",
     )
     args = parser.parse_args()
 
@@ -132,9 +138,14 @@ def main():
     if not problem_files:
         print(f"No .yaml files found in {args.input_dir}")
         return
+    if os.path.abspath(args.output_csv) == os.path.abspath(args.temp_csv):
+        print(f"both output and temp csv cannot be {os.path.abspath(args.temp_csv)}")
+        return
 
     # loop over problems
     added_header = False
+    if args.append_results:
+        added_header = True
     for p_idx, problem_path in enumerate(problem_files):
         problem_name = os.path.basename(problem_path)
         print(f"Processing [{p_idx + 1}/{len(problem_files)}] {problem_name}...")

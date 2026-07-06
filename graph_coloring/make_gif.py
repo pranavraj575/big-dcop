@@ -4,7 +4,7 @@ import subprocess
 from PIL import Image
 import yaml
 import pandas as pd
-from evaluation.algo_configs import get_display_name
+from graph_coloring.algo_configs import get_display_name
 import networkx as nx
 import matplotlib.pyplot as plt
 import argparse
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     p.add_argument(
         "--algorithms",
         type=str,
-        default=os.path.join(DIR, "evaluation", "configs", "algorithm_configs.json"),
+        default=os.path.join(DIR, "graph_coloring", "configs", "algorithm_configs.json"),
         help="json file with algorithm configs",
     )
     p.add_argument(

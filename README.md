@@ -34,20 +34,20 @@ sudo apt install dvipng
 ### Graph coloring
 To generate graphs, run experiments, then plot results:
 ```shell
-python evaluation/graph_coloring_generator.py
-python evaluation/graph_coloring_runner.py 
-python evaluation/plot_results.py 
+python graph_coloring/graph_coloring_generator.py
+python graph_coloring/graph_coloring_runner.py 
+python graph_coloring/plot_results.py 
 ```
 (run each script with `--help` to see options)
 
 To create a visualization:
 * Make a graph coloring instance 
   ```shell
-  python evaluation/graph_coloring_generator.py --output_dir output/gif_graph_instances/ --color_count 3 --graph_n 15 --num_problems 1 
+  python graph_coloring/graph_coloring_generator.py --output_dir output/gif_graph_instances/ --color_count 3 --graph_n 15 --num_problems 1 
   ```
 * Run `make_gif.py` on the generated graph coloring instance:
   ```shell
-  python evaluation/make_gif.py output/gif_graph_instances/gc_n15_k3_random_1.yaml --algorithms evaluation/configs/algorithm_configs.json --display_time --dpi 300 --seed 13 --uniform_start
+  python graph_coloring/make_gif.py output/gif_graph_instances/gc_n15_k3_random_1.yaml --algorithms graph_coloring/configs/algorithm_configs.json --display_time --dpi 300 --seed 13 --uniform_start
   ```
 [//]: <> (python evaluation/graph_coloring_generator.py --output_dir output/gif_graph_instances/ --color_count 3 --graph_n 15 --num_problems 1)
 [//]: <> (python evaluation/make_gif.py output/gif_graph_instances/gc_n15_k3_random_1.yaml --algorithms evaluation/configs/algorithm_configs.json --gif_dir output/graph_color_gifs_readme --display_time --dpi 300 --seed 13 --uniform_start)

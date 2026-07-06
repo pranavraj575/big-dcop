@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from matplotlib import rc
-from evaluation.algo_configs import get_display_name
+from graph_coloring.algo_configs import get_display_name
 
 
 def make_bar_plot(
