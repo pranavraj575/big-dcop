@@ -67,14 +67,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num_problems",
         type=int,
-        default=1,
+        default=5,
         help="Number of graph coloring problems to sample for each case",
     )
     parser.add_argument(
         "--graph_n",
         type=int,
         nargs="+",
-        default=list(range(10, 51, 10)),
+        default=[10,20,30,50,100],
         help="number of nodes in the graph to use (can list multiple)",
     )
     parser.add_argument(
@@ -88,7 +88,7 @@ if __name__ == "__main__":
         "--graph_type",
         type=str,
         nargs="+",
-        default=["random"],
+        default=["random", "scalefree"],
         choices=["random", "scalefree", "grid"],
         help="graph type to generate (can list multiple)",
     )
