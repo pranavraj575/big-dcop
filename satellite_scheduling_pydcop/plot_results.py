@@ -97,8 +97,8 @@ if __name__ == "__main__":
     output_dir = os.path.join(DIR, "output", "sat_sched")
     plt_dir = os.path.join(DIR, "output", "sat_sched_plots")
     algorithm_dirs = [
-        os.path.join(DIR, "satellite_scheduling", "baseline_algorithm_configs.json"),
-        os.path.join(DIR, "satellite_scheduling", "rm_algorithm_configs.json"),
+        os.path.join(DIR, "satellite_scheduling_pydcop", "baseline_algorithm_configs.json"),
+        os.path.join(DIR, "satellite_scheduling_pydcop", "rm_algorithm_configs.json"),
     ]
     alg_to_plot_params = dict()
     for fn in algorithm_dirs:
