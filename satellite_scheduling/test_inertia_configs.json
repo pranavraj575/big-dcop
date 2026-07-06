@@ -1,0 +1,86 @@
+[
+  {
+    "name": "regret_matching",
+    "display_name": "RM",
+    "algo_params": [
+      "max_iterations:45",
+      "update_prob:1.0"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM (inertia .1)",
+    "algo_params": [
+      "max_iterations:45",
+      "update_prob:.9"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM (inertia .2)",
+    "algo_params": [
+      "max_iterations:45",
+      "update_prob:.8"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM (inertia .4)",
+    "algo_params": [
+      "max_iterations:45",
+      "update_prob:.6"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM (inertia .8)",
+    "algo_params": [
+      "max_iterations:45",
+      "update_prob:.2"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Predictive RM",
+    "algo_params": [
+      "max_iterations:45",
+      "predictive:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Predictive RM (inertia .1)",
+    "algo_params": [
+      "max_iterations:45",
+      "predictive:1",
+      "update_prob:.9"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Predictive RM (inertia .2)",
+    "algo_params": [
+      "max_iterations:45",
+      "predictive:1",
+      "update_prob:.8"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Predictive RM (inertia .4)",
+    "algo_params": [
+      "max_iterations:45",
+      "predictive:1",
+      "update_prob:.6"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Predictive RM (inertia .8)",
+    "algo_params": [
+      "max_iterations:45",
+      "predictive:1",
+      "update_prob:.2"
+    ]
+  }
+]
