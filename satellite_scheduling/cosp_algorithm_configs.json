@@ -33,10 +33,27 @@
   },
   {
     "name": "regret_matching",
+    "display_name": "RM(context-based)",
+    "algo_params": [
+      "max_iterations:45",
+      "context_based:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
     "display_name": "RM+",
     "algo_params": [
       "max_iterations:45",
       "rm_plus:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM+(context-based)",
+    "algo_params": [
+      "max_iterations:45",
+      "rm_plus:1",
+      "context_based:1"
     ]
   },
   {
@@ -49,11 +66,30 @@
   },
   {
     "name": "regret_matching",
+    "display_name": "Predictive RM(context based)",
+    "algo_params": [
+      "max_iterations:45",
+      "predictive:1",
+      "context_based:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
     "display_name": "IR-PRM",
     "algo_params": [
       "max_iterations:45",
       "ir_prm:1",
       "rm_plus:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "IR-PRM(context-based)",
+    "algo_params": [
+      "max_iterations:45",
+      "ir_prm:1",
+      "rm_plus:1",
+      "context_based:1"
     ]
   },
   {
@@ -68,25 +104,13 @@
   },
   {
     "name": "regret_matching",
-    "display_name": "DRM+",
+    "display_name": "DRM(context based)",
     "algo_params": [
       "max_iterations:45",
       "discounted_rm:1",
       "alpha:1.5",
       "beta:0",
-      "rm_plus:1"
-    ]
-  },
-  {
-    "name": "regret_matching",
-    "display_name": "Damped DRM+",
-    "algo_params": [
-      "max_iterations:45",
-      "discounted_rm:1",
-      "alpha:1.5",
-      "beta:0",
-      "rm_plus:1",
-      "damping:0.3"
+      "context_based:1"
     ]
   }
 ]
