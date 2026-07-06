@@ -5,13 +5,15 @@ from shortuuid import uuid
 from constraint_generation import solve_constraint_generation
 from utils import parse_json_to_dcop_and_overlaps
 from iterative_pricing import solve_iterative_pricing
-from graph_coloring.algo_configs import get_display_name
 import argparse
 
 
 """
 ITAI: something really weird happens where when running this script pydcop runs an entire dcop for a min. Not sure what this is. It happens before any imports or anything...
 """
+
+def get_display_name(algo_config):
+    return algo_config.get("display_name", algo_config["name"])
 
 
 def main(
