@@ -127,6 +127,8 @@ for title, get_stats in zip(
     all_get_stats,
 ):
     min_stat = min(map(get_stats, data))
+    if title == "time":
+        min_stat = 0
     max_stat = max(map(get_stats, data))
     w, x = 0.4, np.arange(len(algorithms))
     x_vals = x - w / 2
