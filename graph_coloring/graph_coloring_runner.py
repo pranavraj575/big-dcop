@@ -1,9 +1,9 @@
 import subprocess
 import os
-import glob
 import argparse
 import pandas as pd
 import json
+from shortuuid import uuid
 
 from eval_helpers import reformat_file_for_maxsum, extract_json_from_output
 from algo_configs import get_algo_info, get_display_name
@@ -35,6 +35,10 @@ def run_pydcop(problem_file, algo_config, args):
         if args.period is not None:
             cmd.extend(["--period", str(args.period)])
         cmd.extend(["--run_metrics", args.temp_csv])
+        if os.path.exists(args.temp_csv):
+            print(
+                f"WARNING: file {args.temp_csv} exists and will be overwriten. This will be bad if two differenet experiemnts use the same temp file"
+            )
 
     try:
         result = subprocess.run(
@@ -77,10 +81,12 @@ def main():
         default=os.path.join(DIR, "graph_coloring", "configs", "algorithm_configs.json"),
         help="json file with algorithm configs to use",
     )
+    default_instance_dir = os.path.join(DIR, "output", "graph_coloring_instances_hard")
     parser.add_argument(
-        "--input_dir",
+        "--instances",
         type=str,
-        default=os.path.join(DIR, "output", "graph_coloring_instances_hard"),
+        nargs="+",
+        default=[os.path.join(default_instance_dir, fn) for fn in os.listdir(default_instance_dir) if fn.endswith(".yaml")],
         help="Directory containing .yaml problem files",
     )
     parser.add_argument(
@@ -92,7 +98,7 @@ def main():
     parser.add_argument(
         "--temp_csv",
         type=str,
-        default=os.path.join(DIR, "output", "temp.csv"),
+        default=os.path.join(DIR, "output", f"temp_{uuid()}.csv"),
         help="Path to save mid-run results into (cleared after running each experiemnt)",
     )
     parser.add_argument(
@@ -129,14 +135,13 @@ def main():
     with open(args.algorithms) as f:
         algorithms = json.load(f)
         f.close()
+    for fn in args.instances:
+        if not os.path.exists(fn):
+            print(f"Error: Directory '{fn}' does not exist.")
+            return
 
-    if not os.path.exists(args.input_dir):
-        print(f"Error: Directory '{args.input_dir}' does not exist.")
-        return
-
-    problem_files = sorted(glob.glob(os.path.join(args.input_dir, "*.yaml")))
-    if not problem_files:
-        print(f"No .yaml files found in {args.input_dir}")
+    if not args.instances:
+        print(f"No .yaml files found in {default_instance_dir}, must specify input instances with --instances argument")
         return
     if os.path.abspath(args.output_csv) == os.path.abspath(args.temp_csv):
         print(f"both output and temp csv cannot be {os.path.abspath(args.temp_csv)}")
@@ -146,9 +151,9 @@ def main():
     added_header = False
     if args.append_results:
         added_header = True
-    for p_idx, problem_path in enumerate(problem_files):
+    for p_idx, problem_path in enumerate(args.instances):
         problem_name = os.path.basename(problem_path)
-        print(f"Processing [{p_idx + 1}/{len(problem_files)}] {problem_name}...")
+        print(f"Processing [{p_idx + 1}/{len(args.instances)}] {problem_name}...")
 
         # apply fix for maxsum if needed
         reformat_file_for_maxsum(problem_path)
@@ -218,10 +223,9 @@ def main():
                 )
                 added_header = True
                 del df
-
+            if os.path.exists(args.temp_csv):
+                os.remove(args.temp_csv)
     print(f"\nResults saved to {args.output_csv}")
-    if os.path.exists(args.temp_csv):
-        os.remove(args.temp_csv)
 
 
 if __name__ == "__main__":
