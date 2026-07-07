@@ -155,9 +155,10 @@ if __name__ == "__main__":
     p.add_argument(
         "--path",
         required=False,
-        default=os.path.join(DIR, "output", "results.csv"),
+        default=[os.path.join(DIR, "output", "results.csv")],
         type=str,
-        help="Directory of csv result file.",
+        nargs="+",
+        help="csv result file(s).",
     )
     p.add_argument(
         "--output",
@@ -206,7 +207,8 @@ if __name__ == "__main__":
     plt_dir = args.output
     os.makedirs(plt_dir, exist_ok=True)
 
-    df = pd.read_csv(args.path)
+    df = pd.concat([pd.read_csv(fn) for fn in args.path], ignore_index=True, sort=False)
+
     print(f"loaded df, length {len(df)}")
     keys = []
     for key in args.y_keys:
