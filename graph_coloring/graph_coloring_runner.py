@@ -223,8 +223,8 @@ def main():
                 )
                 added_header = True
                 del df
-            if os.path.exists(args.temp_csv):
-                os.remove(args.temp_csv)
+                if os.path.exists(args.temp_csv):
+                    os.remove(args.temp_csv)
     print(f"\nResults saved to {args.output_csv}")
 
 
