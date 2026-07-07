@@ -74,7 +74,7 @@ if __name__ == "__main__":
         "--graph_n",
         type=int,
         nargs="+",
-        default=[10,20,30,50,100],
+        default=[10, 20, 30, 50, 100],
         help="number of nodes in the graph to use (can list multiple)",
     )
     parser.add_argument(
