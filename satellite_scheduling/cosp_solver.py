@@ -957,7 +957,7 @@ class RegretMatchingSolver(COSPSolver):
         }
 
 
-class FTRLSolver(COSPSolver):
+class FTRLSolver(RegretMatchingSolver):
     """
     FTRL
         regularization  (str, default mwu)      — regurlarization type to use
@@ -1018,23 +1018,6 @@ class FTRLSolver(COSPSolver):
             self.cum_u0[vi] = u0
             self.cum_u0[vi] = u1
 
-    def _context(self, vi: int):
-        nbr_vars: Set[int] = set()
-        for c_idx in self.var_to_constraints[vi]:
-            nbr_vars.update(self.constraints[c_idx][0])
-        nbr_vars.discard(vi)
-        return tuple(self.assignments[vj] for vj in sorted(nbr_vars))
-
-    def _compute_utils(self, vi: int, snapshot: List[int]):
-        """Return (u0, u1) using snapshot for all other variables."""
-        orig = snapshot[vi]
-        snapshot[vi] = 1
-        u1 = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
-        snapshot[vi] = 0
-        u0 = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
-        snapshot[vi] = orig
-        return u0, u1
-
     def _strategy_from_cum_utilties(self, cu0: float, cu1: float) -> float:
         if self.regularization == "mwu":
             dist = np.exp(self.eta_reg * (np.array([cu0, cu1]) - max(cu0, cu1)))
@@ -1094,34 +1077,6 @@ class FTRLSolver(COSPSolver):
             new_assignments[vi] = self._sample_assignment(vi, new_p1)
 
         self.assignments = new_assignments
-
-    def solve(self) -> Dict:
-        n_iters = self.stop_cycle if self.stop_cycle > 0 else self.max_iterations
-        for iteration in range(n_iters):
-            self._update(t=iteration + 1)
-
-        return self._result(n_iters, converged=False)
-
-    def _extract_solution(self) -> Dict:
-        # Start with all zeros.
-        final_assignments = [0] * self.n_vars
-
-        # For each constraint, award 1 to the variable with the highest p1.
-        for var_indices, _ in self.constraints:
-            if len(var_indices) == 1:
-                # Unary constraint (penalty): preserve the stochastic assignment.
-                vi = var_indices[0]
-                final_assignments[vi] = self.assignments[vi]
-            else:
-                # Reward constraint: highest-p1 variable wins.
-                winner = max(var_indices, key=lambda vi: self.strategy_p1[vi])
-                if self.strategy_p1[winner] > 0:
-                    final_assignments[winner] = 1
-
-        return {
-            agent_id: [self.variables[vi] for vi in self.agent_var_indices[ai] if final_assignments[vi] == 1]
-            for ai, agent_id in enumerate(self.agents)
-        }
 
     def _result(self, iterations: int, converged: bool) -> Dict:
         return {

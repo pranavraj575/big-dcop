@@ -104,12 +104,27 @@
   },
   {
     "name": "regret_matching",
-    "display_name": "DRM(context based)",
+    "display_name": "DRM(context-based)",
     "algo_params": [
       "max_iterations:45",
       "discounted_rm:1",
       "alpha:1.5",
       "beta:0",
+      "context_based:1"
+    ]
+  },
+  {
+    "name": "ftrl",
+    "display_name": "FTRL",
+    "algo_params": [
+      "max_iterations:45"
+    ]
+  },
+  {
+    "name": "ftrl",
+    "display_name": "FTRL(context-based)",
+    "algo_params": [
+      "max_iterations:45",
       "context_based:1"
     ]
   }
