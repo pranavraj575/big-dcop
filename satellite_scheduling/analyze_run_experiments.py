@@ -38,6 +38,13 @@ p.add_argument(
     help="dir to send plots into",
 )
 p.add_argument(
+    "--algorithms",
+    default=None,
+    type=str,
+    required=False,
+    help="json of algorithms to actually plot",
+)
+p.add_argument(
     "--not-same-scale",
     action="store_true",
     required=False,
@@ -69,6 +76,10 @@ possible_frameworks = ("iterative_pricing", "constraint_generation")
 os.makedirs(plot_dir, exist_ok=True)
 data = list()
 algorithms = None
+if args.algorithms is not None:
+    with open(args.algorithms) as f:
+        algorithms = [get_display_name(ac) for ac in json.load(f)]
+
 for output_dir, framework in itertools.product(args.output_dir, possible_frameworks):
     pth = os.path.join(output_dir, framework)
     if not os.path.exists(pth):
@@ -77,9 +88,10 @@ for output_dir, framework in itertools.product(args.output_dir, possible_framewo
         with open(os.path.join(pth, fn)) as f:
             t = json.load(f)
         temp = [get_display_name(cfg) for cfg in t["algorithm_configs"]]
-        if algorithms is not None:
-            assert algorithms == temp
-        algorithms = temp
+        if algorithms is None:
+            algorithms = temp
+        else:
+            assert set(algorithms).issubset(temp)
 
         for algo_name, run in t["output"].items():
             trial_info = t["run_info"].copy()
@@ -156,7 +168,7 @@ for title, get_stats in zip(
     if title in ["log_time"]:
         plt.yscale("log")
     plt.grid(True, axis="y")
-    save_file = os.path.join(plot_dir, f"{title}_ber.png")
+    save_file = os.path.join(plot_dir, f"{title}_bar.png")
     plt.savefig(save_file, bbox_inches="tight", dpi=args.dpi)
 
     plt.close()

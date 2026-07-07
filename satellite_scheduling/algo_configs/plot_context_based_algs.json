@@ -1,0 +1,82 @@
+[
+  {
+    "name": "mgm",
+    "display_name": "MGM2",
+    "algo_params": [
+      "max_iterations:100",
+      "threshold:0.5"
+    ]
+  },
+  {
+    "name": "dsa",
+    "display_name": "DSA-C",
+    "algo_params": [
+      "max_iterations:100",
+      "probability:0.7"
+    ]
+  },
+  {
+    "name": "maxsum",
+    "display_name": "MaxSum-ADVP",
+    "algo_params": [
+      "max_iterations:100",
+      "damping:0.5",
+      "stability:0.0001"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM(context-based)",
+    "algo_params": [
+      "max_iterations:45",
+      "context_based:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "RM+(context-based)",
+    "algo_params": [
+      "max_iterations:45",
+      "rm_plus:1",
+      "context_based:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Predictive RM(context based)",
+    "algo_params": [
+      "max_iterations:45",
+      "predictive:1",
+      "context_based:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "IR-PRM(context-based)",
+    "algo_params": [
+      "max_iterations:45",
+      "ir_prm:1",
+      "rm_plus:1",
+      "context_based:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "DRM(context-based)",
+    "algo_params": [
+      "max_iterations:45",
+      "discounted_rm:1",
+      "alpha:1.5",
+      "beta:0",
+      "context_based:1"
+    ]
+  },
+  {
+    "name": "ftrl",
+    "display_name": "FTRL(context-based)",
+    "algo_params": [
+      "max_iterations:45",
+      "context_based:1"
+    ]
+  }
+]
