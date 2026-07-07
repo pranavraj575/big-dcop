@@ -673,7 +673,7 @@ class RegretMatchingSolver(COSPSolver):
         damping            (float, default 0.0)   — blend new strategy with previous
         update_prob        (float, default 1.0)   — probability of actually updating value
         deterministic_start(bool, default False)  — start at best deterministic value instead of random
-        stop_cycle         (int,   default 0)     — hard iteration cap (0 = use max_iterations)
+        stop_cycle         (int,   default 20)     — hard iteration cap (0 = use max_iterations)
         max_iterations     (int,   default 100)   — maximum iterations
         context_based      (bool, default False)  — maintain separate regret table per
                                                     neighbor-value context (memory-intensive)
@@ -706,12 +706,13 @@ class RegretMatchingSolver(COSPSolver):
 
         # Cumulative regrets stored as (r0, r1) plain Python float pairs.
         # context_based: dict[context_tuple] -> (r0, r1)
-        self.cum_r0: List = [dict() if self.context_based else 0.0] * self.n_vars
-        self.cum_r1: List = [dict() if self.context_based else 0.0] * self.n_vars
-        # Avoid aliasing from list multiplication for the dict case
         if self.context_based:
-            self.cum_r0 = [dict() for _ in range(self.n_vars)]
-            self.cum_r1 = [dict() for _ in range(self.n_vars)]
+            # Avoid aliasing from list multiplication for the dict case
+            self.cum_r0: List = [dict() for _ in range(self.n_vars)]
+            self.cum_r1: List = [dict() for _ in range(self.n_vars)]
+        else:
+            self.cum_r0: List = [0.0] * self.n_vars
+            self.cum_r1: List = [0.0] * self.n_vars
 
         # IR-PRM: predicted utilities (u0_pred, u1_pred) per variable
         self.ir_prm_pred0: Optional[List[float]] = [0.0] * self.n_vars if self.use_ir_prm else None
