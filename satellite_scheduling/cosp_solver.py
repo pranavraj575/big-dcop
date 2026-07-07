@@ -5,6 +5,7 @@ import random
 import time
 import json
 import logging
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,8 @@ def build_cosp(pydcop_dict: dict, algorithm_config: dict) -> "COSPSolver":
         return MaxSumSolver(algorithm_config, pydcop_dict)
     if name in ("regret_matching", "rm"):
         return RegretMatchingSolver(algorithm_config, pydcop_dict)
+    if name == "ftrl":
+        return FTRLSolver(algorithm_config, pydcop_dict)
     raise ValueError(f"Unknown algorithm: {name}")
 
 
@@ -946,6 +949,183 @@ class RegretMatchingSolver(COSPSolver):
     def _result(self, iterations: int, converged: bool) -> Dict:
         return {
             "algorithm": "RegretMatching",
+            "iterations": iterations,
+            "solution": self._extract_solution(),
+            "converged": converged,
+            "messages_per_iter": self.messages_per_iter,
+            "total_messages": self.total_messages,
+        }
+
+
+class FTRLSolver(COSPSolver):
+    """
+    FTRL
+        regularization  (str, default mwu)      — regurlarization type to use
+        eta_reg         (float, default 1.0)    — regularization parameter
+        predictive      (bool, default False)   — whether to use predictive update
+        context_based   (bool, default False)   — maintain separate regret table per
+                                                    neighbor-value context (memory-intensive)
+        stop_cycle      (int,   default 20)      — hard iteration cap (0 = use max_iterations)
+        update_prob     (float, default 1.0)    — probability of actually updating value
+        max_iterations  (int,   default 100)    — maximum iterations
+    """
+
+    def __init__(self, algorithm_config: dict, pydcop_dict: dict):
+        super().__init__(algorithm_config, pydcop_dict)
+
+        self.regularization = algorithm_config.get("regularization", "mwu")
+        self.eta_reg = algorithm_config.get("eta_reg", 1.0)
+        self.use_predictive = bool(algorithm_config.get("predictive", False))
+        self.context_based = bool(algorithm_config.get("context_based", False))
+        self.stop_cycle = algorithm_config.get("stop_cycle", 20)
+        self.update_prob = float(algorithm_config.get("update_prob", 1.0))
+        # self.constraints = comp_def.node.constraints
+
+        self.max_iterations = algorithm_config.get("max_iterations", 100)
+
+        # strategy_p1[vi] = P(vi=1);  P(vi=0) = 1 - p1.
+        self.strategy_p1: List[float] = [0.5] * self.n_vars
+
+        # Cumulative utilities stored as (u0, u1) plain Python float pairs.
+        # context_based: dict[context_tuple] -> (u0, u1)
+        self.cum_u0: List = [dict() if self.context_based else 0.0] * self.n_vars
+        self.cum_u1: List = [dict() if self.context_based else 0.0] * self.n_vars
+        # Avoid aliasing from list multiplication for the dict case
+        if self.context_based:
+            self.cum_u0 = [dict() for _ in range(self.n_vars)]
+            self.cum_u1 = [dict() for _ in range(self.n_vars)]
+
+        for vi in range(self.n_vars):
+            self.assignments[vi] = random.randint(0, 1)
+
+    # ------------------------------------------------------------------
+    # Plain-Python helpers (no numpy)
+    # ------------------------------------------------------------------
+
+    def _get_cum_utilities(self, vi: int):
+        """Return (r0, r1) for variable vi."""
+        if self.context_based:
+            ctx = self._context(vi)
+            return self.cum_u0[vi].get(ctx, 0.0), self.cum_u0[vi].get(ctx, 0.0)
+        return self.cum_u0[vi], self.cum_u0[vi]
+
+    def _set_cum_utilities(self, vi: int, u0: float, u1: float):
+        if self.context_based:
+            ctx = self._context(vi)
+            self.cum_u0[vi][ctx] = u0
+            self.cum_u0[vi][ctx] = u1
+        else:
+            self.cum_u0[vi] = u0
+            self.cum_u0[vi] = u1
+
+    def _context(self, vi: int):
+        nbr_vars: Set[int] = set()
+        for c_idx in self.var_to_constraints[vi]:
+            nbr_vars.update(self.constraints[c_idx][0])
+        nbr_vars.discard(vi)
+        return tuple(self.assignments[vj] for vj in sorted(nbr_vars))
+
+    def _compute_utils(self, vi: int, snapshot: List[int]):
+        """Return (u0, u1) using snapshot for all other variables."""
+        orig = snapshot[vi]
+        snapshot[vi] = 1
+        u1 = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
+        snapshot[vi] = 0
+        u0 = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
+        snapshot[vi] = orig
+        return u0, u1
+
+    def _strategy_from_cum_utilties(self, cu0: float, cu1: float) -> float:
+        if self.regularization == "mwu":
+            dist = np.exp(self.eta_reg * (np.array([cu0, cu1]) - max(cu0, cu1)))
+            dist = dist / np.sum(dist)
+        elif self.regularization == "none":
+            support = np.equal(np.array([cu0, cu1]), np.max(max(cu0, cu1)))
+            dist = support / np.sum(support)
+        else:
+            raise ValueError(self.regularization)
+        return dist[1]
+
+    def _sample_assignment(self, vi: int, p1: float) -> int:
+        if random.random() >= self.update_prob:
+            return self.assignments[vi]
+        return 1 if random.random() < p1 else 0
+
+    # ------------------------------------------------------------------
+    # Update rules — plain Python floats, no numpy allocations
+    # ------------------------------------------------------------------
+
+    def ftrl_update(self, vi: int, u0: float, u1: float, t: int) -> float:
+        # p1 = self.strategy_p1[vi]
+        # exp = u0 * (1.0 - p1) + u1 * p1  # expected utility
+
+        cu0, cu1 = self._get_cum_utilities(vi)
+
+        cu0 += u0
+        cu1 += u1
+
+        self._set_cum_utilities(vi, cu0, cu1)
+
+        b0, b1 = cu0, cu1
+        if self.use_predictive:
+            b0 += u0
+            b1 += u1
+        new_p1 = self._strategy_from_cum_utilties(b0, b1)
+
+        # if self.damping > 0:
+        #    new_p1 = self.damping * p1 + (1.0 - self.damping) * new_p1
+        return new_p1
+
+    # ------------------------------------------------------------------
+    # Main iteration
+    # ------------------------------------------------------------------
+
+    def _update(self, t: int):
+        self.total_messages += self.messages_per_iter
+        snapshot = list(self.assignments)
+        new_assignments = list(self.assignments)
+
+        for vi in range(self.n_vars):
+            u0, u1 = self._compute_utils(vi, snapshot)
+
+            new_p1 = self.ftrl_update(vi, u0, u1, t)
+
+            self.strategy_p1[vi] = new_p1
+            new_assignments[vi] = self._sample_assignment(vi, new_p1)
+
+        self.assignments = new_assignments
+
+    def solve(self) -> Dict:
+        n_iters = self.stop_cycle if self.stop_cycle > 0 else self.max_iterations
+        for iteration in range(n_iters):
+            self._update(t=iteration + 1)
+
+        return self._result(n_iters, converged=False)
+
+    def _extract_solution(self) -> Dict:
+        # Start with all zeros.
+        final_assignments = [0] * self.n_vars
+
+        # For each constraint, award 1 to the variable with the highest p1.
+        for var_indices, _ in self.constraints:
+            if len(var_indices) == 1:
+                # Unary constraint (penalty): preserve the stochastic assignment.
+                vi = var_indices[0]
+                final_assignments[vi] = self.assignments[vi]
+            else:
+                # Reward constraint: highest-p1 variable wins.
+                winner = max(var_indices, key=lambda vi: self.strategy_p1[vi])
+                if self.strategy_p1[winner] > 0:
+                    final_assignments[winner] = 1
+
+        return {
+            agent_id: [self.variables[vi] for vi in self.agent_var_indices[ai] if final_assignments[vi] == 1]
+            for ai, agent_id in enumerate(self.agents)
+        }
+
+    def _result(self, iterations: int, converged: bool) -> Dict:
+        return {
+            "algorithm": "FTRL",
             "iterations": iterations,
             "solution": self._extract_solution(),
             "converged": converged,

@@ -12,6 +12,7 @@ import argparse
 ITAI: something really weird happens where when running this script pydcop runs an entire dcop for a min. Not sure what this is. It happens before any imports or anything...
 """
 
+
 def get_display_name(algo_config):
     return algo_config.get("display_name", algo_config["name"])
 
