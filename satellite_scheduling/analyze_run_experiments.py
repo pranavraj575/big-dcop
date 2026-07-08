@@ -153,6 +153,8 @@ for title, get_stats in zip(
             capsize=5,
         )
         x_vals = x_vals + w
+        if title=='time':
+            print(f'{framework}\tavg time to run all algorithms once: {stats.mean(axis=1).sum()}')
 
     plt.xticks(rotation=45, ha="right")
     if args.title:
