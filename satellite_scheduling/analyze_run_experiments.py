@@ -157,9 +157,15 @@ for title, get_stats in zip(
             print(f"{framework}\tavg time to run all algorithms once: {stats.mean(axis=1).sum()}")
             temp_scenarios = sorted(set(dt["info"]["scenario"] for dt in frm_data))
             for scen in temp_scenarios:
-                print(
-                    f"\t scenario {scen}: {np.array([get_stats(ag) for ag in frm_data if ag['info']['scenario'] == scen]).mean()}"
+                temp_alg_dt = np.array(
+                    [
+                        list(filter(lambda d: d["info"]["algo_name"] == algo_name and d["info"]["scenario"] == scen, frm_data))
+                        for algo_name in algorithms
+                    ]
                 )
+                temp_stats = np.array([list(map(get_stats, ag)) for ag in temp_alg_dt])
+
+                print(f"\t scenario {scen}: {temp_stats.mean(axis=1).sum()}")
 
             # temp = np.array([list(map(get_stats, ag)) for ag in frm_data])
 
