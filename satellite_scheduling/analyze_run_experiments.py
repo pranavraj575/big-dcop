@@ -155,6 +155,13 @@ for title, get_stats in zip(
         x_vals = x_vals + w
         if title == "time":
             print(f"{framework}\tavg time to run all algorithms once: {stats.mean(axis=1).sum()}")
+            temp_scenarios = sorted(set(dt["info"]["scenario"] for dt in frm_data))
+            for scen in temp_scenarios:
+                print(
+                    f"\t scenario {scen}: {np.array([get_stats(ag) for ag in frm_data if ag['info']['scenario'] == scen]).mean()}"
+                )
+
+            # temp = np.array([list(map(get_stats, ag)) for ag in frm_data])
 
     plt.xticks(rotation=45, ha="right")
     if args.title:
