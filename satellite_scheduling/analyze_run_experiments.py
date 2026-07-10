@@ -165,8 +165,8 @@ for title, get_stats in zip(
                     ]
                 )
                 temp_stats = np.array([list(map(get_stats, ag)) for ag in temp_alg_dt])
-                temp_scenarios[scen] = temp_stats.mean(axis=1).sum()
-            for scen in sorted(temp_scenarios.keys(), key=lambda sc: temp_scenarios[sc]):
+                temp_scenarios[scen] = f"\t{temp_stats.mean(axis=1).sum()} s,\t{len(temp_stats[0])} samples"
+            for scen in sorted(temp_scenarios.keys(), key=lambda sc: float(temp_scenarios[sc][:temp_scenarios[sc].index('s')])):
                 print(f"\t scenario {scen}: {temp_scenarios[scen]}")
 
             # temp = np.array([list(map(get_stats, ag)) for ag in frm_data])
