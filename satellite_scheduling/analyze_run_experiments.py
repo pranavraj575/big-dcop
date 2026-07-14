@@ -69,6 +69,12 @@ p.add_argument(
     help="specify if performance results should only reflect the first n iterations",
 )
 p.add_argument(
+    "--show-numbers",
+    action="store_true",
+    required=False,
+    help="specify whether to show numbers",
+)
+p.add_argument(
     "--dpi",
     default=300,
     type=int,
@@ -241,8 +247,12 @@ for title, get_stats in zip(
             x_vals, stats.mean(axis=1) - min_stat, bottom=min_stat, width=w, label=framework.replace("_", " ").capitalize()
         )
         for bar in bars:
-            txt = f"{bar.get_height() + min_stat:.3f}"
-            # plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + min_stat, txt, ha="center", va="bottom", fontsize=12)
+            if args.show_numbers:
+                txts = [f"{bar.get_height() + min_stat:.3E}", f"{bar.get_height() + min_stat:.3f}"]
+                txt = min(txts, key=lambda s: len(s))
+                plt.text(
+                    bar.get_x() + bar.get_width() / 2, bar.get_height() + min_stat, txt, ha="center", va="bottom", fontsize=12
+                )
         # stats.std is sqrt(1/n * biased variance)
         # sample std is sqrt(1/(n-1) * biased variance) = stats.std *sqrt(n/(n-1))
         # std error is sample std/sqrt(n) = stats.std /sqrt(n-1)
