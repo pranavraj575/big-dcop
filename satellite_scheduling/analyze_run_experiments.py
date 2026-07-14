@@ -129,6 +129,7 @@ if args.max_iteration is None:
 else:
     all_get_stats = (lambda dic: max(dic["data"]["utility_per_iter"][: args.max_iteration]),)
 c_values = sorted(set(dic["info"]["step_size_c"] for dic in iterative_pricing_data))
+c_values = list(map(lambda c: int(c) if int(c) == c else c, c_values))
 print("c values:", c_values)
 data_with_optimal_c = dict()
 if len(c_values) > 1:
@@ -241,7 +242,7 @@ for title, get_stats in zip(
         )
         for bar in bars:
             txt = f"{bar.get_height() + min_stat:.3f}"
-            # plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + min_stat, txt, ha="center", va="bottom", fontsize=12)
+            plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + min_stat, txt, ha="center", va="bottom", fontsize=12)
         # stats.std is sqrt(1/n * biased variance)
         # sample std is sqrt(1/(n-1) * biased variance) = stats.std *sqrt(n/(n-1))
         # std error is sample std/sqrt(n) = stats.std /sqrt(n-1)
