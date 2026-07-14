@@ -33,6 +33,7 @@ def solve_constraint_generation(
     run_data = []  # in-memory iteration results (no temp files)
     utility_per_iter = []
     runtime_per_iter = []
+    messages_per_iter = []
     total_messages = 0
     t_start = time.time()
 
@@ -42,7 +43,7 @@ def solve_constraint_generation(
 
         run_data.append({k: v for k, v in result.items() if k not in ignore_keys})
         total_messages += result.get("run_info", {}).get("total_messages", 0)
-
+        messages_per_iter.append(result.get("run_info", {}).get("total_messages", 0))
         assignments = result["assignment"]
 
         # Group assigned variables by agent
@@ -108,5 +109,6 @@ def solve_constraint_generation(
             "runtime_s": runtime_s,
             "utility_per_iter": utility_per_iter,
             "runtime_per_iter": runtime_per_iter,
+            "messages_per_iter": messages_per_iter,
         },
     )
