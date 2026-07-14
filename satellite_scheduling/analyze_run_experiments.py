@@ -242,7 +242,7 @@ for title, get_stats in zip(
         )
         for bar in bars:
             txt = f"{bar.get_height() + min_stat:.3f}"
-            plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + min_stat, txt, ha="center", va="bottom", fontsize=12)
+            # plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + min_stat, txt, ha="center", va="bottom", fontsize=12)
         # stats.std is sqrt(1/n * biased variance)
         # sample std is sqrt(1/(n-1) * biased variance) = stats.std *sqrt(n/(n-1))
         # std error is sample std/sqrt(n) = stats.std /sqrt(n-1)

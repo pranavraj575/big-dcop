@@ -15,7 +15,6 @@ python satellite_scheduling/analyze_run_experiments.py --hyperparam-optim --outp
 python satellite_scheduling/analyze_run_experiments.py --hyperparam-optim --output output/cosp_final_c_tuning/* output/cosp_final_100_iter_no_iterative --plot output/cosp_solver_plots_final/all --max-iteration "$MAX_ITER" &
 python satellite_scheduling/analyze_run_experiments.py --hyperparam-optim --output output/cosp_final_c_tuning/* output/cosp_final_100_iter_no_iterative --plot output/cosp_solver_plots_final/ctx_cmp  --algorithms satellite_scheduling/algo_configs/ctx_comparison.json --max-iteration "$MAX_ITER" &
 python satellite_scheduling/analyze_run_experiments.py --hyperparam-optim --output output/cosp_final_c_tuning/* output/cosp_final_100_iter_no_iterative --plot output/cosp_solver_plots_final/ONLY_ctx  --algorithms satellite_scheduling/algo_configs/ONLY_ctx_based.json --max-iteration "$MAX_ITER" &
-
 python satellite_scheduling/analyze_run_experiments.py --hyperparam-optim --output output/cosp_final_c_tuning/* output/cosp_final_100_iter_no_iterative --plot output/cosp_solver_plots_final/"$TEST_MAX_ITER"_max_iter --algorithms satellite_scheduling/algo_configs/plot_context_based_algs.json --max-iteration "$TEST_MAX_ITER"
 
 
