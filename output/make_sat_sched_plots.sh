@@ -1,7 +1,10 @@
 
 # bash run_experiments.sh  --output-dir output/cosp_final_100_iter --trials 20 --max-iterations 100 --slurm
-
 # bash run_experiments.sh  --output-dir output/cosp_final_c_tuning/c_<C VAL STRING> --trials 20 --max-iterations 100 --slurm --step-size-c <C VALUE>
+
+rm -r output/cosp_final_100_iter_no_iterative/
+cp -r output/cosp_final_100_iter output/cosp_final_100_iter_no_iterative
+rm -r output/cosp_final_100_iter_no_iterative/iterative_pricing
 
 echo "plotting main experiment"
 python satellite_scheduling/analyze_run_experiments.py --hyperparam-optim --output output/cosp_final_c_tuning/* output/cosp_final_100_iter_no_iterative --plot output/cosp_solver_plots_final/context --algorithms satellite_scheduling/algo_configs/plot_context_based_algs.json &
