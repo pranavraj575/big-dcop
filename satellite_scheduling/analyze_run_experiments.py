@@ -216,7 +216,7 @@ else:
         lambda dic: max(dic["data"]["utility_per_iter"][: args.max_iteration]),
         lambda dic: sum(dic["data"]["runtime_per_iter"][: args.max_iteration]),
         lambda dic: sum(dic["data"]["runtime_per_iter"][: args.max_iteration]),
-        lambda dic: dic["data"]["total_messages"],
+        lambda dic: sum(dic["data"]["messages_per_iter"][: args.max_iteration]),
     )
 
 
@@ -307,14 +307,16 @@ if args.max_iteration is None:
     all_get_stat_list = (
         lambda dic: dic["data"]["utility_per_iter"],
         lambda dic: dic["data"]["runtime_per_iter"],
+        lambda dic: dic["data"]["messages_per_iter"],
     )
 else:
     all_get_stat_list = (
         lambda dic: dic["data"]["utility_per_iter"][: args.max_iteration],
         lambda dic: dic["data"]["runtime_per_iter"][: args.max_iteration],
+        lambda dic: dic["data"]["messages_per_iter"][: args.max_iteration],
     )
 
-for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
+for title, get_stats_list in zip(("utility", "runtime", "messages"), all_get_stat_list):
     min_stat = min(map(min, map(get_stats_list, data)))
     max_stat = max(map(max, map(get_stats_list, data)))
     overall_max_iterations = max(map(len, map(get_stats_list, data)))
@@ -354,7 +356,7 @@ for title, get_stats_list in zip(("utility", "runtime"), all_get_stat_list):
         if args.title:
             plt.title(f"{framework} performance", size=17)
         plt.tick_params(labelsize=15)
-        ylabels = {"utility": "Proportion of requests fulfilled", "runtime": "Time (s)"}
+        ylabels = {"utility": "Proportion of requests fulfilled", "runtime": "Time (s)", "messages": "Messages passed"}
         plt.ylabel(ylabels[title], size=17)
         plt.xlabel("Iteration", size=17)
         plt.grid(True, axis="both")
