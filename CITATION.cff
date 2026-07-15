@@ -7,7 +7,7 @@ authors:
 - family-names: "Zilberstein"
   given-names: "Itai"
   orcid: "https://orcid.org/0009-0008-7175-5319"
-title: "New algorithms for distributed constraint optimization based on online learning and application to decentralized satellite scheduling"
+title: "DCOP solvers with online learning"
 version: 6.9.0
 date-released: 2026-04-20
 url: "https://github.com/pranavraj575/big-dcop"
