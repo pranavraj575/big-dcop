@@ -33,8 +33,8 @@ echo "PLOTTING c tuning in parallel"
 for output_path in output/cosp_final_c_tuning/c_*; do
   c_var=$(cut -c 30-100 <<< $output_path)
   echo "plotting c=${c_var}" &
-  #python satellite_scheduling/analyze_run_experiments.py --output "${output_path}" --plot output/cosp_solver_plots_c_tuning/c_"${c_var}"/all --max-iteration "$MAX_ITER" &
-  #python satellite_scheduling/analyze_run_experiments.py --output "${output_path}" --plot output/cosp_solver_plots_c_tuning/c_"${c_var}"/no_context --algorithms satellite_scheduling/algo_configs/plot_default_algs.json --max-iteration "$MAX_ITER" &
-  #python satellite_scheduling/analyze_run_experiments.py --output "${output_path}" --plot output/cosp_solver_plots_c_tuning/c_"${c_var}"/context --algorithms satellite_scheduling/algo_configs/plot_context_based_algs.json --max-iteration "$MAX_ITER" &
+  python satellite_scheduling/analyze_run_experiments.py --output "${output_path}" --plot output/cosp_solver_plots_c_tuning/c_"${c_var}"/all --max-iteration "$MAX_ITER" &
+  python satellite_scheduling/analyze_run_experiments.py --output "${output_path}" --plot output/cosp_solver_plots_c_tuning/c_"${c_var}"/no_context --algorithms satellite_scheduling/algo_configs/plot_default_algs.json --max-iteration "$MAX_ITER" &
+  python satellite_scheduling/analyze_run_experiments.py --output "${output_path}" --plot output/cosp_solver_plots_c_tuning/c_"${c_var}"/context --algorithms satellite_scheduling/algo_configs/plot_context_based_algs.json --max-iteration "$MAX_ITER" --show-numbers &
 done
 echo "running"

@@ -201,6 +201,12 @@ if __name__ == "__main__":
         default=100,
         help="dpi of plots",
     )
+    p.add_argument(
+        "--full_range",
+        action="store_true",
+        required=False,
+        help="plot full range of every algorithm",
+    )
     args = p.parse_args()
     if args.subsample is not None:
         assert args.subsample > 0, f"--subsample value must be positive value, got {args.subsample}"
@@ -312,16 +318,30 @@ if __name__ == "__main__":
             plt_name = graph_config.get("prefix", "") + plt_name
             save_dir = os.path.join(this_plot_dir, f"{plt_name}.png")
             # points from lowest to highest x_param value, spaced evenly on a logarithmic plot
-            grid = {
-                alg: np.exp(
-                    np.linspace(
-                        np.log(min(relevant_df[relevant_df["algorithm"] == alg][x_param])),
-                        np.log(max(relevant_df[relevant_df["algorithm"] == alg][x_param])),
-                        num=args.grid_n,
+            if args.full_range:
+                grid = {
+                    alg: np.exp(
+                        np.linspace(
+                            np.log(min(relevant_df[relevant_df["algorithm"] == alg][x_param])),
+                            np.log(max(relevant_df[relevant_df["algorithm"] == alg][x_param])),
+                            num=args.grid_n,
+                        )
                     )
-                )
-                for alg in algs
-            }
+                    for alg in algs
+                }
+            else:
+                maxmin = max(min(relevant_df[relevant_df["algorithm"] == alg][x_param]) for alg in algs)
+                minmax = min(max(relevant_df[relevant_df["algorithm"] == alg][x_param]) for alg in algs)
+                grid = {
+                    alg: np.exp(
+                        np.linspace(
+                            np.log(maxmin),
+                            np.log(minmax),
+                            num=args.grid_n,
+                        )
+                    )
+                    for alg in algs
+                }
             if kernel is None:
                 plot_wrt_param(
                     df=relevant_df,
