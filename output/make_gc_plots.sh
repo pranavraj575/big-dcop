@@ -8,7 +8,7 @@ for algo_path in graph_coloring/configs/hyperparam_configs_*; do
   python graph_coloring/plot_results.py \
     --path output/gc_final_hyperparams/* \
     --algorithms "${algo_path}" \
-    --y_keys cost msg_count \
+    --y_keys cost \
     --output output/gc_plot_hp/"${nm}";
 done
 

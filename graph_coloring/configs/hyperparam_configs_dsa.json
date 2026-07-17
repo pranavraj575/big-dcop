@@ -1,19 +1,19 @@
 [
-  {"name": "dsa", "display_name": "DSA_A_p=0.1", "algo_params": ["stop_cycle:100", "variant:A", "probability:0.1"],"plot_config": {"color": "C0"}},
-  {"name": "dsa", "display_name": "DSA_A_p=0.3", "algo_params": ["stop_cycle:100", "variant:A", "probability:0.3"],"plot_config": {"color": "C1"}},
-  {"name": "dsa", "display_name": "DSA_A_p=0.5", "algo_params": ["stop_cycle:100", "variant:A", "probability:0.5"],"plot_config": {"color": "C2"}},
-  {"name": "dsa", "display_name": "DSA_A_p=0.7", "algo_params": ["stop_cycle:100", "variant:A", "probability:0.7"],"plot_config": {"color": "C3"}},
-  {"name": "dsa", "display_name": "DSA_A_p=0.9", "algo_params": ["stop_cycle:100", "variant:A", "probability:0.9"],"plot_config": {"color": "C4"}},
+  {"name": "dsa", "display_name": "DSA_A_p=0.1", "plt_name":"DSA-A($p=.1$)", "algo_params": ["stop_cycle:100", "variant:A", "probability:0.1"],"plot_config": {"color": "C0"}},
+  {"name": "dsa", "display_name": "DSA_A_p=0.3", "plt_name":"DSA-A($p=.3$)", "algo_params": ["stop_cycle:100", "variant:A", "probability:0.3"],"plot_config": {"color": "C1"}},
+  {"name": "dsa", "display_name": "DSA_A_p=0.5", "plt_name":"DSA-A($p=.5$)", "algo_params": ["stop_cycle:100", "variant:A", "probability:0.5"],"plot_config": {"color": "C2"}},
+  {"name": "dsa", "display_name": "DSA_A_p=0.7", "plt_name":"DSA-A($p=.7$)", "algo_params": ["stop_cycle:100", "variant:A", "probability:0.7"],"plot_config": {"color": "C3"}},
+  {"name": "dsa", "display_name": "DSA_A_p=0.9", "plt_name":"DSA-A($p=.9$)", "algo_params": ["stop_cycle:100", "variant:A", "probability:0.9"],"plot_config": {"color": "C4"}},
 
-  {"name": "dsa", "display_name": "DSA_B_p=0.1", "algo_params": ["stop_cycle:100", "variant:B", "probability:0.1"],"plot_config": {"linestyle": "--", "color": "C0"}},
-  {"name": "dsa", "display_name": "DSA_B_p=0.3", "algo_params": ["stop_cycle:100", "variant:B", "probability:0.3"],"plot_config": {"linestyle": "--", "color": "C1"}},
-  {"name": "dsa", "display_name": "DSA_B_p=0.5", "algo_params": ["stop_cycle:100", "variant:B", "probability:0.5"],"plot_config": {"linestyle": "--", "color": "C2"}},
-  {"name": "dsa", "display_name": "DSA_B_p=0.7", "algo_params": ["stop_cycle:100", "variant:B", "probability:0.7"],"plot_config": {"linestyle": "--", "color": "C3"}},
-  {"name": "dsa", "display_name": "DSA_B_p=0.9", "algo_params": ["stop_cycle:100", "variant:B", "probability:0.9"],"plot_config": {"linestyle": "--", "color": "C4"}},
+  {"name": "dsa", "display_name": "DSA_B_p=0.1", "plt_name":"DSA-B($p=.1$)", "algo_params": ["stop_cycle:100", "variant:B", "probability:0.1"],"plot_config": {"linestyle": "--", "color": "C0"}},
+  {"name": "dsa", "display_name": "DSA_B_p=0.3", "plt_name":"DSA-B($p=.3$)", "algo_params": ["stop_cycle:100", "variant:B", "probability:0.3"],"plot_config": {"linestyle": "--", "color": "C1"}},
+  {"name": "dsa", "display_name": "DSA_B_p=0.5", "plt_name":"DSA-B($p=.5$)", "algo_params": ["stop_cycle:100", "variant:B", "probability:0.5"],"plot_config": {"linestyle": "--", "color": "C2"}},
+  {"name": "dsa", "display_name": "DSA_B_p=0.7", "plt_name":"DSA-B($p=.7$)", "algo_params": ["stop_cycle:100", "variant:B", "probability:0.7"],"plot_config": {"linestyle": "--", "color": "C3"}},
+  {"name": "dsa", "display_name": "DSA_B_p=0.9", "plt_name":"DSA-B($p=.9$)", "algo_params": ["stop_cycle:100", "variant:B", "probability:0.9"],"plot_config": {"linestyle": "--", "color": "C4"}},
 
-  {"name": "dsa", "display_name": "DSA_C_p=0.1", "algo_params": ["stop_cycle:100", "variant:C", "probability:0.1"],"plot_config": {"linestyle": ":", "color": "C0"}},
-  {"name": "dsa", "display_name": "DSA_C_p=0.3", "algo_params": ["stop_cycle:100", "variant:C", "probability:0.3"],"plot_config": {"linestyle": ":", "color": "C1"}},
-  {"name": "dsa", "display_name": "DSA_C_p=0.5", "algo_params": ["stop_cycle:100", "variant:C", "probability:0.5"],"plot_config": {"linestyle": ":", "color": "C2"}},
-  {"name": "dsa", "display_name": "DSA_C_p=0.7", "algo_params": ["stop_cycle:100", "variant:C", "probability:0.7"],"plot_config": {"linestyle": ":", "color": "C3"}},
-  {"name": "dsa", "display_name": "DSA_C_p=0.9", "algo_params": ["stop_cycle:100", "variant:C", "probability:0.9"],"plot_config": {"linestyle": ":", "color": "C4"}}
+  {"name": "dsa", "display_name": "DSA_C_p=0.1", "plt_name":"DSA-C($p=.1$)", "algo_params": ["stop_cycle:100", "variant:C", "probability:0.1"],"plot_config": {"linestyle": ":", "color": "C0"}},
+  {"name": "dsa", "display_name": "DSA_C_p=0.3", "plt_name":"DSA-C($p=.3$)", "algo_params": ["stop_cycle:100", "variant:C", "probability:0.3"],"plot_config": {"linestyle": ":", "color": "C1"}},
+  {"name": "dsa", "display_name": "DSA_C_p=0.5", "plt_name":"DSA-C($p=.5$)", "algo_params": ["stop_cycle:100", "variant:C", "probability:0.5"],"plot_config": {"linestyle": ":", "color": "C2"}},
+  {"name": "dsa", "display_name": "DSA_C_p=0.7", "plt_name":"DSA-C($p=.7$)", "algo_params": ["stop_cycle:100", "variant:C", "probability:0.7"],"plot_config": {"linestyle": ":", "color": "C3"}},
+  {"name": "dsa", "display_name": "DSA_C_p=0.9", "plt_name":"DSA-C($p=.9$)", "algo_params": ["stop_cycle:100", "variant:C", "probability:0.9"],"plot_config": {"linestyle": ":", "color": "C4"}}
 ]

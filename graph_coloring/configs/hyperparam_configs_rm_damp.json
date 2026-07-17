@@ -1,7 +1,8 @@
 [
-  {"name": "regret_matching", "display_name": "RM_damp=0.1", "algo_params": ["stop_cycle:100", "damping:0.1"]},
-  {"name": "regret_matching", "display_name": "RM_damp=0.3", "algo_params": ["stop_cycle:100", "damping:0.3"]},
-  {"name": "regret_matching", "display_name": "RM_damp=0.5", "algo_params": ["stop_cycle:100", "damping:0.5"]},
-  {"name": "regret_matching", "display_name": "RM_damp=0.7", "algo_params": ["stop_cycle:100", "damping:0.7"]},
-  {"name": "regret_matching", "display_name": "RM_damp=0.9", "algo_params": ["stop_cycle:100", "damping:0.9"]}
+  {"name": "regret_matching", "display_name": "RM_uprob=1.0", "plt_name":"RM(damping=0)", "algo_params": ["stop_cycle:100", "update_prob:1.0"]},
+  {"name": "regret_matching", "display_name": "RM_damp=0.1", "plt_name":"RM(damping=.1)", "algo_params": ["stop_cycle:100", "damping:0.1"]},
+  {"name": "regret_matching", "display_name": "RM_damp=0.3", "plt_name":"RM(damping=.3)", "algo_params": ["stop_cycle:100", "damping:0.3"]},
+  {"name": "regret_matching", "display_name": "RM_damp=0.5", "plt_name":"RM(damping=.5)", "algo_params": ["stop_cycle:100", "damping:0.5"]},
+  {"name": "regret_matching", "display_name": "RM_damp=0.7", "plt_name":"RM(damping=.7)", "algo_params": ["stop_cycle:100", "damping:0.7"]},
+  {"name": "regret_matching", "display_name": "RM_damp=0.9", "plt_name":"RM(damping=.9)", "algo_params": ["stop_cycle:100", "damping:0.9"]}
 ]

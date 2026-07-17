@@ -1,7 +1,7 @@
 [
-  {"name": "ftrl", "display_name": "FTRL_eta=0.1", "algo_params": ["stop_cycle:100", "eta_reg:0.1"]},
-  {"name": "ftrl", "display_name": "FTRL_eta=0.5", "algo_params": ["stop_cycle:100", "eta_reg:0.5"]},
-  {"name": "ftrl", "display_name": "FTRL_eta=1.0", "algo_params": ["stop_cycle:100", "eta_reg:1.0"]},
-  {"name": "ftrl", "display_name": "FTRL_eta=2.0", "algo_params": ["stop_cycle:100", "eta_reg:2.0"]},
-  {"name": "ftrl", "display_name": "FTRL_eta=5.0", "algo_params": ["stop_cycle:100", "eta_reg:5.0"]}
+  {"name": "ftrl", "display_name": "FTRL_eta=0.1", "plt_name":"FTRL($\\eta=.1$)", "algo_params": ["stop_cycle:100", "eta_reg:0.1"]},
+  {"name": "ftrl", "display_name": "FTRL_eta=0.5", "plt_name":"FTRL($\\eta=.5$)", "algo_params": ["stop_cycle:100", "eta_reg:0.5"]},
+  {"name": "ftrl", "display_name": "FTRL_eta=1.0", "plt_name":"FTRL($\\eta=1$)", "algo_params": ["stop_cycle:100", "eta_reg:1.0"]},
+  {"name": "ftrl", "display_name": "FTRL_eta=2.0", "plt_name":"FTRL($\\eta=2$)", "algo_params": ["stop_cycle:100", "eta_reg:2.0"]},
+  {"name": "ftrl", "display_name": "FTRL_eta=5.0", "plt_name":"FTRL($\\eta=5$)", "algo_params": ["stop_cycle:100", "eta_reg:5.0"]}
 ]

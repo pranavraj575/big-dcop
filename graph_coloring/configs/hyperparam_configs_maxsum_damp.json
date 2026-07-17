@@ -1,7 +1,7 @@
 [
-  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_damp=0.50", "algo_params": ["stop_cycle:100", "start_messages:leafs", "stability:0.1", "damping:0.5"]},
-  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_damp=0.70", "algo_params": ["stop_cycle:100", "start_messages:leafs", "stability:0.1", "damping:0.7"]},
-  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_damp=0.80", "algo_params": ["stop_cycle:100", "start_messages:leafs", "stability:0.1", "damping:0.8"]},
-  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_damp=0.90", "algo_params": ["stop_cycle:100", "start_messages:leafs", "stability:0.1", "damping:0.9"]},
-  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_damp=0.95", "algo_params": ["stop_cycle:100", "start_messages:leafs", "stability:0.1", "damping:0.95"]}
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_damp=0.50", "plt_name":"Maxsum(damping=.5)", "algo_params": ["stop_cycle:100", "start_messages:leafs", "stability:0.1", "damping:0.5"]},
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_damp=0.70", "plt_name":"Maxsum(damping=.7)", "algo_params": ["stop_cycle:100", "start_messages:leafs", "stability:0.1", "damping:0.7"]},
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_damp=0.80", "plt_name":"Maxsum(damping=.8)", "algo_params": ["stop_cycle:100", "start_messages:leafs", "stability:0.1", "damping:0.8"]},
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_damp=0.90", "plt_name":"Maxsum(damping=.9)", "algo_params": ["stop_cycle:100", "start_messages:leafs", "stability:0.1", "damping:0.9"]},
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_damp=0.95", "plt_name":"Maxsum(damping=.95)", "algo_params": ["stop_cycle:100", "start_messages:leafs", "stability:0.1", "damping:0.95"]}
 ]

@@ -1,14 +1,14 @@
 [
-  {"name": "regret_matching", "display_name": "DRM(a=0.5,b=0)",   "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:0.5", "beta:0"]},
-  {"name": "regret_matching", "display_name": "DRM(a=0.5,b=0.5)", "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:0.5", "beta:0.5"]},
-  {"name": "regret_matching", "display_name": "DRM(a=0.5,b=1.0)", "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:0.5", "beta:1.0"]},
-  {"name": "regret_matching", "display_name": "DRM(a=1.0,b=0)",   "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:1.0", "beta:0"]},
-  {"name": "regret_matching", "display_name": "DRM(a=1.0,b=0.5)", "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:1.0", "beta:0.5"]},
-  {"name": "regret_matching", "display_name": "DRM(a=1.0,b=1.0)", "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:1.0", "beta:1.0"]},
-  {"name": "regret_matching", "display_name": "DRM(a=1.5,b=0)",   "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:1.5", "beta:0"]},
-  {"name": "regret_matching", "display_name": "DRM(a=1.5,b=0.5)", "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:1.5", "beta:0.5"]},
-  {"name": "regret_matching", "display_name": "DRM(a=1.5,b=1.0)", "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:1.5", "beta:1.0"]},
-  {"name": "regret_matching", "display_name": "DRM(a=2.0,b=0)",   "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:2.0", "beta:0"]},
-  {"name": "regret_matching", "display_name": "DRM(a=2.0,b=0.5)", "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:2.0", "beta:0.5"]},
-  {"name": "regret_matching", "display_name": "DRM(a=2.0,b=1.0)", "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:2.0", "beta:1.0"]}
+  {"name": "regret_matching", "display_name": "DRM(a=0.5,b=0)",   "plt_name": "DRM($\\alpha=\\frac12,\\beta=0$)",         "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:0.5", "beta:0"]},
+  {"name": "regret_matching", "display_name": "DRM(a=0.5,b=0.5)", "plt_name": "DRM($\\alpha=\\frac12,\\beta=\\frac12$)",  "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:0.5", "beta:0.5"]},
+  {"name": "regret_matching", "display_name": "DRM(a=0.5,b=1.0)", "plt_name": "DRM($\\alpha=\\frac12,\\beta=1$)",         "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:0.5", "beta:1.0"]},
+  {"name": "regret_matching", "display_name": "DRM(a=1.0,b=0)",   "plt_name": "DRM($\\alpha=1,\\beta=0$)",                "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:1.0", "beta:0"]},
+  {"name": "regret_matching", "display_name": "DRM(a=1.0,b=0.5)", "plt_name": "DRM($\\alpha=1,\\beta=\\frac12$)",         "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:1.0", "beta:0.5"]},
+  {"name": "regret_matching", "display_name": "DRM(a=1.0,b=1.0)", "plt_name": "DRM($\\alpha=1,\\beta=1$)",                "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:1.0", "beta:1.0"]},
+  {"name": "regret_matching", "display_name": "DRM(a=1.5,b=0)",   "plt_name": "DRM($\\alpha=\\frac32,\\beta=0$)",         "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:1.5", "beta:0"]},
+  {"name": "regret_matching", "display_name": "DRM(a=1.5,b=0.5)", "plt_name": "DRM($\\alpha=\\frac32,\\beta=\\frac12$)",  "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:1.5", "beta:0.5"]},
+  {"name": "regret_matching", "display_name": "DRM(a=1.5,b=1.0)", "plt_name": "DRM($\\alpha=\\frac32,\\beta=1$)",         "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:1.5", "beta:1.0"]},
+  {"name": "regret_matching", "display_name": "DRM(a=2.0,b=0)",   "plt_name": "DRM($\\alpha=2,\\beta=0$)",                "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:2.0", "beta:0"]},
+  {"name": "regret_matching", "display_name": "DRM(a=2.0,b=0.5)", "plt_name": "DRM($\\alpha=2,\\beta=\\frac12$)",         "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:2.0", "beta:0.5"]},
+  {"name": "regret_matching", "display_name": "DRM(a=2.0,b=1.0)", "plt_name": "DRM($\\alpha=2,\\beta=1$)",                "algo_params": ["stop_cycle:100", "discounted_rm:1", "alpha:2.0", "beta:1.0"]}
 ]

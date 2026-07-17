@@ -51,10 +51,11 @@
   {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_damp=0.90", "algo_params": ["stop_cycle:100", "start_messages:leafs", "stability:0.1", "damping:0.9"]},
   {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_damp=0.95", "algo_params": ["stop_cycle:100", "start_messages:leafs", "stability:0.1", "damping:0.95"]},
 
-  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0.01", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.9", "stability:0.01"]},
-  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0.05", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.9", "stability:0.05"]},
-  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0.10", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.9", "stability:0.1"]},
-  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0.50", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.9", "stability:0.5"]},
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.8", "stability:0.0"]},
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0.01", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.8", "stability:0.01"]},
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0.05", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.8", "stability:0.05"]},
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0.10", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.8", "stability:0.1"]},
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0.50", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.8", "stability:0.5"]},
 
   {"name": "ftrl", "display_name": "FTRL_eta=0.1", "algo_params": ["stop_cycle:100", "eta_reg:0.1"]},
   {"name": "ftrl", "display_name": "FTRL_eta=0.5", "algo_params": ["stop_cycle:100", "eta_reg:0.5"]},

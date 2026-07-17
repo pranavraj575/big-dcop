@@ -1,35 +1,6 @@
 [
   {
     "name": "regret_matching",
-    "display_name": "Damped DRM+",
-    "algo_params": [
-      "stop_cycle:100",
-      "discounted_rm:1",
-      "alpha:1.5",
-      "beta:0",
-      "rm_plus:1",
-      "damping:0.3"
-    ]
-  },
-  {
-    "name": "regret_matching",
-    "display_name": "Damped RM (0.5)",
-    "algo_params": [
-      "stop_cycle:100",
-      "damping:0.5"
-    ]
-  },
-  {
-    "name": "regret_matching",
-    "display_name": "Damped PRM",
-    "algo_params": [
-      "stop_cycle:100",
-      "predictive:1",
-      "damping:0.5"
-    ]
-  },
-  {
-    "name": "regret_matching",
     "display_name": "RM",
     "algo_params": [
       "stop_cycle:100"
@@ -102,15 +73,12 @@
     "name": "maxsum_advp",
     "dist": "adhoc",
     "algo_params": [
-      "damping:0.9",
-      "stability:0.1",
+      "damping:0.8",
+      "stability:0.01",
       "start_messages:leafs",
       "stop_cycle:100"
     ],
-    "plt_name": "Maxsum ADVP",
-    "plot_config": {
-      "linestyle": "dotted"
-    }
+    "plt_name": "Maxsum ADVP"
   },
   {
     "name": "gdba",
@@ -120,30 +88,23 @@
       "violation:NZ",
       "increase_mode:E"
     ],
-    "plt_name": "GDBA",
-    "plot_config": {
-      "linestyle": "dotted"
-    }
+    "plt_name": "GDBA"
   },
   {
     "name": "dsa",
     "algo_params": [
       "stop_cycle:100",
-      "variant:B"
+      "variant:C",
+      "probability:0.5"
     ],
-    "plt_name": "DSA",
-    "plot_config": {
-      "linestyle": "dotted"
-    }
+    "plt_name": "DSA"
   },
   {
     "name": "mgm2",
     "algo_params": [
-      "stop_cycle:100"
+      "stop_cycle:100",
+      "threshold:0.5"
     ],
-    "plt_name": "MGM 2",
-    "plot_config": {
-      "linestyle": "dotted"
-    }
+    "plt_name": "MGM 2"
   }
 ]
