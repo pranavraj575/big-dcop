@@ -24,6 +24,8 @@ while [[ $# -gt 0 ]]; do
       GRAPH_INSTANCE_DIR="$2"; shift 2;;
     --trials)
       TRIALS="$2"; shift 2;;
+    --start-trial)
+      START_TRIAL="$2"; shift 2;;
     --slurm)
       USE_SLURM_JOBS=true; shift 1;;
     --overwrite)
