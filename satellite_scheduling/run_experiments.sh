@@ -42,7 +42,7 @@ TRIALS=2
 START_TRIAL=0
 USE_SLURM_JOBS=false
 OVERWRITE=false
-PROJECT_DIR=$(readlink -e $(dirname $0))
+PROJECT_DIR=$(readlink -e $(dirname $(dirname $0)))
 OUTPUT_DIR="$PROJECT_DIR/output"
 SCRIPT="$PROJECT_DIR/satellite_scheduling/main.py"
 ALGORITHMS_JSON="$PROJECT_DIR/satellite_scheduling/cosp_algorithm_configs.json"
@@ -70,6 +70,7 @@ PYTHON=""
 # ---------------------------------------------------------------------------
 # Parse arguments
 # ---------------------------------------------------------------------------
+FRAMEWORKS=("iterative_pricing" "constraint_generation")
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --max-iterations)
@@ -90,6 +91,8 @@ while [[ $# -gt 0 ]]; do
       USE_SLURM_JOBS=true; shift 1;;
     --overwrite)
       OVERWRITE=true; shift 1;;
+    --no-cg)
+      FRAMEWORKS=("iterative_pricing"); shift 1;;
     --python)
       PYTHON="$2"; shift 2;;   # explicit override skips auto-detect
     *)
@@ -109,7 +112,6 @@ fi
 echo "Using Python: ${PYTHON}"
 echo ""
 
-FRAMEWORKS=("iterative_pricing" "constraint_generation")
 
 # ---------------------------------------------------------------------------
 # Run
