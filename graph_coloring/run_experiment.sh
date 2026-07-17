@@ -10,7 +10,7 @@ TRIALS=2
 START_TRIAL=0
 OVERWRITE=false
 USE_SLURM_JOBS=false
-EXCLUSIVE=""
+EXCLUSIVE=false
 
 # ---------------------------------------------------------------------------
 # Parse arguments
@@ -32,7 +32,7 @@ while [[ $# -gt 0 ]]; do
     --overwrite)
       OVERWRITE=true; shift 1;;
     --exclusive)
-      EXCLUSIVE="--exclusive"; shift 1;;
+      EXCLUSIVE=true; shift 1;;
     *)
       echo "Unknown argument: $1" >&2; exit 1;;
   esac
@@ -72,11 +72,19 @@ for instance_path in "${GRAPH_INSTANCE_DIR}"/*.yaml; do
       fi
       if [[ $USE_SLURM_JOBS == true ]]; then
         echo "sending job to slurm"
-        sbatch "${EXCLUSIVE}" "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
-          --algorithms "${ALGORITHMS}" \
-          --collect_on value_change \
-          --instances "${instance_path}" \
-          --output_csv "${output_csv}"
+        if [[ $EXCLUSIVE == true ]]; then
+          sbatch --exclusive "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
+            --algorithms "${ALGORITHMS}" \
+            --collect_on value_change \
+            --instances "${instance_path}" \
+            --output_csv "${output_csv}"
+        else
+          sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
+            --algorithms "${ALGORITHMS}" \
+            --collect_on value_change \
+            --instances "${instance_path}" \
+            --output_csv "${output_csv}"
+        fi
         slurmed=$((slurmed + 1))
       else
         python "${SCRIPT}" \
