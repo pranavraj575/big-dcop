@@ -45,6 +45,10 @@ conda activate big-dcop
 #  --graph_n 10 20 30 50 100 \
 #  --color_count 3 \
 #  --graph_type random scalefree
+total=0
+passed=0
+skipped=0
+slurmed=0
 
 counter=0
 for instance_path in "${GRAPH_INSTANCE_DIR}"/*.yaml; do
@@ -54,9 +58,11 @@ for instance_path in "${GRAPH_INSTANCE_DIR}"/*.yaml; do
     echo "--------------------------------------------------------------"
     echo "  instance  : ${instance_path}  (trial ${current_trial})"
     echo "--------------------------------------------------------------"
+    total=$((total + 1))
 
     if [[ -e "$output_csv" ]] && [[ $OVERWRITE == false ]]; then
       echo "WARNING: $output_csv exists, skipping this trial (use --overwrite to overwrite this)"
+      skipped=$((skipped + 1))
     else
       if [[ -e "$output_csv" ]]; then
         echo "WARNING: $output_csv exists, python script will overwrite this"
@@ -68,6 +74,7 @@ for instance_path in "${GRAPH_INSTANCE_DIR}"/*.yaml; do
           --collect_on value_change \
           --instances "${instance_path}" \
           --output_csv "${output_csv}"
+        slurmed=$((slurmed + 1))
       else
         python "${SCRIPT}" \
             --algorithms "${ALGORITHMS}" \
@@ -75,6 +82,7 @@ for instance_path in "${GRAPH_INSTANCE_DIR}"/*.yaml; do
             --collect_on value_change \
             --instances "${instance_path}" \
             --output_csv "${output_csv}"
+        passed=$((passed + 1))
       fi
     fi
     current_trial=$(($current_trial+1))
@@ -83,3 +91,16 @@ for instance_path in "${GRAPH_INSTANCE_DIR}"/*.yaml; do
 done
 
 
+echo "============================================================"
+echo "  Experiments complete"
+echo "  Total   : ${total}"
+echo "  Passed  : ${passed}"
+echo "  Skipped : ${skipped}"
+echo "  Slurmed : ${slurmed}"
+if [[ ${failed} -gt 0 ]]; then
+  echo "  Failed runs:"
+  for f in "${failed_list[@]}"; do
+    echo "    - ${f}"
+  done
+fi
+echo "============================================================"
