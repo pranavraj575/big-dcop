@@ -1,9 +1,5 @@
 #!/bin/bash
 
-source ~/.bashrc
-source ~/miniconda3/bin/activate
-conda activate big-dcop
-
 PROJECT_DIR="$( dirname -- "$( dirname -- "$( readlink -f -- "${BASH_SOURCE[0]}"; )"; )"; )"
 
 SCRIPT="$PROJECT_DIR/graph_coloring/graph_coloring_runner.py"
@@ -11,6 +7,32 @@ OUTPUT_DIR="$PROJECT_DIR/output"
 GRAPH_INSTANCE_DIR="$OUTPUT_DIR/graph_coloring_instances_hard"
 ALGORITHMS="$PROJECT_DIR/graph_coloring/configs/algorithm_configs.json"
 TRIALS=2
+START_TRIAL=0
+USE_SLURM_JOBS=false
+
+# ---------------------------------------------------------------------------
+# Parse arguments
+# ---------------------------------------------------------------------------
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --output-dir)
+      OUTPUT_DIR="$2"; shift 2;;
+    --algorithms)
+      ALGORITHMS="$2"; shift 2;;
+    --graph-instances)
+      GRAPH_INSTANCE_DIR="$2"; shift 2;;
+    --trials)
+      TRIALS="$2"; shift 2;;
+    --slurm)
+      USE_SLURM_JOBS=true; shift 1;;
+    *)
+      echo "Unknown argument: $1" >&2; exit 1;;
+  esac
+done
+
+source ~/.bashrc
+source ~/miniconda3/bin/activate
+conda activate big-dcop
 
 #python graph_coloring/graph_coloring_generator.py \
 #  --output_dir "${GRAPH_INSTANCE_DIR}" \
@@ -21,13 +43,25 @@ TRIALS=2
 
 counter=0
 for instance_path in "${GRAPH_INSTANCE_DIR}"/*.yaml; do
-  python "${SCRIPT}" \
-    --algorithms "${ALGORITHMS}" \
-    --trials "${TRIALS}" \
-    --collect_on value_change \
-    --instances "${instance_path}" \
-    --output_csv "${OUTPUT_DIR}/graph_coloring_results_${counter}.csv"
-
+  current_trial="${START_TRIAL}"
+  while [[ $current_trial -lt $(($TRIALS + $START_TRIAL)) ]]; do
+    if [[ $USE_SLURM_JOBS == true ]]; then
+      echo "sending job to slurm"
+      sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
+        --algorithms "${ALGORITHMS}" \
+        --collect_on value_change \
+        --instances "${instance_path}" \
+        --output_csv "${OUTPUT_DIR}/graph_coloring_results_i_${counter}_t_${current_trial}.csv"
+    else
+      python "${SCRIPT}" \
+          --algorithms "${ALGORITHMS}" \
+          --trials "${TRIALS}" \
+          --collect_on value_change \
+          --instances "${instance_path}" \
+          --output_csv "${OUTPUT_DIR}/graph_coloring_results_${counter}.csv"
+    fi
+    current_trial=$(($current_trial+1))
+  done
   counter=$((counter + 1))
 done
 
