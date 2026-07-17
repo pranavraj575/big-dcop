@@ -8,6 +8,7 @@ GRAPH_INSTANCE_DIR="$OUTPUT_DIR/graph_coloring_instances_hard"
 ALGORITHMS="$PROJECT_DIR/graph_coloring/configs/algorithm_configs.json"
 TRIALS=2
 START_TRIAL=0
+OVERWRITE=false
 USE_SLURM_JOBS=false
 
 # ---------------------------------------------------------------------------
@@ -25,6 +26,8 @@ while [[ $# -gt 0 ]]; do
       TRIALS="$2"; shift 2;;
     --slurm)
       USE_SLURM_JOBS=true; shift 1;;
+    --overwrite)
+      OVERWRITE=true; shift 1;;
     *)
       echo "Unknown argument: $1" >&2; exit 1;;
   esac
@@ -45,20 +48,32 @@ counter=0
 for instance_path in "${GRAPH_INSTANCE_DIR}"/*.yaml; do
   current_trial="${START_TRIAL}"
   while [[ $current_trial -lt $(($TRIALS + $START_TRIAL)) ]]; do
-    if [[ $USE_SLURM_JOBS == true ]]; then
-      echo "sending job to slurm"
-      sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
-        --algorithms "${ALGORITHMS}" \
-        --collect_on value_change \
-        --instances "${instance_path}" \
-        --output_csv "${OUTPUT_DIR}/graph_coloring_results_i_${counter}_t_${current_trial}.csv"
+    output_csv="${OUTPUT_DIR}/graph_coloring_results_i_${counter}_t_${current_trial}.csv"
+    echo "--------------------------------------------------------------"
+    echo "  instance  : ${instance_path}  (trial ${current_trial})"
+    echo "--------------------------------------------------------------"
+
+    if [[ -e "$output_csv" ]] && [[ $OVERWRITE == false ]]; then
+      echo "WARNING: $output_csv exists, skipping this trial (use --overwrite to overwrite this)"
     else
-      python "${SCRIPT}" \
+      if [[ -e "$output_csv" ]]; then
+        echo "WARNING: $output_csv exists, python script will overwrite this"
+      fi
+      if [[ $USE_SLURM_JOBS == true ]]; then
+        echo "sending job to slurm"
+        sbatch "$PROJECT_DIR/slurm_template.sh" "python" "${SCRIPT}" \
           --algorithms "${ALGORITHMS}" \
-          --trials "${TRIALS}" \
           --collect_on value_change \
           --instances "${instance_path}" \
-          --output_csv "${OUTPUT_DIR}/graph_coloring_results_${counter}.csv"
+          --output_csv "${output_csv}"
+      else
+        python "${SCRIPT}" \
+            --algorithms "${ALGORITHMS}" \
+            --trials "${TRIALS}" \
+            --collect_on value_change \
+            --instances "${instance_path}" \
+            --output_csv "${output_csv}"
+      fi
     fi
     current_trial=$(($current_trial+1))
   done
