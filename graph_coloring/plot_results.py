@@ -198,7 +198,7 @@ if __name__ == "__main__":
     p.add_argument(
         "--dpi",
         type=int,
-        default=100,
+        default=300,
         help="dpi of plots",
     )
     p.add_argument(
