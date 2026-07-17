@@ -1,0 +1,6 @@
+[
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0.01", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.9", "stability:0.01"]},
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0.05", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.9", "stability:0.05"]},
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0.10", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.9", "stability:0.1"]},
+  {"name": "maxsum_advp", "dist": "adhoc", "display_name": "MS_stab=0.50", "algo_params": ["stop_cycle:100", "start_messages:leafs", "damping:0.9", "stability:0.5"]}
+]

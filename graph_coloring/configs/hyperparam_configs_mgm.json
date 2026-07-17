@@ -1,0 +1,7 @@
+[
+  {"name": "mgm2", "display_name": "MGM2_thr=0.1", "algo_params": ["stop_cycle:100", "threshold:0.1"]},
+  {"name": "mgm2", "display_name": "MGM2_thr=0.3", "algo_params": ["stop_cycle:100", "threshold:0.3"]},
+  {"name": "mgm2", "display_name": "MGM2_thr=0.5", "algo_params": ["stop_cycle:100", "threshold:0.5"]},
+  {"name": "mgm2", "display_name": "MGM2_thr=0.7", "algo_params": ["stop_cycle:100", "threshold:0.7"]},
+  {"name": "mgm2", "display_name": "MGM2_thr=0.9", "algo_params": ["stop_cycle:100", "threshold:0.9"]}
+]

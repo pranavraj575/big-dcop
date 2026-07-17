@@ -1,0 +1,7 @@
+[
+  {"name": "regret_matching", "display_name": "RM_damp=0.1", "algo_params": ["stop_cycle:100", "damping:0.1"]},
+  {"name": "regret_matching", "display_name": "RM_damp=0.3", "algo_params": ["stop_cycle:100", "damping:0.3"]},
+  {"name": "regret_matching", "display_name": "RM_damp=0.5", "algo_params": ["stop_cycle:100", "damping:0.5"]},
+  {"name": "regret_matching", "display_name": "RM_damp=0.7", "algo_params": ["stop_cycle:100", "damping:0.7"]},
+  {"name": "regret_matching", "display_name": "RM_damp=0.9", "algo_params": ["stop_cycle:100", "damping:0.9"]}
+]
