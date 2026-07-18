@@ -150,4 +150,4 @@ def convert_scenario_bin_to_pydcop(json_filepath, yaml_filepath):
 
 
 if __name__ == "__main__":
-    convert_scenario_bin_to_pydcop("test.json", "test.yaml")
+    convert_scenario_bin_to_pydcop("scenarios/test.json", "test.yaml")

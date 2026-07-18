@@ -10,16 +10,15 @@ print("=" * 70 + "\n")
 
 # Check all required files exist
 files_to_check = [
-    "satellite_scheduling/cosp_algorithm_configs.json",
-    "satellite_scheduling/test_minimal.json",
-    "satellite_scheduling/test.json",
+    "satellite_scheduling/algo_configs/cosp_algorithm_configs.json",
+    "satellite_scheduling/scenarios/test_minimal.json",
+    "satellite_scheduling/scenarios/test.json",
     "satellite_scheduling/COSPSOLVER_CONFIG_GUIDE.md",
 ]
 
 scripts_to_check = [
-    "satellite_scheduling/run_cosp_quick_test.sh",
-    "satellite_scheduling/run_cosp_full_test.sh",
-    "satellite_scheduling/run_cosp_perf_test.sh",
+    "satellite_scheduling/hyperparam_tuning.sh",
+    "satellite_scheduling/run_experiments.sh",
 ]
 
 print("Config and Scenario Files:")
@@ -47,7 +46,7 @@ print("\nJSON Configuration Validation:")
 print("-" * 70)
 
 try:
-    with open("satellite_scheduling/cosp_algorithm_configs.json") as f:
+    with open("satellite_scheduling/algo_configs/cosp_algorithm_configs.json") as f:
         configs = json.load(f)
     print("✓ cosp_algorithm_configs.json: {} algorithms defined".format(len(configs)))
     for cfg in configs:
@@ -57,7 +56,7 @@ except Exception as e:
     print("✗ Error parsing cosp_algorithm_configs.json: {}".format(e))
 
 try:
-    with open("satellite_scheduling/test_minimal.json") as f:
+    with open("satellite_scheduling/scenarios/test_minimal.json") as f:
         scenario = json.load(f)
     requests = len(scenario.get("requests", []))
     agents = len(scenario.get("agents", []))
