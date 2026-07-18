@@ -40,8 +40,8 @@ Time: ~30-120 seconds | Output: output/cosp_full_test.json
 ```bash
 cd satellite_scheduling
 python3 main.py \
-  --scenario test_minimal.json \
-  --algorithms_json cosp_algorithm_configs.json \
+  --scenario scenarios/test_minimal.json \
+  --algorithms_json algo_configs/cosp_algorithm_configs.json \
   --output_json output/my_test.json \
   --framework iterative_pricing \
   --max_iterations 2
