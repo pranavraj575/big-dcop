@@ -45,7 +45,7 @@ OVERWRITE=false
 PROJECT_DIR=$(readlink -e $(dirname $(dirname $0)))
 OUTPUT_DIR="$PROJECT_DIR/output"
 SCRIPT="$PROJECT_DIR/satellite_scheduling/main.py"
-ALGORITHMS_JSON="$PROJECT_DIR/satellite_scheduling/cosp_algorithm_configs.json"
+ALGORITHMS_JSON="$PROJECT_DIR/satellite_scheduling/algo_configs/cosp_algorithm_configs.json"
 SCENARIOS_DIR="$PROJECT_DIR/satellite_scheduling/scenarios_larger"
 
 
