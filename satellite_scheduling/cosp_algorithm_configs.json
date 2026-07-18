@@ -12,7 +12,7 @@
     "display_name": "DSA-C",
     "algo_params": [
       "max_iterations:100",
-      "probability:0.7"
+      "probability:0.5"
     ]
   },
   {
