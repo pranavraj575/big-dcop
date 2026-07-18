@@ -1,7 +1,7 @@
 import json
 import numpy as np
 
-with open("satellite_scheduling/scenarios_larger/nss_results_25.json", "r") as f:
+with open("satellite_scheduling/nss_results/nss_results_25.json", "r") as f:
     data = json.load(f)
 
 
