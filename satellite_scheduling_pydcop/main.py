@@ -9,7 +9,7 @@ import argparse
 
 
 """
-ITAI: something really weird happens where when running this script pydcop runs an entire dcop for a min. Not sure what this is. It happens before any imports or anything...
+REDACTED: something really weird happens where when running this script pydcop runs an entire dcop for a min. Not sure what this is. It happens before any imports or anything...
 """
 
 
