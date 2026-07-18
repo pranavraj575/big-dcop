@@ -27,7 +27,7 @@
 #   --step-size-c     1.8
 #   --output-dir      output
 #   --scenarios       satellite_scheduling/scenarios_larger
-#   --algorithms      satellite_scheduling/cosp_algorithm_configs.json
+#   --algorithms      satellite_scheduling/algo_configs/cosp_algorithm_configs.json
 #   --trials          2
 #   --start-trial     0
 
