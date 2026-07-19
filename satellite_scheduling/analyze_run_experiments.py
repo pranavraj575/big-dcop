@@ -347,7 +347,8 @@ for title, get_stats_list in zip(("utility", "runtime", "messages"), all_get_sta
         alg_data = [list(filter(lambda d: d["info"]["algo_name"] == algo_name, frm_data)) for algo_name in algorithms]
         temp_stats = [list(map(get_stats_list, ag)) for ag in alg_data]
         max_iterations = max(map(len, map(get_stats_list, frm_data)))
-        stats = np.nan * np.ones((len(algorithms), len(temp_stats[0]), max_iterations))
+        max_samples = max(map(len, temp_stats))
+        stats = np.nan * np.ones((len(algorithms), max_samples, max_iterations))
         if (include_error and title == "utility") and max_iterations < overall_max_iterations:
             print(f"framework {framework} only has samples up to {max_iterations} iterations")
 
