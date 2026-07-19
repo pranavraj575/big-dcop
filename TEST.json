@@ -1,0 +1,295 @@
+{
+  "run_info": {
+    "scenario": "satellite_scheduling/scenarios_larger/scenario_1.json",
+    "algorithms_json": "satellite_scheduling/algo_configs/ONLY_ctx_based.json",
+    "framework": "iterative_pricing",
+    "step_size_c": 1.8
+  },
+  "algorithm_configs": [
+    {
+      "name": "regret_matching",
+      "display_name": "RM(context-based)",
+      "algo_params": [
+        "max_iterations:45",
+        "context_based:1"
+      ]
+    },
+    {
+      "name": "regret_matching",
+      "display_name": "RM+(context-based)",
+      "algo_params": [
+        "max_iterations:45",
+        "rm_plus:1",
+        "context_based:1"
+      ]
+    },
+    {
+      "name": "regret_matching",
+      "display_name": "Predictive RM(context based)",
+      "algo_params": [
+        "max_iterations:45",
+        "predictive:1",
+        "context_based:1"
+      ]
+    },
+    {
+      "name": "regret_matching",
+      "display_name": "IR-PRM(context-based)",
+      "algo_params": [
+        "max_iterations:45",
+        "ir_prm:1",
+        "rm_plus:1",
+        "context_based:1"
+      ]
+    },
+    {
+      "name": "regret_matching",
+      "display_name": "DRM(context-based)",
+      "algo_params": [
+        "max_iterations:45",
+        "discounted_rm:1",
+        "alpha:1.5",
+        "beta:0",
+        "context_based:1"
+      ]
+    },
+    {
+      "name": "ftrl",
+      "display_name": "FTRL(context-based)",
+      "algo_params": [
+        "max_iterations:45",
+        "context_based:1"
+      ]
+    }
+  ],
+  "output": {
+    "RM(context-based)": {
+      "aux_info": {
+        "best_total_scheduled": 0.868,
+        "best_iter": 7,
+        "total_messages": 432640,
+        "runtime_s": 6.516606330871582,
+        "utility_per_iter": [
+          0.482,
+          0.672,
+          0.79,
+          0.822,
+          0.818,
+          0.848,
+          0.852,
+          0.868
+        ],
+        "runtime_per_iter": [
+          0.9922389984130859,
+          0.7410120964050293,
+          0.7850260734558105,
+          0.7437779903411865,
+          0.8022966384887695,
+          0.8096299171447754,
+          0.8259432315826416,
+          0.8166751861572266
+        ],
+        "messages_per_iter": [
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080
+        ]
+      }
+    },
+    "RM+(context-based)": {
+      "aux_info": {
+        "best_total_scheduled": 0.854,
+        "best_iter": 7,
+        "total_messages": 432640,
+        "runtime_s": 6.402627229690552,
+        "utility_per_iter": [
+          0.478,
+          0.67,
+          0.804,
+          0.818,
+          0.828,
+          0.83,
+          0.844,
+          0.854
+        ],
+        "runtime_per_iter": [
+          0.9027891159057617,
+          0.7900090217590332,
+          0.7596652507781982,
+          0.7824265956878662,
+          0.7930564880371094,
+          0.7756307125091553,
+          0.7967483997344971,
+          0.8022959232330322
+        ],
+        "messages_per_iter": [
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080
+        ]
+      }
+    },
+    "Predictive RM(context based)": {
+      "aux_info": {
+        "best_total_scheduled": 0.878,
+        "best_iter": 7,
+        "total_messages": 432640,
+        "runtime_s": 6.2105393409729,
+        "utility_per_iter": [
+          0.482,
+          0.672,
+          0.786,
+          0.818,
+          0.82,
+          0.832,
+          0.844,
+          0.878
+        ],
+        "runtime_per_iter": [
+          0.9012455940246582,
+          0.7372431755065918,
+          0.7507941722869873,
+          0.7490503787994385,
+          0.7520673274993896,
+          0.7679710388183594,
+          0.7798242568969727,
+          0.7723371982574463
+        ],
+        "messages_per_iter": [
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080
+        ]
+      }
+    },
+    "IR-PRM(context-based)": {
+      "aux_info": {
+        "best_total_scheduled": 0.88,
+        "best_iter": 7,
+        "total_messages": 432640,
+        "runtime_s": 6.595028400421143,
+        "utility_per_iter": [
+          0.484,
+          0.652,
+          0.794,
+          0.84,
+          0.84,
+          0.856,
+          0.862,
+          0.88
+        ],
+        "runtime_per_iter": [
+          0.9440934658050537,
+          0.8456201553344727,
+          0.8027193546295166,
+          0.8002800941467285,
+          0.8184187412261963,
+          0.7913818359375,
+          0.796921968460083,
+          0.7955865859985352
+        ],
+        "messages_per_iter": [
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080
+        ]
+      }
+    },
+    "DRM(context-based)": {
+      "aux_info": {
+        "best_total_scheduled": 0.868,
+        "best_iter": 7,
+        "total_messages": 432640,
+        "runtime_s": 6.429677724838257,
+        "utility_per_iter": [
+          0.484,
+          0.666,
+          0.79,
+          0.816,
+          0.822,
+          0.842,
+          0.856,
+          0.868
+        ],
+        "runtime_per_iter": [
+          0.9104290008544922,
+          0.7766971588134766,
+          0.7780864238739014,
+          0.7803637981414795,
+          0.7889702320098877,
+          0.7947394847869873,
+          0.7920401096343994,
+          0.8083462715148926
+        ],
+        "messages_per_iter": [
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080
+        ]
+      }
+    },
+    "FTRL(context-based)": {
+      "aux_info": {
+        "best_total_scheduled": 0.862,
+        "best_iter": 7,
+        "total_messages": 432640,
+        "runtime_s": 9.19089937210083,
+        "utility_per_iter": [
+          0.684,
+          0.72,
+          0.74,
+          0.766,
+          0.804,
+          0.786,
+          0.824,
+          0.862
+        ],
+        "runtime_per_iter": [
+          1.1608033180236816,
+          1.1448469161987305,
+          1.1385502815246582,
+          1.1331455707550049,
+          1.1668529510498047,
+          1.1552157402038574,
+          1.1496655941009521,
+          1.141813039779663
+        ],
+        "messages_per_iter": [
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080
+        ]
+      }
+    }
+  }
+}

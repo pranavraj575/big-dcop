@@ -53,6 +53,21 @@ To create a visualization:
 [//]: <> (python evaluation/make_gif.py output/gif_graph_instances/gc_n15_k3_random_1.yaml --algorithms evaluation/configs/algorithm_configs.json --gif_dir output/graph_color_gifs_readme --display_time --dpi 300 --seed 13 --uniform_start)
 ![](https://github.com/pranavraj575/big-dcop/blob/master/output/graph_color_gifs_readme/RM.gif)
 
+### Satellite scheduling
+
+
+To run experiment, use 
+```bash
+python satellite_scheduling/main.py \ 
+  --scenario satellite_scheduling/scenarios_larger/scenario_1.json \ 
+  --framework iterative_pricing \ 
+  --output_json output/test_main.json \
+  --algorithms satellite_scheduling/algo_configs/cosp_algorithm_configs.json
+````
+To run the pydcop version, use `satellite_scheduling_pydcop/main.py`
+
+(Instances of satellite scheduling problems are found in `satellite_scheduling/scenarios` and `satellite_scheduling/scenarios_larger`)
+
 ## Formatting
 
 To allow tests and formatting, install ruff:

@@ -28,8 +28,8 @@ def main(
         run_info["step_size_c"] = step_size_c
     else:
         run_info["step_size_c"] = None
-
-    os.makedirs(os.path.dirname(output_json), exist_ok=True)
+    if os.path.dirname(output_json):
+        os.makedirs(os.path.dirname(output_json), exist_ok=True)
 
     with open(algorithms_json, "r") as f:
         algorithms = json.load(f)

@@ -33,7 +33,9 @@ def main(
     }
     working_dir = os.path.join("output", f"{framework}_runs")
     os.makedirs(working_dir, exist_ok=True)
-    os.makedirs(os.path.dirname(output_json), exist_ok=True)
+
+    if os.path.dirname(output_json):
+        os.makedirs(os.path.dirname(output_json), exist_ok=True)
     # temp_json = os.path.join( output_dir,"dcop_global.json")
     with open(algorithms_json, "r") as f:
         algorithms = json.load(f)
