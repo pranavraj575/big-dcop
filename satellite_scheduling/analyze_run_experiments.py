@@ -243,12 +243,18 @@ for title, get_stats in zip(
     for framework in frameworks:
         frm_data = list(filter(lambda d: d["info"]["framework"] == framework, data))
         alg_data = [list(filter(lambda d: d["info"]["algo_name"] == algo_name, frm_data)) for algo_name in algorithms]
-        stats = np.array([list(map(get_stats, ag)) for ag in alg_data])
+        temp_stats = [list(map(get_stats, ag)) for ag in alg_data]
+        max_samples = max(map(len, temp_stats))
+        stats = np.ones((len(temp_stats), max_samples)) * np.nan
+        for i, s in enumerate(temp_stats):
+            stats[i, : len(s)] = s
+        if np.any(np.isnan(stats)):
+            print(f"WARNING: unequal number of samples across types: {np.nansum(np.logical_not(np.isnan(stats)), axis=1)}")
 
         plt.tick_params(labelsize=15)
 
         bars = plt.bar(
-            x_vals, stats.mean(axis=1) - min_stat, bottom=min_stat, width=w, label=framework.replace("_", " ").capitalize()
+            x_vals, np.nanmean(stats, axis=1) - min_stat, bottom=min_stat, width=w, label=framework.replace("_", " ").capitalize()
         )
         for bar in bars:
             if args.show_numbers:
@@ -260,10 +266,11 @@ for title, get_stats in zip(
         # stats.std is sqrt(1/n * biased variance)
         # sample std is sqrt(1/(n-1) * biased variance) = stats.std *sqrt(n/(n-1))
         # std error is sample std/sqrt(n) = stats.std /sqrt(n-1)
-        std_errors = stats.std(axis=1) / np.sqrt(stats.shape[1] - 1)
+        counts = np.nansum(np.logical_not(np.isnan(stats)), axis=1)
+        std_errors = np.nanstd(stats, axis=1) / np.sqrt(counts - 1)
         plt.errorbar(
             x_vals,
-            stats.mean(axis=1),
+            np.nanmean(stats, axis=1),
             std_errors,
             fmt="none",
             color="black",
