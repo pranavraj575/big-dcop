@@ -98,7 +98,11 @@ for output_dir, framework in itertools.product(args.output_dir, possible_framewo
         continue
     for fn in os.listdir(pth):
         with open(os.path.join(pth, fn)) as f:
-            t = json.load(f)
+            try:
+                t = json.load(f)
+            except json.decoder.JSONDecodeError:
+                print(f"WARNING: FAILED TO DECODE {os.path.join(pth, fn)}")
+                continue
         temp = [get_display_name(cfg) for cfg in t["algorithm_configs"]]
         if algorithms is None:
             algorithms = temp
