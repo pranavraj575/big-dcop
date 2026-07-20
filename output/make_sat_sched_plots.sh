@@ -35,7 +35,7 @@ python satellite_scheduling/analyze_run_experiments.py --output output/temp_cosp
 
 echo "PLOTTING c tuning in parallel"
 for output_path in output/temp_cosp_c_tuning_filt/c_*; do
-  c_var=$(cut -c 24-100 <<< $output_path)
+  c_var=$(cut -c 34-100 <<< $output_path)
   echo "plotting c=${c_var}" &
   python satellite_scheduling/analyze_run_experiments.py --output "${output_path}" --plot output/cosp_plots_c_tuning/c_"${c_var}"/all --max-iteration "$MAX_ITER" &
   python satellite_scheduling/analyze_run_experiments.py --output "${output_path}" --plot output/cosp_plots_c_tuning/c_"${c_var}"/no_context --algorithms satellite_scheduling/algo_configs/plot_default_algs.json --max-iteration "$MAX_ITER" &
