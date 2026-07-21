@@ -8,6 +8,22 @@
   },
   {
     "name": "regret_matching",
+    "display_name": "Damped RM (0.1)",
+    "algo_params": [
+      "stop_cycle:100",
+      "damping:0.1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Damped RM (0.5)",
+    "algo_params": [
+      "stop_cycle:100",
+      "damping:0.5"
+    ]
+  },
+  {
+    "name": "regret_matching",
     "display_name": "RM+",
     "algo_params": [
       "stop_cycle:100",
@@ -20,6 +36,15 @@
     "algo_params": [
       "stop_cycle:100",
       "ir_prm:1"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "Damped IR-PRM",
+    "algo_params": [
+      "stop_cycle:100",
+      "ir_prm:1",
+      "damping:0.1"
     ]
   },
   {
@@ -54,14 +79,6 @@
   },
   {
     "name": "regret_matching",
-    "display_name": "Damped RM (0.5)",
-    "algo_params": [
-      "stop_cycle:100",
-      "damping:0.5"
-    ]
-  },
-  {
-    "name": "regret_matching",
     "display_name": "Damped DRM+",
     "algo_params": [
       "stop_cycle:100",
@@ -70,6 +87,14 @@
       "beta:0",
       "rm_plus:1",
       "damping:0.3"
+    ]
+  },
+  {
+    "name": "regret_matching",
+    "display_name": "PRM",
+    "algo_params": [
+      "stop_cycle:100",
+      "predictive:1"
     ]
   },
   {
