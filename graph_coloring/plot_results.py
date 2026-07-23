@@ -3,11 +3,14 @@ import itertools
 import matplotlib.pyplot as plt
 from matplotlib import rc
 import os.path
+import shutil
 import pandas as pd
 
 import numpy as np
 import json
 from algo_configs import get_display_name
+
+latex_exists = bool(shutil.which("latex"))
 
 
 def kernel_smoothed_plot_wrt_value(
@@ -48,14 +51,15 @@ def kernel_smoothed_plot_wrt_value(
     -------
 
     """
-    rc(
-        "font",
-        **{
-            "family": "serif",
-            "serif": ["Times"],
-        },
-    )
-    rc("text", usetex=True)
+    if latex_exists:
+        rc(
+            "font",
+            **{
+                "family": "serif",
+                "serif": ["Times"],
+            },
+        )
+    rc("text", usetex=latex_exists)
     plt.tick_params(labelsize=15)
     if algs is None:
         algs = sorted(set(df["algorithm"]), key=lambda s: s.lower())
