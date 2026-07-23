@@ -20,9 +20,14 @@ def generate_graph_coloring_problems(
         os.makedirs(output_dir, exist_ok=True)
 
     print(f"Generating {n_problems} problems in '{output_dir}'...")
-
+    if graph_type == "random":
+        arg_str = "_p_" + str(p_edge).replace(".", "_")
+    elif graph_type == "scalefree":
+        arg_str = f"_m_{m_edge}"
+    else:
+        arg_str = ""
     for i in range(1, n_problems + 1):
-        filename = f"gc_n{node_count}_k{color_count}_{graph_type}_{i}.yaml"
+        filename = f"gc_n{node_count}_k{color_count}_{graph_type}{arg_str}_i_{i}.yaml"
         filepath = os.path.join(output_dir, filename)
 
         base_cmd = ["pydcop", "generate", "graph_coloring"]
@@ -93,6 +98,20 @@ if __name__ == "__main__":
         help="graph type to generate (can list multiple)",
     )
     parser.add_argument(
+        "--p_edge",
+        type=float,
+        nargs="+",
+        default=[None],
+        help="probability of an edge in random graph (defaults to 4.6/n)",
+    )
+    parser.add_argument(
+        "--m_edge",
+        type=int,
+        nargs="+",
+        default=[2],
+        help="number of edges in scalefree graph (defaults to 2)",
+    )
+    parser.add_argument(
         "--dont_use_seed",
         action="store_true",
         help="dont use a random seed (will generate different graphs on each run)",
@@ -113,14 +132,23 @@ if __name__ == "__main__":
         shutil.rmtree(args.output_dir)
     # generate random 3 coloring problems
     for n, c, g in itertools.product(args.graph_n, args.color_count, args.graph_type):
-        generate_graph_coloring_problems(
-            n_problems=args.num_problems,
-            output_dir=args.output_dir,
-            node_count=n,  # -v
-            color_count=c,  # -c
-            graph_type=g,  # -g (random, grid, scalefree)
-            p_edge=4.6 / (n - 1),  # -p (only used if type is random)
-            use_seed=not args.dont_use_seed,
-        )
+        p_edge = args.p_edge
+        m_edge = args.m_edge
+        if g == "scalefree":
+            p_edge = [None]
+        elif g == "random":
+            m_edge = [None]
+            p_edge = [min(4.6 / n, 1) if p is None else p for p in p_edge]
+        for p, m in itertools.product(p_edge, m_edge):
+            generate_graph_coloring_problems(
+                n_problems=args.num_problems,
+                output_dir=args.output_dir,
+                node_count=n,  # -v
+                color_count=c,  # -c
+                graph_type=g,  # -g (random, grid, scalefree)
+                p_edge=p,  # -p (only used if type is random)
+                m_edge=m,  # -m (only used if type is scalefree)
+                use_seed=not args.dont_use_seed,
+            )
 
     print("\nDone.")
