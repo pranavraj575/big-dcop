@@ -119,7 +119,7 @@ if __name__ == "__main__":
             node_count=n,  # -v
             color_count=c,  # -c
             graph_type=g,  # -g (random, grid, scalefree)
-            p_edge=(4.6 * n) / (n * (n - 1)),  # -p (only used if type is random)
+            p_edge=4.6 / (n - 1),  # -p (only used if type is random)
             use_seed=not args.dont_use_seed,
         )
 
