@@ -24,7 +24,7 @@ algo_params = [
     AlgoParameterDef("stop_cycle", "int", None, 0),
     AlgoParameterDef("update_prob", "float", None, 1.0),
     AlgoParameterDef("discounted_rm", "int", [0, 1], 0),
-    AlgoParameterDef("alpha", "float", None, 1.5),  # Discount for negative regrets
+    AlgoParameterDef("alpha", "float", None, 1.5),  # Discount for positive regrets
     AlgoParameterDef("beta", "float", None, 0),  # Discount for negative regrets
     AlgoParameterDef("damping", "float", None, 0.0),
 ]
