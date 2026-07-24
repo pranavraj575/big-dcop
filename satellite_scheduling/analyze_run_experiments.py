@@ -307,7 +307,7 @@ for title, get_stats in zip(
         "messages": "Total messages passed",
     }
     plt.ylabel(ylabels[title], size=17)
-    plt.xlabel("Algorithm", size=17)
+    # plt.xlabel("Algorithm", size=17)
     plt.xticks(x, labels=map(get_plotting_name, algorithms))
 
     plt.legend(fontsize=15, loc="lower center", bbox_to_anchor=(0.5, 1))
