@@ -1,2 +1,0 @@
-
-.. automodule:: pydcop.commands.generate

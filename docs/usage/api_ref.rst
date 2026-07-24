@@ -1,5 +1,0 @@
-
-pyDCOP API
-==========
-
-TODO

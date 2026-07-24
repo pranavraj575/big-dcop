@@ -1,3 +1,0 @@
-
-
-.. automodule:: pydcop.commands.agent
