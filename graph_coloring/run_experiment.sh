@@ -42,12 +42,24 @@ source ~/.bashrc
 source ~/miniconda3/bin/activate
 conda activate big-dcop
 
-#python graph_coloring/graph_coloring_generator.py \
-#  --output_dir "${GRAPH_INSTANCE_DIR}" \
-# --num_problems 5 \
-#  --graph_n 10 20 30 50 100 \
-#  --color_count 3 \
-#  --graph_type random scalefree
+
+ns=(10 20 30 50 100)
+if [ -d "$GRAPH_INSTANCE_DIR" ]; then
+  echo "'$GRAPH_INSTANCE_DIR' exists, skipping graph generation."
+else
+  echo "'$GRAPH_INSTANCE_DIR' doesnt exist, generating graphs."
+  for n in "${ns[@]}"; do
+    python graph_coloring/graph_coloring_generator.py \
+      --output_dir "${GRAPH_INSTANCE_DIR}" \
+      --num_problems 2 \
+      --graph_n ${n} \
+      --p_edge $(python -c "print(round(4 / $n,3))") $(python -c "print(round(5 / $n,3))") $(python -c "print(round(6 / $n,3))") \
+      --m_edge 2 3 4 \
+      --graph_type random scalefree \
+      --dont_clear_dir
+  done
+fi
+
 total=0
 passed=0
 skipped=0
