@@ -6,8 +6,8 @@ for C_VAL in "${C_VALS[@]}"; do
   C_STRING="${C_VAL//./_}"
   bash satellite_scheduling/run_experiments.sh \
       --no-cg \
-      --output-dir output/cosp_c_tuning/c_"${C_STRING}" \
-      --trials 20 \
+      --output-dir output/cosp_redundant_c_tuning/c_"${C_STRING}" \
+      --trials 2 \
       --max-iterations 100 \
       --slurm \
       --step-size-c "${C_VAL}"

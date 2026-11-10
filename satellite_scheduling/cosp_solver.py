@@ -28,6 +28,7 @@ def _make_reward_fn() -> Callable:
             return 0.0
         if n == 1:
             return 1.0
+        return 1.0 / n
         return 1.0 / (n * n)
 
     return fn
