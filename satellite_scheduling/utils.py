@@ -275,7 +275,7 @@ def _to_cosp_dict(pydcop_dict: dict) -> dict:
     }
 
 
-def run_global_dispatcher_cosp(pydcop_dict: dict, algorithm_config: dict) -> dict:
+def run_global_dispatcher_cosp(pydcop_dict: dict, algorithm_config: dict, var_to_details=None,lambda_penalties=None) -> dict:
     """
     Run the COSPSolver in-process and return the result dict directly.
 
@@ -289,6 +289,6 @@ def run_global_dispatcher_cosp(pydcop_dict: dict, algorithm_config: dict) -> dic
 
     cosp_config = translate_pydcop_to_cosp_config(algorithm_config)
     cosp_pydcop = _to_cosp_dict(pydcop_dict)
-    solver = build_cosp(cosp_pydcop, cosp_config)
+    solver = build_cosp(cosp_pydcop, cosp_config,var_to_details=var_to_details,lambda_penalties=lambda_penalties)
     cosp_result = solver.solve()
     return convert_cosp_to_assignments(cosp_result)

@@ -39,7 +39,7 @@ def _make_reward_fn() -> Callable:
 # ---------------------------------------------------------------------------
 
 
-def build_cosp(pydcop_dict: dict, algorithm_config: dict) -> "COSPSolver":
+def build_cosp(pydcop_dict: dict, algorithm_config: dict,var_to_details=None,lambda_penalties=None) -> "COSPSolver":
     """Instantiate the correct COSPSolver subclass."""
     name = algorithm_config.get("algorithm", "mgm").lower()
     if name == "mgm":
@@ -52,6 +52,8 @@ def build_cosp(pydcop_dict: dict, algorithm_config: dict) -> "COSPSolver":
         return RegretMatchingSolver(algorithm_config, pydcop_dict)
     if name == "ftrl":
         return FTRLSolver(algorithm_config, pydcop_dict)
+    if name == "per_request":
+        return perRequestBaselineSolver(algorithm_config, pydcop_dict, var_to_details=var_to_details, lambda_penalties=lambda_penalties)
     raise ValueError(f"Unknown algorithm: {name}")
 
 
@@ -1166,6 +1168,156 @@ def cosp_parse_json_to_dcop_and_overlaps(json_filepath: str):
         pydcop["constraints"][f"reward_req_{req_id}"] = var_list
 
     return pydcop, agent_tasks, agent_downlinks, agent_capacities, var_to_details, requests
+
+class perRequestBaselineSolver(COSPSolver):
+    """
+    assigns each request to the agent with most price
+    """
+
+    def __init__(self, algorithm_config: dict, pydcop_dict: dict,var_to_details,lambda_penalties):
+        super().__init__(algorithm_config, pydcop_dict)
+        self.var_to_details=var_to_details
+        self.lambda_penalties=lambda_penalties
+        self.req_id_to_agent_id_var_idx=dict()
+        self._build_requests_and_pricing(var_to_details=self.var_to_details,
+                                         lambda_penalties=self.lambda_penalties)
+
+        self.penalties=dict()
+        self.max_iterations = algorithm_config.get("max_iterations", 100)
+        self.stop_cycle = algorithm_config.get("stop_cycle", 20)
+        self.det_start = bool(algorithm_config.get("deterministic_start", False))
+
+        # strategy_p1[vi] = P(vi=1);  P(vi=0) = 1 - p1.
+        self.strategy_p1: List[float] = [0.5] * self.n_vars
+
+
+        if self.det_start:
+            self._deterministic_init()
+        else:
+            for vi in range(self.n_vars):
+                self.assignments[vi] = random.randint(0, 1)
+
+    def _build_requests_and_pricing(self, var_to_details:dict,lambda_penalties):
+        for var_name,d in var_to_details.items():
+            req_id=d['req_id']
+            agent_id = d['agent_id']
+            lst=self.req_id_to_agent_id_var_idx.get(req_id,[])
+            lst.append((agent_id,self.var_to_idx[var_name]))
+            self.req_id_to_agent_id_var_idx[req_id]=lst
+
+    # ------------------------------------------------------------------
+    # Plain-Python helpers (no numpy)
+    # ------------------------------------------------------------------
+
+    def _context(self, vi: int):
+        nbr_vars: Set[int] = set()
+        for c_idx in self.var_to_constraints[vi]:
+            nbr_vars.update(self.constraints[c_idx][0])
+        nbr_vars.discard(vi)
+        return tuple(self.assignments[vj] for vj in sorted(nbr_vars))
+
+    def _compute_utils(self, vi: int, snapshot: List[int]):
+        """Return (u0, u1) using snapshot for all other variables."""
+        orig = snapshot[vi]
+        snapshot[vi] = 1
+        u1 = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
+        snapshot[vi] = 0
+        u0 = sum(self._constraint_value(c, snapshot) for c in self.var_to_constraints[vi])
+        snapshot[vi] = orig
+        return u0, u1
+
+    def _deterministic_init(self):
+        snap = list(self.assignments)
+        for vi in range(self.n_vars):
+            u0, u1 = self._compute_utils(vi, snap)
+            self.assignments[vi] = 1 if u1 >= u0 else 0
+
+    def _sample_assignment(self, vi: int, p1: float) -> int:
+        return 1 if random.random() < p1 else 0
+
+    # ------------------------------------------------------------------
+    # Update rules — plain Python floats, no numpy allocations
+    # ------------------------------------------------------------------
+
+
+    # ------------------------------------------------------------------
+    # Main iteration
+    # ------------------------------------------------------------------
+
+    def _update(self, t: int):
+        self.total_messages += self.messages_per_iter
+        # snapshot = list(self.assignments)
+        new_assignments = list(self.assignments)
+        for req_id,lst in self.req_id_to_agent_id_var_idx.items():
+            for agent_id,var_idx in lst:
+                new_assignments[var_idx]=0.
+            penalties = [self.lambda_penalties[(agent_id, req_id)]
+                         for (agent_id, var_idx) in lst]
+            min_idx = penalties.index(min(penalties))
+            min_agent_id,min_var_idx=lst[min_idx]
+            new_assignments[min_var_idx]=1.
+
+        self.assignments = new_assignments
+
+    def solve(self) -> Dict:
+        # RM does not have a clean convergence signal in contested environments:
+        # - Assignment-based checks fail because stochastic sampling keeps
+        #   jittering even after strategies stabilise.
+        # - Strategy-change checks (max/mean dp) fail because a small subset of
+        #   "contested" variables permanently swing as neighbours re-sample.
+        # - Pure-strategy checks fire after a single iteration (all vars greedily
+        #   jump to p1≈1 before contention resolves) giving terrible solutions.
+        #
+        # The correct budget control is stop_cycle (set in algo_params).  RM
+        # quality plateaus within ~20–30 iterations; stop_cycle:30 gives good
+        # results at a message cost comparable to DSA-C.
+        n_iters = self.stop_cycle if self.stop_cycle > 0 else self.max_iterations
+        for iteration in range(n_iters):
+            self._update(t=iteration + 1)
+
+        return self._result(n_iters, converged=False)
+
+    def _extract_solution(self) -> Dict:
+        """
+        Per-constraint argmax extraction.
+
+        RM's mixed strategy causes many variables to be sampled as 1
+        simultaneously (heavy overcoverage), which makes OR-tools scheduling
+        slow.  Instead of using the last stochastic sample, we deterministically
+        assign 1 to the variable with the highest strategy_p1 within each
+        constraint (ties broken by index), giving at most one agent per request.
+        Variables not participating in any reward constraint keep their sampled
+        assignment.
+        """
+        # Start with all zeros.
+        final_assignments = [0] * self.n_vars
+
+        # For each constraint, award 1 to the variable with the highest p1.
+        for var_indices, _ in self.constraints:
+            if len(var_indices) == 1:
+                # Unary constraint (penalty): preserve the stochastic assignment.
+                vi = var_indices[0]
+                final_assignments[vi] = self.assignments[vi]
+            else:
+                # Reward constraint: highest-p1 variable wins.
+                winner = max(var_indices, key=lambda vi: self.strategy_p1[vi])
+                if self.strategy_p1[winner] > 0:
+                    final_assignments[winner] = 1
+
+        return {
+            agent_id: [self.variables[vi] for vi in self.agent_var_indices[ai] if final_assignments[vi] == 1]
+            for ai, agent_id in enumerate(self.agents)
+        }
+
+    def _result(self, iterations: int, converged: bool) -> Dict:
+        return {
+            "algorithm": "perRequestBaseline",
+            "iterations": iterations,
+            "solution": self._extract_solution(),
+            "converged": converged,
+            "messages_per_iter": self.messages_per_iter,
+            "total_messages": self.total_messages,
+        }
 
 
 if __name__ == "__main__":
