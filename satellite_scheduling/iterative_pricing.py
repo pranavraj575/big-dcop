@@ -71,7 +71,9 @@ def solve_iterative_pricing(
     for iteration in range(max_iterations):
         iter_t_start = time.time()
         current_pydcop_dict = update_dcop_utilities(pydcop_dict, lambda_penalties, var_to_details)
-        result = utils.run_global_dispatcher_cosp(current_pydcop_dict, algorithm_config,var_to_details=var_to_details,lambda_penalties=lambda_penalties)
+        result = utils.run_global_dispatcher_cosp(
+            current_pydcop_dict, algorithm_config, var_to_details=var_to_details, lambda_penalties=lambda_penalties
+        )
 
         run_data.append({k: v for k, v in result.items() if k not in ignore_keys})
         total_messages += result.get("run_info", {}).get("total_messages", 0)

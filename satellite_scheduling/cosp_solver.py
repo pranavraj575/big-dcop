@@ -39,7 +39,7 @@ def _make_reward_fn() -> Callable:
 # ---------------------------------------------------------------------------
 
 
-def build_cosp(pydcop_dict: dict, algorithm_config: dict,var_to_details=None,lambda_penalties=None) -> "COSPSolver":
+def build_cosp(pydcop_dict: dict, algorithm_config: dict, var_to_details=None, lambda_penalties=None) -> "COSPSolver":
     """Instantiate the correct COSPSolver subclass."""
     name = algorithm_config.get("algorithm", "mgm").lower()
     if name == "mgm":
@@ -53,7 +53,9 @@ def build_cosp(pydcop_dict: dict, algorithm_config: dict,var_to_details=None,lam
     if name == "ftrl":
         return FTRLSolver(algorithm_config, pydcop_dict)
     if name == "per-request":
-        return perRequestBaselineSolver(algorithm_config, pydcop_dict, var_to_details=var_to_details, lambda_penalties=lambda_penalties)
+        return perRequestBaselineSolver(
+            algorithm_config, pydcop_dict, var_to_details=var_to_details, lambda_penalties=lambda_penalties
+        )
     raise ValueError(f"Unknown algorithm: {name}")
 
 
@@ -1169,19 +1171,20 @@ def cosp_parse_json_to_dcop_and_overlaps(json_filepath: str):
 
     return pydcop, agent_tasks, agent_downlinks, agent_capacities, var_to_details, requests
 
+
 class perRequestBaselineSolver(COSPSolver):
     """
     assigns each request to the agent with most price
     """
 
-    def __init__(self, algorithm_config: dict, pydcop_dict: dict,var_to_details,lambda_penalties):
+    def __init__(self, algorithm_config: dict, pydcop_dict: dict, var_to_details, lambda_penalties):
         super().__init__(algorithm_config, pydcop_dict)
-        self.var_to_details=var_to_details
-        self.lambda_penalties=lambda_penalties
-        self.req_id_to_agent_id_var_idx=dict()
+        self.var_to_details = var_to_details
+        self.lambda_penalties = lambda_penalties
+        self.req_id_to_agent_id_var_idx = dict()
         self._build_request_dict(var_to_details=self.var_to_details)
 
-        self.penalties=dict()
+        self.penalties = dict()
         self.max_iterations = algorithm_config.get("max_iterations", 100)
         self.stop_cycle = algorithm_config.get("stop_cycle", 20)
         self.det_start = bool(algorithm_config.get("deterministic_start", False))
@@ -1189,20 +1192,19 @@ class perRequestBaselineSolver(COSPSolver):
         # strategy_p1[vi] = P(vi=1);  P(vi=0) = 1 - p1.
         self.strategy_p1: List[float] = [0.5] * self.n_vars
 
-
         if self.det_start:
             self._deterministic_init()
         else:
             for vi in range(self.n_vars):
                 self.assignments[vi] = random.randint(0, 1)
 
-    def _build_request_dict(self, var_to_details:dict):
-        for var_name,d in var_to_details.items():
-            req_id=d['req_id']
-            agent_id = d['agent_id']
-            lst=self.req_id_to_agent_id_var_idx.get(req_id,[])
-            lst.append((agent_id,self.var_to_idx[var_name]))
-            self.req_id_to_agent_id_var_idx[req_id]=lst
+    def _build_request_dict(self, var_to_details: dict):
+        for var_name, d in var_to_details.items():
+            req_id = d["req_id"]
+            agent_id = d["agent_id"]
+            lst = self.req_id_to_agent_id_var_idx.get(req_id, [])
+            lst.append((agent_id, self.var_to_idx[var_name]))
+            self.req_id_to_agent_id_var_idx[req_id] = lst
 
     # ------------------------------------------------------------------
     # Plain-Python helpers (no numpy)
@@ -1228,7 +1230,6 @@ class perRequestBaselineSolver(COSPSolver):
     # Update rules — plain Python floats, no numpy allocations
     # ------------------------------------------------------------------
 
-
     # ------------------------------------------------------------------
     # Main iteration
     # ------------------------------------------------------------------
@@ -1237,14 +1238,13 @@ class perRequestBaselineSolver(COSPSolver):
         self.total_messages += self.messages_per_iter
         # snapshot = list(self.assignments)
         new_assignments = list(self.assignments)
-        for req_id,lst in self.req_id_to_agent_id_var_idx.items():
-            for agent_id,var_idx in lst:
-                new_assignments[var_idx]=0.
-            penalties = [self.lambda_penalties[(agent_id, req_id)]
-                         for (agent_id, var_idx) in lst]
+        for req_id, lst in self.req_id_to_agent_id_var_idx.items():
+            for agent_id, var_idx in lst:
+                new_assignments[var_idx] = 0.0
+            penalties = [self.lambda_penalties[(agent_id, req_id)] for (agent_id, var_idx) in lst]
             min_idx = penalties.index(min(penalties))
-            min_agent_id,min_var_idx=lst[min_idx]
-            new_assignments[min_var_idx]=1.
+            min_agent_id, min_var_idx = lst[min_idx]
+            new_assignments[min_var_idx] = 1.0
 
         self.assignments = new_assignments
 
