@@ -61,7 +61,7 @@ To run experiment, use
 python satellite_scheduling/main.py \ 
   --scenario satellite_scheduling/scenarios_larger/scenario_1.json \ 
   --framework iterative_pricing \ 
-  --output_json output/test_main.json \
+  --output-json output/test_main.json \
   --algorithms satellite_scheduling/algo_configs/cosp_algorithm_configs.json
 ````
 To run the pydcop version, use `satellite_scheduling_pydcop/main.py`
