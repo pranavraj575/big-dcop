@@ -1179,8 +1179,7 @@ class perRequestBaselineSolver(COSPSolver):
         self.var_to_details=var_to_details
         self.lambda_penalties=lambda_penalties
         self.req_id_to_agent_id_var_idx=dict()
-        self._build_requests_and_pricing(var_to_details=self.var_to_details,
-                                         lambda_penalties=self.lambda_penalties)
+        self._build_request_dict(var_to_details=self.var_to_details)
 
         self.penalties=dict()
         self.max_iterations = algorithm_config.get("max_iterations", 100)
@@ -1197,7 +1196,7 @@ class perRequestBaselineSolver(COSPSolver):
             for vi in range(self.n_vars):
                 self.assignments[vi] = random.randint(0, 1)
 
-    def _build_requests_and_pricing(self, var_to_details:dict,lambda_penalties):
+    def _build_request_dict(self, var_to_details:dict):
         for var_name,d in var_to_details.items():
             req_id=d['req_id']
             agent_id = d['agent_id']
@@ -1208,13 +1207,6 @@ class perRequestBaselineSolver(COSPSolver):
     # ------------------------------------------------------------------
     # Plain-Python helpers (no numpy)
     # ------------------------------------------------------------------
-
-    def _context(self, vi: int):
-        nbr_vars: Set[int] = set()
-        for c_idx in self.var_to_constraints[vi]:
-            nbr_vars.update(self.constraints[c_idx][0])
-        nbr_vars.discard(vi)
-        return tuple(self.assignments[vj] for vj in sorted(nbr_vars))
 
     def _compute_utils(self, vi: int, snapshot: List[int]):
         """Return (u0, u1) using snapshot for all other variables."""
@@ -1231,9 +1223,6 @@ class perRequestBaselineSolver(COSPSolver):
         for vi in range(self.n_vars):
             u0, u1 = self._compute_utils(vi, snap)
             self.assignments[vi] = 1 if u1 >= u0 else 0
-
-    def _sample_assignment(self, vi: int, p1: float) -> int:
-        return 1 if random.random() < p1 else 0
 
     # ------------------------------------------------------------------
     # Update rules — plain Python floats, no numpy allocations

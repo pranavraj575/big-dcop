@@ -1,7 +1,7 @@
 [
   {
     "name": "per-request",
-    "display_name": "MGM2",
+    "display_name": "Per-request baseline",
     "algo_params": [
       "max_iterations:100"
     ]
