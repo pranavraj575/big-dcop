@@ -26,6 +26,9 @@ def _timed(*args, **kwargs):
         return _real(*args, **kwargs)
     finally:
         TIMINGS.append(time.perf_counter() - t0)
+        if len(TIMINGS) % 500 == 0:
+            print(f"  ... {len(TIMINGS)} MILP solves so far "
+                  f"(avg {sum(TIMINGS) / len(TIMINGS) * 1000:.2f} ms)", flush=True)
 
 
 # Patch every reference (the function is imported by-name into these modules).
