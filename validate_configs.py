@@ -26,20 +26,20 @@ print("-" * 70)
 for filepath in files_to_check:
     if os.path.exists(filepath):
         size = os.path.getsize(filepath)
-        print("✓ {:<50} ({} bytes)".format(filepath, "{:,}".format(size)))
+        print("✓ {:<50} ({} bytes)".format(filepath, f"{size:,}"))
     else:
-        print("✗ {:<50} MISSING!".format(filepath))
+        print(f"✗ {filepath:<50} MISSING!")
 
 print("\nExecution Scripts:")
 print("-" * 70)
 for filepath in scripts_to_check:
     if os.path.exists(filepath):
         if os.access(filepath, os.X_OK):
-            print("✓ {:<50} (executable)".format(filepath))
+            print(f"✓ {filepath:<50} (executable)")
         else:
-            print("⚠ {:<50} (not executable)".format(filepath))
+            print(f"⚠ {filepath:<50} (not executable)")
     else:
-        print("✗ {:<50} MISSING!".format(filepath))
+        print(f"✗ {filepath:<50} MISSING!")
 
 # Validate JSON files
 print("\nJSON Configuration Validation:")
@@ -48,21 +48,21 @@ print("-" * 70)
 try:
     with open("satellite_scheduling/algo_configs/cosp_algorithm_configs.json") as f:
         configs = json.load(f)
-    print("✓ cosp_algorithm_configs.json: {} algorithms defined".format(len(configs)))
+    print(f"✓ cosp_algorithm_configs.json: {len(configs)} algorithms defined")
     for cfg in configs:
         display_name = cfg.get("display_name", cfg.get("name"))
         print("  - {}: {}".format(display_name, cfg["name"]))
 except Exception as e:
-    print("✗ Error parsing cosp_algorithm_configs.json: {}".format(e))
+    print(f"✗ Error parsing cosp_algorithm_configs.json: {e}")
 
 try:
     with open("satellite_scheduling/scenarios/test_minimal.json") as f:
         scenario = json.load(f)
     requests = len(scenario.get("requests", []))
     agents = len(scenario.get("agents", []))
-    print("✓ test_minimal.json: {} requests, {} agents".format(requests, agents))
+    print(f"✓ test_minimal.json: {requests} requests, {agents} agents")
 except Exception as e:
-    print("✗ Error parsing test_minimal.json: {}".format(e))
+    print(f"✗ Error parsing test_minimal.json: {e}")
 
 print("\nDocumentation:")
 print("-" * 70)
@@ -71,7 +71,7 @@ if os.path.exists(guide_path):
     size = os.path.getsize(guide_path)
     with open(guide_path) as f:
         lines = len(f.readlines())
-    print("✓ COSPSOLVER_CONFIG_GUIDE.md: {} lines, {} bytes".format(lines, "{:,}".format(size)))
+    print("✓ COSPSOLVER_CONFIG_GUIDE.md: {} lines, {} bytes".format(lines, f"{size:,}"))
 else:
     print("✗ COSPSOLVER_CONFIG_GUIDE.md: MISSING!")
 
