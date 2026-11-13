@@ -1,0 +1,57 @@
+{
+  "run_info": {
+    "scenario": "satellite_scheduling/scenarios_larger/scenario_1.json",
+    "algorithms_json": "satellite_scheduling/algo_configs/per_iteration_baseline.json",
+    "framework": "iterative_pricing",
+    "step_size_c": 1.8
+  },
+  "algorithm_configs": [
+    {
+      "name": "per-request",
+      "display_name": "MGM2",
+      "algo_params": [
+        "max_iterations:100"
+      ]
+    }
+  ],
+  "output": {
+    "MGM2": {
+      "aux_info": {
+        "best_total_scheduled": 0.476,
+        "best_iter": 0,
+        "total_messages": 432640,
+        "runtime_s": 0.996117353439331,
+        "utility_per_iter": [
+          0.476,
+          0.476,
+          0.476,
+          0.476,
+          0.476,
+          0.476,
+          0.476,
+          0.476
+        ],
+        "runtime_per_iter": [
+          0.32973551750183105,
+          0.09441995620727539,
+          0.09429526329040527,
+          0.09410285949707031,
+          0.09643006324768066,
+          0.0963125228881836,
+          0.09403324127197266,
+          0.09678196907043457
+        ],
+        "messages_per_iter": [
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080,
+          54080
+        ]
+      }
+    }
+  }
+}

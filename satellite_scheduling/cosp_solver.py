@@ -52,7 +52,7 @@ def build_cosp(pydcop_dict: dict, algorithm_config: dict,var_to_details=None,lam
         return RegretMatchingSolver(algorithm_config, pydcop_dict)
     if name == "ftrl":
         return FTRLSolver(algorithm_config, pydcop_dict)
-    if name == "per_request":
+    if name == "per-request":
         return perRequestBaselineSolver(algorithm_config, pydcop_dict, var_to_details=var_to_details, lambda_penalties=lambda_penalties)
     raise ValueError(f"Unknown algorithm: {name}")
 
