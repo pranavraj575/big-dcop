@@ -29,8 +29,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-from setuptools import setup, find_packages
 from os import path
+
+from setuptools import find_packages, setup
 
 # Basic dependencies, required to run pyDCOP:
 deps = [
